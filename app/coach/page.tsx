@@ -19,6 +19,7 @@ export default function CoachPage() {
   const [loading, setLoading] = useState(true)
   const [coachId, setCoachId] = useState<string | null>(null)
   const [unreadMessages, setUnreadMessages] = useState(0)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -55,8 +56,25 @@ export default function CoachPage() {
     </div>
   )
 
+  function navTo(id: string) {
+    setActiveTab(id)
+    if (id === 'messages') setUnreadMessages(0)
+    setSidebarOpen(false)
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex' }}>
+
+      {/* Backdrop mobile */}
+      {sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
+            zIndex: 40, display: 'block',
+          }}
+        />
+      )}
 
       {/* Sidebar */}
       <div style={{
@@ -68,6 +86,9 @@ export default function CoachPage() {
         padding: '24px 16px',
         position: 'fixed',
         height: '100vh',
+        zIndex: 50,
+        transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+        transition: 'transform 0.25s ease',
       }}>
         <div style={{ marginBottom: '40px', paddingLeft: '8px' }}>
           <div style={{ fontSize: '18px', fontWeight: '900', letterSpacing: '-0.5px' }}>
@@ -81,7 +102,7 @@ export default function CoachPage() {
           {NAV_ITEMS.map(item => (
             <button
               key={item.id}
-              onClick={() => { setActiveTab(item.id); if (item.id === 'messages') setUnreadMessages(0) }}
+              onClick={() => navTo(item.id)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -128,7 +149,26 @@ export default function CoachPage() {
       </div>
 
       {/* Contenu principal */}
-      <div style={{ marginLeft: '220px', flex: 1, padding: '32px' }}>
+      <div style={{ flex: 1, padding: '20px 20px 32px' }}>
+        {/* Barre top avec hamburger */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            style={{
+              background: '#111', border: '1px solid #2A2A2A', borderRadius: '10px',
+              padding: '10px 12px', cursor: 'pointer', display: 'flex', flexDirection: 'column',
+              gap: '5px', flexShrink: 0,
+            }}
+          >
+            <span style={{ display: 'block', width: '20px', height: '2px', background: '#FFF', borderRadius: '1px' }} />
+            <span style={{ display: 'block', width: '20px', height: '2px', background: '#FFF', borderRadius: '1px' }} />
+            <span style={{ display: 'block', width: '20px', height: '2px', background: '#FFF', borderRadius: '1px' }} />
+          </button>
+          <div style={{ fontSize: '16px', fontWeight: '700', color: '#FFF' }}>
+            {NAV_ITEMS.find(n => n.id === activeTab)?.icon} {NAV_ITEMS.find(n => n.id === activeTab)?.label}
+          </div>
+        </div>
+
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'joueurs' && <Joueurs />}
         {activeTab === 'exercices' && <Exercices />}
