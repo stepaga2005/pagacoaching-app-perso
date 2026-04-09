@@ -33,31 +33,15 @@ export default function LoginPage() {
       return
     }
 
-    // Vérifie l'accès du joueur
-    const { data: joueur } = await supabase
-      .from('joueurs')
-      .select('actif, acces_debut, acces_fin')
-      .eq('email', data.user?.email)
-      .single()
+    // Vérifie l'accès du joueur via API (service role)
+    const res = await fetch(`/api/joueurs/check-access?email=${encodeURIComponent(data.user?.email ?? '')}`)
+    const access = await res.json()
 
-    if (!joueur || !joueur.actif) {
+    if (!access.allowed) {
       await supabase.auth.signOut()
-      setError('Accès suspendu. Contacte ton coach.')
-      setLoading(false)
-      return
-    }
-
-    const aujourd_hui = new Date()
-    if (joueur.acces_fin && new Date(joueur.acces_fin) < aujourd_hui) {
-      await supabase.auth.signOut()
-      setError('Ton accès a expiré. Contacte ton coach.')
-      setLoading(false)
-      return
-    }
-
-    if (joueur.acces_debut && new Date(joueur.acces_debut) > aujourd_hui) {
-      await supabase.auth.signOut()
-      setError("Ton accès n'est pas encore actif.")
+      if (access.reason === 'expired') setError('Ton accès a expiré. Contacte ton coach.')
+      else if (access.reason === 'not_yet') setError("Ton accès n'est pas encore actif.")
+      else setError('Accès suspendu. Contacte ton coach.')
       setLoading(false)
       return
     }
