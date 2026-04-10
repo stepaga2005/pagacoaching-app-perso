@@ -1799,15 +1799,15 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
   const [rechercheExo, setRechercheExo] = useState('')
   const [loading, setLoading] = useState(true)
   const [expandedExo, setExpandedExo] = useState<{ rId: string; eId: string } | null>(null)
-  const [windowWidth, setWindowWidth] = useState(() => typeof window !== 'undefined' ? window.innerWidth : 1200)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    const handler = () => setWindowWidth(window.innerWidth)
-    window.addEventListener('resize', handler)
-    return () => window.removeEventListener('resize', handler)
+    const check = () => setIsMobile(window.innerWidth < 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
   }, [])
 
-  const isMobile = windowWidth < 640
   const nbDays = isMobile ? 3 : 7
 
   const JOUR_NOMS = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM']
