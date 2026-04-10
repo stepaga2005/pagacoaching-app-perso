@@ -1969,20 +1969,23 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', borderBottom: '1px solid #222', background: '#111', flexShrink: 0 }}>
-        <div style={{ fontWeight: '900', fontSize: '14px', letterSpacing: '-0.5px', whiteSpace: 'nowrap' }}>
-          <span style={{ color: '#1A6FFF' }}>▦</span> <span style={{ color: '#FFF' }}>MASTER PLANNER</span>
+      <div style={{ display: 'flex', flexDirection: 'column', borderBottom: '1px solid #222', background: '#111', flexShrink: 0 }}>
+        {/* Ligne 1 : fermer + titre + joueur */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px 6px' }}>
+          <button onClick={onClose} style={{ background: '#FF475720', border: '1px solid #FF475740', borderRadius: '8px', padding: '8px 14px', color: '#FF4757', cursor: 'pointer', fontSize: '13px', fontWeight: '700', whiteSpace: 'nowrap', flexShrink: 0 }}>✕ Fermer</button>
+          <div style={{ fontWeight: '900', fontSize: '13px', letterSpacing: '-0.5px', whiteSpace: 'nowrap', flex: 1 }}>
+            <span style={{ color: '#1A6FFF' }}>▦</span> <span style={{ color: '#FFF' }}>MASTER PLANNER</span>
+          </div>
+          {!isMobile && <span style={{ color: '#444', fontSize: '11px' }}>{joueur.prenom} {joueur.nom}</span>}
         </div>
-        <div style={{ display: 'flex', gap: '3px' }}>
-          <button onClick={prevWeek} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '4px 10px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>‹</button>
-          <button onClick={nextWeek} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '4px 10px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>›</button>
+        {/* Ligne 2 : nav semaine + date picker */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px 8px' }}>
+          <button onClick={prevWeek} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '6px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>‹</button>
+          <button onClick={nextWeek} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '6px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>›</button>
+          <span style={{ color: '#555', fontSize: '11px', whiteSpace: 'nowrap', flex: 1 }}>{weekLabel}</span>
+          <input type="date" onChange={e => e.target.value && jumpToDate(e.target.value)}
+            style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '4px 8px', color: '#1A6FFF', fontSize: '11px', outline: 'none', cursor: 'pointer' }} />
         </div>
-        <span style={{ color: '#555', fontSize: '11px', whiteSpace: 'nowrap' }}>{weekLabel}</span>
-        <input type="date" onChange={e => e.target.value && jumpToDate(e.target.value)}
-          style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '4px 8px', color: '#1A6FFF', fontSize: '11px', outline: 'none', cursor: 'pointer' }} />
-        <div style={{ flex: 1 }} />
-        <span style={{ color: '#444', fontSize: '11px' }}>{joueur.prenom} {joueur.nom}</span>
-        <button onClick={onClose} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '5px 10px', color: '#888', cursor: 'pointer', fontSize: '13px' }}>✕</button>
       </div>
 
       {/* Grid of day columns */}
