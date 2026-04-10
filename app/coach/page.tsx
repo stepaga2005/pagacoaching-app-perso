@@ -1799,6 +1799,43 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
   const [rechercheExo, setRechercheExo] = useState('')
   const [loading, setLoading] = useState(true)
   const [expandedExo, setExpandedExo] = useState<{ rId: string; eId: string } | null>(null)
+  const [mpActionDate, setMpActionDate] = useState<string | null>(null)
+  const [mpWellnessDate, setMpWellnessDate] = useState<string | null>(null)
+  const [mpWellnessData, setMpWellnessData] = useState({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' })
+  const [mpTemplates, setMpTemplates] = useState<{ id: string; nom: string }[]>([])
+  const [mpSeanceChoisie, setMpSeanceChoisie] = useState('')
+
+  useEffect(() => {
+    supabase.from('seances').select('id, nom').eq('est_template', true).order('nom')
+      .then(({ data }) => { if (data) setMpTemplates(data) })
+  }, [])
+
+  async function mpAttribuerSession(ds: string) {
+    if (!mpSeanceChoisie) return
+    await supabase.from('realisations').insert({ joueur_id: joueur.id, seance_id: mpSeanceChoisie, date_realisation: ds, completee: false })
+    const { data } = await supabase.from('realisations')
+      .select('id, seance_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur))))')
+      .eq('joueur_id', joueur.id).order('date_realisation')
+    if (data) setReals(data as unknown as MPRealisation[])
+    setMpActionDate(null)
+    setMpSeanceChoisie('')
+  }
+
+  async function mpSauvegarderWellness() {
+    if (!mpWellnessDate) return
+    await supabase.from('realisations').insert({
+      joueur_id: joueur.id, seance_id: null, date_realisation: mpWellnessDate, completee: true,
+      fatigue: mpWellnessData.fatigue || null, rpe: mpWellnessData.rpe || null,
+      courbatures: mpWellnessData.courbatures || null, qualite_sommeil: mpWellnessData.qualite_sommeil || null,
+      notes_joueur: mpWellnessData.notes || null,
+    })
+    const { data } = await supabase.from('realisations')
+      .select('id, seance_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur))))')
+      .eq('joueur_id', joueur.id).order('date_realisation')
+    if (data) setReals(data as unknown as MPRealisation[])
+    setMpWellnessDate(null)
+    setMpWellnessData({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' })
+  }
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -2005,10 +2042,16 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           return (
             <div key={ds} style={{ background: isToday ? '#0C0C14' : '#0D0D0D', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               {/* Day header */}
-              <div style={{ padding: '8px 10px 6px', borderBottom: '1px solid #1A1A1A', background: isToday ? '#111520' : '#111', flexShrink: 0, textAlign: 'center' }}>
-                <div style={{ color: '#444', fontSize: '9px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>{JOUR_NOMS[di]}</div>
-                <div style={{ color: isToday ? '#1A6FFF' : '#777', fontSize: '20px', fontWeight: '900', lineHeight: 1 }}>{dateNum}</div>
-                <div style={{ color: '#333', fontSize: '9px' }}>{mois}</div>
+              <div style={{ padding: '6px 8px 4px', borderBottom: '1px solid #1A1A1A', background: isToday ? '#111520' : '#111', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ textAlign: 'center', flex: 1 }}>
+                    <div style={{ color: '#444', fontSize: '9px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>{JOUR_NOMS[di]}</div>
+                    <div style={{ color: isToday ? '#1A6FFF' : '#777', fontSize: '20px', fontWeight: '900', lineHeight: 1 }}>{dateNum}</div>
+                    <div style={{ color: '#333', fontSize: '9px' }}>{mois}</div>
+                  </div>
+                  <button onClick={() => { setMpActionDate(ds); setMpSeanceChoisie('') }}
+                    style={{ width: '18px', height: '18px', borderRadius: '4px', border: '1px solid #2A2A2A', background: 'transparent', color: '#444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: 0 }}>+</button>
+                </div>
               </div>
 
               {/* Sessions scroll area */}
@@ -2221,6 +2264,84 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
         })}
       </div>
 
+      {/* MP — Menu action + / Wellness */}
+      {mpActionDate && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}
+          onClick={() => setMpActionDate(null)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '340px' }}>
+            <div style={{ fontWeight: '800', fontSize: '16px', marginBottom: '4px' }}>Ajouter</div>
+            <div style={{ color: '#C9A84C', fontSize: '13px', marginBottom: '20px' }}>
+              {new Date(mpActionDate + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '14px', borderRadius: '14px', border: '1px solid #1A6FFF40', background: '#1A6FFF10' }}>
+                <div style={{ color: '#1A6FFF', fontWeight: '700', fontSize: '14px' }}>📋 Session d'entraînement</div>
+                <select value={mpSeanceChoisie} onChange={e => setMpSeanceChoisie(e.target.value)}
+                  style={{ background: '#0D0D0D', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 10px', color: mpSeanceChoisie ? '#FFF' : '#555', fontSize: '13px', outline: 'none' }}>
+                  <option value="">Choisir un modèle...</option>
+                  {mpTemplates.map(t => <option key={t.id} value={t.id}>{t.nom}</option>)}
+                </select>
+                <button onClick={() => mpAttribuerSession(mpActionDate)} disabled={!mpSeanceChoisie}
+                  style={{ padding: '10px', borderRadius: '10px', border: 'none', background: mpSeanceChoisie ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpSeanceChoisie ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>
+                  Ajouter au planning
+                </button>
+              </div>
+              <button onClick={() => { setMpWellnessDate(mpActionDate); setMpWellnessData({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' }); setMpActionDate(null) }}
+                style={{ padding: '16px', borderRadius: '14px', border: '1px solid #2ECC7140', background: '#2ECC7115', color: '#2ECC71', cursor: 'pointer', fontSize: '15px', fontWeight: '700', textAlign: 'left' }}>
+                💚 Indices Wellness
+              </button>
+            </div>
+            <button onClick={() => setMpActionDate(null)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+          </div>
+        </div>
+      )}
+
+      {/* MP — Modal Wellness */}
+      {mpWellnessDate && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}>
+          <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '85vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+              <div style={{ fontWeight: '800', fontSize: '17px' }}>💚 Wellness</div>
+              <button onClick={() => setMpWellnessDate(null)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ color: '#C9A84C', fontSize: '13px', marginBottom: '24px' }}>
+              {new Date(mpWellnessDate + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </div>
+            {([
+              { key: 'fatigue', label: 'Fatigue', color: '#FF4757', desc: '1 = reposé · 10 = épuisé' },
+              { key: 'rpe', label: 'Effort perçu (RPE)', color: '#1A6FFF', desc: '1 = très facile · 10 = maximal' },
+              { key: 'courbatures', label: 'Courbatures', color: '#FF6B35', desc: '1 = aucune · 10 = très douloureux' },
+              { key: 'qualite_sommeil', label: 'Qualité du sommeil', color: '#2ECC71', desc: '1 = très mauvais · 10 = excellent' },
+            ] as { key: keyof typeof mpWellnessData; label: string; color: string; desc: string }[]).map(({ key, label, color, desc }) => (
+              <div key={key} style={{ marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <div>
+                    <div style={{ fontWeight: '700', fontSize: '14px', color }}>{label}</div>
+                    <div style={{ color: '#555', fontSize: '11px' }}>{desc}</div>
+                  </div>
+                  <div style={{ color, fontWeight: '900', fontSize: '28px', minWidth: '40px', textAlign: 'center', lineHeight: 1 }}>
+                    {key !== 'notes' && mpWellnessData[key]}
+                  </div>
+                </div>
+                <input type="range" min="1" max="10" value={mpWellnessData[key] as number}
+                  onChange={e => setMpWellnessData(prev => ({ ...prev, [key]: Number(e.target.value) }))}
+                  style={{ width: '100%', accentColor: color, height: '6px', cursor: 'pointer' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#333', fontSize: '10px', marginTop: '2px' }}>
+                  <span>1</span><span>5</span><span>10</span>
+                </div>
+              </div>
+            ))}
+            <textarea placeholder="Notes (optionnel)..." value={mpWellnessData.notes}
+              onChange={e => setMpWellnessData(prev => ({ ...prev, notes: e.target.value }))}
+              style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '12px', color: '#FFF', fontSize: '14px', outline: 'none', resize: 'none', minHeight: '80px', marginBottom: '16px', boxSizing: 'border-box' }} />
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => setMpWellnessDate(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+              <button onClick={mpSauvegarderWellness} style={{ flex: 2, padding: '13px', borderRadius: '12px', border: 'none', background: '#2ECC71', color: '#FFF', cursor: 'pointer', fontWeight: '700', fontSize: '14px' }}>Enregistrer</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {addExoTo && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}>
           <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
@@ -2402,6 +2523,9 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
   const [seanceEdit, setSeanceEdit] = useState<Seance | null>(null)
   const [seanceDetail, setSeanceDetail] = useState<Realisation | null>(null)
   const [sauvegarderFavori, setSauvegarderFavori] = useState(false)
+  const [actionMenuDate, setActionMenuDate] = useState<string | null>(null)
+  const [wellnessDate, setWellnessDate] = useState<string | null>(null)
+  const [wellnessData, setWellnessData] = useState({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' })
   useEffect(() => { loadData() }, [joueur.id])
 
   async function loadData() {
@@ -2429,6 +2553,24 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
     await supabase.from('realisations').delete().eq('id', id)
     setSeanceDetail(null)
     await loadData()
+  }
+
+  async function sauvegarderWellness() {
+    if (!wellnessDate) return
+    await supabase.from('realisations').insert({
+      joueur_id: joueur.id,
+      seance_id: null,
+      date_realisation: wellnessDate,
+      completee: true,
+      fatigue: wellnessData.fatigue || null,
+      rpe: wellnessData.rpe || null,
+      courbatures: wellnessData.courbatures || null,
+      qualite_sommeil: wellnessData.qualite_sommeil || null,
+      notes_joueur: wellnessData.notes || null,
+    })
+    await loadData()
+    setWellnessDate(null)
+    setWellnessData({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' })
   }
 
   async function toggleCompletee(r: Realisation) {
@@ -2594,13 +2736,29 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                       {/* Header jour */}
                       <div style={{ padding: '6px 8px 4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1E1E1E' }}>
                         <div style={{ fontSize: '16px', fontWeight: isToday ? '900' : '600', color: isToday ? '#1A6FFF' : isPast ? '#444' : '#DDD', lineHeight: 1 }}>{dateNum}</div>
-                        <button onClick={() => { setCreateDate(ds); setCreateMode('choisir'); setSeanceChoisie('') }}
+                        <button onClick={() => setActionMenuDate(ds)}
                           style={{ width: '20px', height: '20px', borderRadius: '5px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, padding: 0 }}>+</button>
                       </div>
 
                       {/* Cartes séances */}
                       <div style={{ flex: 1, padding: '4px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
                         {realsJour.map(r => {
+                          const isWellness = !r.seances
+                          if (isWellness) return (
+                            <div key={r.id} onClick={() => setSeanceDetail(r)} style={{
+                              background: '#2ECC7110', borderLeft: '3px solid #2ECC71',
+                              borderTop: '1px solid #2ECC7130', borderBottom: '1px solid #2ECC7130', borderRight: '1px solid #2ECC7130',
+                              borderRadius: '4px', padding: '4px 6px', cursor: 'pointer',
+                            }}>
+                              <div style={{ fontSize: '10px', fontWeight: '700', color: '#2ECC71' }}>💚 Wellness</div>
+                              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '2px' }}>
+                                {r.fatigue != null && <span style={{ fontSize: '9px', color: '#FF475790' }}>F:{r.fatigue}</span>}
+                                {r.rpe != null && <span style={{ fontSize: '9px', color: '#1A6FFF90' }}>R:{r.rpe}</span>}
+                                {r.qualite_sommeil != null && <span style={{ fontSize: '9px', color: '#2ECC7190' }}>S:{r.qualite_sommeil}</span>}
+                                {r.courbatures != null && <span style={{ fontSize: '9px', color: '#FF6B3590' }}>C:{r.courbatures}</span>}
+                              </div>
+                            </div>
+                          )
                           const couleur = r.completee ? '#2ECC71' : isPast ? '#FF4757' : '#1A6FFF'
                           return (
                             <div key={r.id} onClick={() => setSeanceDetail(r)} style={{
@@ -2685,7 +2843,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
           <div onClick={e => e.stopPropagation()} style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '80vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
               <div>
-                <div style={{ fontWeight: '800', fontSize: '17px' }}>{seanceDetail.seances?.nom || 'Séance'}</div>
+                <div style={{ fontWeight: '800', fontSize: '17px' }}>{seanceDetail.seances ? seanceDetail.seances.nom : '💚 Wellness'}</div>
                 <div style={{ color: '#C9A84C', fontSize: '13px', marginTop: '3px' }}>
                   {new Date(seanceDetail.date_realisation + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </div>
@@ -2868,6 +3026,76 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
           onClose={() => setShowMasterPlanner(false)}
           onReload={loadData}
         />
+      )}
+
+      {/* Menu action : Session ou Wellness */}
+      {actionMenuDate && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}
+          onClick={() => setActionMenuDate(null)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '320px' }}>
+            <div style={{ fontWeight: '800', fontSize: '16px', marginBottom: '4px' }}>Ajouter</div>
+            <div style={{ color: '#C9A84C', fontSize: '13px', marginBottom: '20px' }}>
+              {new Date(actionMenuDate + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button onClick={() => { setCreateDate(actionMenuDate); setCreateMode('choisir'); setSeanceChoisie(''); setActionMenuDate(null) }}
+                style={{ padding: '16px', borderRadius: '14px', border: '1px solid #1A6FFF40', background: '#1A6FFF15', color: '#1A6FFF', cursor: 'pointer', fontSize: '15px', fontWeight: '700', textAlign: 'left' }}>
+                📋 Session d'entraînement
+              </button>
+              <button onClick={() => { setWellnessDate(actionMenuDate); setWellnessData({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' }); setActionMenuDate(null) }}
+                style={{ padding: '16px', borderRadius: '14px', border: '1px solid #2ECC7140', background: '#2ECC7115', color: '#2ECC71', cursor: 'pointer', fontSize: '15px', fontWeight: '700', textAlign: 'left' }}>
+                💚 Indices Wellness
+              </button>
+            </div>
+            <button onClick={() => setActionMenuDate(null)} style={{ width: '100%', padding: '12px', marginTop: '12px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Wellness */}
+      {wellnessDate && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
+          <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '85vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+              <div style={{ fontWeight: '800', fontSize: '17px' }}>💚 Wellness</div>
+              <button onClick={() => setWellnessDate(null)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ color: '#C9A84C', fontSize: '13px', marginBottom: '24px' }}>
+              {new Date(wellnessDate + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </div>
+            {([
+              { key: 'fatigue', label: 'Fatigue', color: '#FF4757', desc: '1 = reposé · 10 = épuisé' },
+              { key: 'rpe', label: 'Effort perçu (RPE)', color: '#1A6FFF', desc: '1 = très facile · 10 = maximal' },
+              { key: 'courbatures', label: 'Courbatures', color: '#FF6B35', desc: '1 = aucune · 10 = très douloureux' },
+              { key: 'qualite_sommeil', label: 'Qualité du sommeil', color: '#2ECC71', desc: '1 = très mauvais · 10 = excellent' },
+            ] as { key: keyof typeof wellnessData; label: string; color: string; desc: string }[]).map(({ key, label, color, desc }) => (
+              <div key={key} style={{ marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <div>
+                    <div style={{ fontWeight: '700', fontSize: '14px', color }}>{label}</div>
+                    <div style={{ color: '#555', fontSize: '11px' }}>{desc}</div>
+                  </div>
+                  <div style={{ color, fontWeight: '900', fontSize: '28px', minWidth: '40px', textAlign: 'center', lineHeight: 1 }}>
+                    {key === 'notes' ? '' : wellnessData[key]}
+                  </div>
+                </div>
+                <input type="range" min="1" max="10" value={wellnessData[key] as number}
+                  onChange={e => setWellnessData(prev => ({ ...prev, [key]: Number(e.target.value) }))}
+                  style={{ width: '100%', accentColor: color, height: '6px', cursor: 'pointer' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#333', fontSize: '10px', marginTop: '2px' }}>
+                  <span>1</span><span>5</span><span>10</span>
+                </div>
+              </div>
+            ))}
+            <textarea placeholder="Notes (optionnel)..." value={wellnessData.notes}
+              onChange={e => setWellnessData(prev => ({ ...prev, notes: e.target.value }))}
+              style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '12px', color: '#FFF', fontSize: '14px', outline: 'none', resize: 'none', minHeight: '80px', marginBottom: '16px', boxSizing: 'border-box' }} />
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => setWellnessDate(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+              <button onClick={sauvegarderWellness} style={{ flex: 2, padding: '13px', borderRadius: '12px', border: 'none', background: '#2ECC71', color: '#FFF', cursor: 'pointer', fontWeight: '700', fontSize: '14px' }}>Enregistrer</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Modal ajouter une séance */}
