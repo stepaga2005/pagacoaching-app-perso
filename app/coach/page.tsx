@@ -1824,7 +1824,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
   async function mpSauvegarderWellness() {
     if (!mpWellnessDate) return
     await supabase.from('realisations').insert({
-      joueur_id: joueur.id, seance_id: null, date_realisation: mpWellnessDate, completee: true,
+      joueur_id: joueur.id, seance_id: null, date_realisation: mpWellnessDate, completee: false,
       fatigue: mpWellnessData.fatigue || null, rpe: mpWellnessData.rpe || null,
       courbatures: mpWellnessData.courbatures || null, qualite_sommeil: mpWellnessData.qualite_sommeil || null,
       notes_joueur: mpWellnessData.notes || null,
@@ -2561,7 +2561,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
       joueur_id: joueur.id,
       seance_id: null,
       date_realisation: wellnessDate,
-      completee: true,
+      completee: false,
       fatigue: wellnessData.fatigue || null,
       rpe: wellnessData.rpe || null,
       courbatures: wellnessData.courbatures || null,
@@ -2851,16 +2851,19 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
               <button onClick={() => setSeanceDetail(null)} style={{ background: 'none', border: 'none', color: '#555', fontSize: '20px', cursor: 'pointer' }}>✕</button>
             </div>
 
-            {/* Toggle complétée */}
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '16px', padding: '10px 14px', background: seanceDetail.completee ? '#2ECC7115' : '#1A1A1A', borderRadius: '10px', border: `1px solid ${seanceDetail.completee ? '#2ECC7140' : '#2A2A2A'}` }}>
-              <input type="checkbox" checked={seanceDetail.completee} onChange={() => toggleCompletee(seanceDetail)} style={{ accentColor: '#2ECC71', width: '16px', height: '16px', cursor: 'pointer' }} />
-              <span style={{ fontWeight: '600', fontSize: '13px', color: seanceDetail.completee ? '#2ECC71' : '#888' }}>
-                {seanceDetail.completee ? 'Séance réalisée' : 'Marquer comme réalisée'}
-              </span>
-            </label>
+            {/* Toggle complétée — seulement pour les vraies séances */}
+            {seanceDetail.seances && (
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '16px', padding: '10px 14px', background: seanceDetail.completee ? '#2ECC7115' : '#1A1A1A', borderRadius: '10px', border: `1px solid ${seanceDetail.completee ? '#2ECC7140' : '#2A2A2A'}` }}>
+                <input type="checkbox" checked={seanceDetail.completee} onChange={() => toggleCompletee(seanceDetail)} style={{ accentColor: '#2ECC71', width: '16px', height: '16px', cursor: 'pointer' }} />
+                <span style={{ fontWeight: '600', fontSize: '13px', color: seanceDetail.completee ? '#2ECC71' : '#888' }}>
+                  {seanceDetail.completee ? 'Séance réalisée' : 'Marquer comme réalisée'}
+                </span>
+              </label>
+            )}
 
-            {/* Exercices — rendu complet avec supersets */}
+            {/* Exercices — seulement pour les vraies séances */}
             {(() => {
+              if (!seanceDetail.seances) return null
               const exos = [...(seanceDetail.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
               if (exos.length === 0) return <div style={{ color: '#444', fontSize: '13px', marginBottom: '16px', fontStyle: 'italic' }}>Aucun exercice enregistré.</div>
               const blocs: typeof exos[] = []
