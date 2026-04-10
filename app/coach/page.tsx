@@ -795,6 +795,14 @@ function Exercices() {
   )
 }
 
+type SetConfig = {
+  reps?: number
+  duree?: number
+  dist?: number
+  charge?: number
+  recup?: number
+}
+
 type SeanceExercice = {
   id?: string
   exercice_id: string
@@ -810,6 +818,7 @@ type SeanceExercice = {
   lien_suivant?: boolean
   uni_podal?: boolean
   notes?: string
+  sets_config?: SetConfig[]
   exercices?: { nom: string; familles?: { nom: string; couleur: string } }
 }
 
@@ -1015,14 +1024,36 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
       exercice_id: ex.id, ordre: prev.length + 1,
       series: undefined, repetitions: undefined, duree_secondes: undefined,
       distance_metres: undefined, charge_kg: undefined, recuperation_secondes: undefined,
-      notes: '', exercices: { nom: ex.nom, familles: ex.familles },
+      notes: '', sets_config: undefined, exercices: { nom: ex.nom, familles: ex.familles },
     }])
     setShowPicker(false)
     setRecherche('')
   }
 
   function updateLigne(idx: number, key: keyof SeanceExercice, val: string) {
-    setLignes(prev => prev.map((l, i) => i === idx ? { ...l, [key]: val === '' ? undefined : key === 'notes' ? val : Number(val) } : l))
+    setLignes(prev => prev.map((l, i) => i === idx ? { ...l, [key]: val === '' ? undefined : key === 'notes' ? val : Math.max(0, Number(val)) } : l))
+  }
+
+  function handleSeriesChange(idx: number, val: string) {
+    const n = val === '' ? undefined : Math.max(1, Number(val))
+    setLignes(prev => prev.map((l, i) => {
+      if (i !== idx) return l
+      if (!n) return { ...l, series: undefined, sets_config: undefined }
+      const current = l.sets_config || []
+      const s1 = current[0] || { reps: l.repetitions, duree: l.duree_secondes, dist: l.distance_metres, charge: l.charge_kg, recup: l.recuperation_secondes }
+      const newSets: SetConfig[] = Array.from({ length: n }, (_, si) => current[si] || { ...s1 })
+      return { ...l, series: n, sets_config: newSets }
+    }))
+  }
+
+  function updateSetField(idx: number, setIdx: number, key: keyof SetConfig, val: string) {
+    setLignes(prev => prev.map((l, i) => {
+      if (i !== idx || !l.sets_config) return l
+      const newSets = l.sets_config.map((s, si) =>
+        si === setIdx ? { ...s, [key]: val === '' ? undefined : Math.max(0, Number(val)) } : s
+      )
+      return { ...l, sets_config: newSets }
+    }))
   }
 
   function removeLigne(idx: number) {
@@ -1058,16 +1089,17 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
           exercice_id: l.exercice_id,
           ordre: i + 1,
           series: l.series || null,
-          repetitions: l.repetitions || null,
-          duree_secondes: l.duree_secondes || null,
-          distance_metres: l.distance_metres || null,
-          charge_kg: l.charge_kg || null,
-          recuperation_secondes: l.recuperation_secondes || null,
+          repetitions: l.sets_config ? null : (l.repetitions || null),
+          duree_secondes: l.sets_config ? null : (l.duree_secondes || null),
+          distance_metres: l.sets_config ? null : (l.distance_metres || null),
+          charge_kg: l.sets_config ? null : (l.charge_kg || null),
+          recuperation_secondes: l.sets_config ? null : (l.recuperation_secondes || null),
           recuperation_active: l.recuperation_active || false,
           recuperation_inter_sets: l.recuperation_inter_sets || null,
           lien_suivant: l.lien_suivant || false,
           uni_podal: l.uni_podal || false,
           notes: l.notes || null,
+          sets_config: l.sets_config || null,
         }))
       )
     }
@@ -1135,10 +1167,8 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
 
       {/* En-têtes paramètres */}
       {lignes.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 65px 65px 65px 65px 65px 65px 80px 40px', gap: '8px', padding: '0 8px 8px', marginBottom: '4px' }}>
-          {['Exercice', 'Séries', 'Reps', 'Durée(s)', 'Dist(m)', 'Charge(kg)', 'Récup(s)', 'Notes', ''].map(h => (
-            <div key={h} style={{ color: '#555', fontSize: '11px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>{h}</div>
-          ))}
+        <div style={{ padding: '0 8px 8px', marginBottom: '4px', color: '#444', fontSize: '11px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+          Exercices — définissez le nombre de séries pour configurer chaque série individuellement
         </div>
       )}
 
@@ -1322,46 +1352,101 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
           }
 
           // Exercice standard (hors superset)
+          const hasPerSet = l.sets_config && l.sets_config.length > 0
           return (
             <div key={idx} style={{ marginTop: idx > 0 ? '8px' : '0' }}>
               <div style={{
-                display: 'grid', gridTemplateColumns: '1fr 65px 65px 65px 65px 65px 65px 80px 40px',
-                gap: '8px',
                 background: '#111',
-                borderTop: '1px solid #2A2A2A',
-                borderBottom: '1px solid #2A2A2A',
-                borderLeft: '1px solid #2A2A2A',
-                borderRight: '1px solid #2A2A2A',
-                borderRadius: '10px',
-                padding: '10px 8px', alignItems: 'center',
+                border: '1px solid #2A2A2A',
+                borderRadius: hasPerSet ? '10px 10px 0 0' : '10px',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <button onClick={() => moveLigne(idx, -1)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
-                    <button onClick={() => moveLigne(idx, 1)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: '600', fontSize: '13px' }}>{l.exercices?.nom}</div>
-                    <div style={{ display: 'flex', gap: '5px', marginTop: '3px', flexWrap: 'wrap' }}>
-                      {fam && <span style={{ fontSize: '10px', color: fam.couleur }}>{fam.nom}</span>}
-                      <button onClick={() => setLignes(prev => prev.map((li, i) => i === idx ? { ...li, uni_podal: !li.uni_podal } : li))}
-                        style={{ background: l.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${l.uni_podal ? '#1A6FFF60' : '#2A2A2A'}`, color: l.uni_podal ? '#1A6FFF' : '#444', fontSize: '9px', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer', fontWeight: '700' }}>↔ 2 côtés</button>
+                {/* Ligne principale : nom + séries + notes + supprimer */}
+                <div style={{
+                  display: 'grid', gridTemplateColumns: '1fr auto auto auto',
+                  gap: '8px', padding: '10px 8px', alignItems: 'center',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <button onClick={() => moveLigne(idx, -1)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
+                      <button onClick={() => moveLigne(idx, 1)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: '600', fontSize: '13px' }}>{l.exercices?.nom}</div>
+                      <div style={{ display: 'flex', gap: '5px', marginTop: '3px', flexWrap: 'wrap' }}>
+                        {fam && <span style={{ fontSize: '10px', color: fam.couleur }}>{fam.nom}</span>}
+                        <button onClick={() => setLignes(prev => prev.map((li, i) => i === idx ? { ...li, uni_podal: !li.uni_podal } : li))}
+                          style={{ background: l.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${l.uni_podal ? '#1A6FFF60' : '#2A2A2A'}`, color: l.uni_podal ? '#1A6FFF' : '#444', fontSize: '9px', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer', fontWeight: '700' }}>↔ 2 côtés</button>
+                      </div>
                     </div>
                   </div>
+                  {/* Séries */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ color: '#555', fontSize: '11px', whiteSpace: 'nowrap' }}>Séries</span>
+                    <input
+                      type="number" placeholder="-"
+                      value={l.series ?? ''}
+                      onChange={e => handleSeriesChange(idx, e.target.value)}
+                      style={{ width: '55px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '6px', padding: '6px 8px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }}
+                    />
+                  </div>
+                  {/* Notes */}
+                  <input value={l.notes || ''} onChange={e => updateLigne(idx, 'notes', e.target.value)}
+                    placeholder="note..."
+                    style={{ width: '110px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '6px', padding: '6px 8px', color: '#FFF', fontSize: '12px', outline: 'none' }} />
+                  <button onClick={() => removeLigne(idx)} style={{
+                    background: 'transparent', border: '1px solid #FF475730', color: '#FF4757',
+                    borderRadius: '6px', padding: '6px', cursor: 'pointer', fontSize: '12px',
+                  }}>✕</button>
                 </div>
-                {paramInput(idx, 'series', '-')}
-                {paramInput(idx, 'repetitions', '-')}
-                {paramInput(idx, 'duree_secondes', '-')}
-                {paramInput(idx, 'distance_metres', '-')}
-                {paramInput(idx, 'charge_kg', '-')}
-                {paramInput(idx, 'recuperation_secondes', '-')}
-                <input value={l.notes || ''} onChange={e => updateLigne(idx, 'notes', e.target.value)}
-                  placeholder="note..."
-                  style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '6px', padding: '6px 8px', color: '#FFF', fontSize: '12px', outline: 'none' }} />
-                <button onClick={() => removeLigne(idx)} style={{
-                  background: 'transparent', border: '1px solid #FF475730', color: '#FF4757',
-                  borderRadius: '6px', padding: '6px', cursor: 'pointer', fontSize: '12px',
-                }}>✕</button>
+
+                {/* Lignes par série */}
+                {hasPerSet && (
+                  <div style={{ borderTop: '1px solid #2A2A2A' }}>
+                    {/* Sous-header */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '60px 65px 65px 65px 65px 65px', gap: '6px', padding: '5px 12px', background: '#0A0A0A' }}>
+                      {['Série', 'Reps', 'Durée(s)', 'Dist(m)', 'Charge(kg)', 'Récup(s)'].map(h => (
+                        <div key={h} style={{ color: '#444', fontSize: '10px', letterSpacing: '0.3px', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
+                      ))}
+                    </div>
+                    {l.sets_config!.map((s, si) => (
+                      <div key={si} style={{
+                        display: 'grid', gridTemplateColumns: '60px 65px 65px 65px 65px 65px', gap: '6px',
+                        padding: '6px 12px', borderTop: '1px solid #1A1A1A', alignItems: 'center',
+                        background: si % 2 === 0 ? '#0D0D0D' : '#111',
+                      }}>
+                        <div style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '700', textAlign: 'center' }}>S{si + 1}</div>
+                        {(['reps', 'duree', 'dist', 'charge', 'recup'] as (keyof SetConfig)[]).map(key => (
+                          <input
+                            key={key}
+                            type="number"
+                            placeholder="-"
+                            value={s[key] ?? ''}
+                            onChange={e => updateSetField(idx, si, key, e.target.value)}
+                            style={{ width: '100%', background: '#1A1A1A', border: '1px solid #222', borderRadius: '5px', padding: '5px 6px', color: '#FFF', fontSize: '12px', outline: 'none', textAlign: 'center' }}
+                          />
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Mode simple (pas de sets_config) */}
+                {!hasPerSet && (
+                  <div style={{ borderTop: '1px solid #1E1E1E' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '65px 65px 65px 65px 65px', gap: '6px', padding: '5px 12px', background: '#0A0A0A' }}>
+                      {['Reps', 'Durée(s)', 'Dist(m)', 'Charge(kg)', 'Récup(s)'].map(h => (
+                        <div key={h} style={{ color: '#444', fontSize: '10px', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '65px 65px 65px 65px 65px', gap: '6px', padding: '8px 12px' }}>
+                      {paramInput(idx, 'repetitions', '-', '100%')}
+                      {paramInput(idx, 'duree_secondes', '-', '100%')}
+                      {paramInput(idx, 'distance_metres', '-', '100%')}
+                      {paramInput(idx, 'charge_kg', '-', '100%')}
+                      {paramInput(idx, 'recuperation_secondes', '-', '100%')}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Bouton Lier en superset */}
@@ -1445,6 +1530,35 @@ type Realisation = {
       exercices?: { nom: string; consignes_execution?: string; familles?: { nom: string; couleur: string } | null } | null
     }[]
   } | null
+}
+
+type MPSeanceExercice = {
+  id: string
+  ordre: number
+  series?: number
+  repetitions?: number
+  duree_secondes?: number
+  distance_metres?: number
+  charge_kg?: number
+  recuperation_secondes?: number
+  lien_suivant?: boolean
+  uni_podal?: boolean
+  notes?: string
+  sets_config?: SetConfig[]
+  exercices?: { nom: string; video_url?: string; consignes_execution?: string; familles?: { nom: string; couleur: string } | null } | null
+}
+
+type MPRealisation = {
+  id: string
+  seance_id: string
+  date_realisation: string
+  completee: boolean
+  rpe?: number | null
+  fatigue?: number | null
+  courbatures?: number | null
+  qualite_sommeil?: number | null
+  notes_joueur?: string | null
+  seances?: { id: string; nom: string; type: string; est_template: boolean; seance_exercices?: MPSeanceExercice[] } | null
 }
 
 function WellnessGraphiques({ realisations }: { realisations: Realisation[] }) {
@@ -1665,9 +1779,392 @@ function WellnessGraphiques({ realisations }: { realisations: Realisation[] }) {
   )
 }
 
+function MasterPlannerView({ joueur, realisations: initialReals, exercices, weekStart: initialWeekStart, onClose, onReload }: {
+  joueur: Joueur
+  realisations: MPRealisation[]
+  exercices: Exercice[]
+  weekStart: string
+  onClose: () => void
+  onReload: () => void
+}) {
+  const today = new Date().toISOString().split('T')[0]
+  const [reals, setReals] = useState<MPRealisation[]>(initialReals)
+  const [weekStart, setWeekStart] = useState(() => {
+    const d = new Date(initialWeekStart + 'T12:00:00')
+    const day = d.getDay()
+    d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day))
+    return d.toISOString().split('T')[0]
+  })
+  const [addExoTo, setAddExoTo] = useState<string | null>(null)
+  const [rechercheExo, setRechercheExo] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  const JOUR_NOMS = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM']
+
+  useEffect(() => {
+    setLoading(true)
+    supabase
+      .from('realisations')
+      .select('id, seance_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur))))')
+      .eq('joueur_id', joueur.id)
+      .order('date_realisation')
+      .then(({ data, error }) => {
+        if (!error && data) setReals(data as unknown as MPRealisation[])
+        else setReals(initialReals) // fallback si colonnes manquantes en DB
+        setLoading(false)
+      })
+  }, [joueur.id])
+
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart + 'T12:00:00')
+    d.setDate(d.getDate() + i)
+    return d.toISOString().split('T')[0]
+  })
+
+  const byDate = reals.reduce((acc, r) => {
+    const d = r.date_realisation
+    if (!acc[d]) acc[d] = []
+    acc[d].push(r)
+    return acc
+  }, {} as Record<string, MPRealisation[]>)
+
+  function prevWeek() {
+    const d = new Date(weekStart + 'T12:00:00'); d.setDate(d.getDate() - 7)
+    setWeekStart(d.toISOString().split('T')[0])
+  }
+  function nextWeek() {
+    const d = new Date(weekStart + 'T12:00:00'); d.setDate(d.getDate() + 7)
+    setWeekStart(d.toISOString().split('T')[0])
+  }
+  function jumpToDate(ds: string) {
+    const d = new Date(ds + 'T12:00:00')
+    const day = d.getDay()
+    d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day))
+    setWeekStart(d.toISOString().split('T')[0])
+  }
+
+  function patchExoLocal(realisationId: string, exoId: string, updates: Partial<MPSeanceExercice>) {
+    setReals(prev => prev.map(r => {
+      if (r.id !== realisationId) return r
+      return { ...r, seances: r.seances ? { ...r.seances, seance_exercices: r.seances.seance_exercices?.map(e => e.id === exoId ? { ...e, ...updates } : e) } : r.seances }
+    }))
+  }
+
+  async function saveExoField(exoId: string, updates: Record<string, unknown>) {
+    await supabase.from('seance_exercices').update(updates).eq('id', exoId)
+  }
+
+  async function removeExo(realisationId: string, exoId: string) {
+    setReals(prev => prev.map(r => {
+      if (r.id !== realisationId) return r
+      return { ...r, seances: r.seances ? { ...r.seances, seance_exercices: r.seances.seance_exercices?.filter(e => e.id !== exoId) } : r.seances }
+    }))
+    await supabase.from('seance_exercices').delete().eq('id', exoId)
+  }
+
+  function moveExo(realisationId: string, exoId: string, dir: -1 | 1) {
+    setReals(prev => prev.map(r => {
+      if (r.id !== realisationId) return r
+      const exos = [...(r.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
+      const idx = exos.findIndex(e => e.id === exoId)
+      const swap = idx + dir
+      if (swap < 0 || swap >= exos.length) return r
+      const swapId = exos[swap].id
+      ;[exos[idx], exos[swap]] = [exos[swap], exos[idx]]
+      const newExos = exos.map((e, i) => ({ ...e, ordre: i + 1 }))
+      supabase.from('seance_exercices').update({ ordre: swap + 1 }).eq('id', exoId)
+      supabase.from('seance_exercices').update({ ordre: idx + 1 }).eq('id', swapId)
+      return { ...r, seances: { ...r.seances!, seance_exercices: newExos } }
+    }))
+  }
+
+  async function addSet(realisationId: string, exoId: string, exo: MPSeanceExercice) {
+    const current = exo.sets_config || []
+    const s1: SetConfig = current[0] || { reps: exo.repetitions, charge: exo.charge_kg, recup: exo.recuperation_secondes }
+    const newSets = [...current, { ...s1 }]
+    const updates = { sets_config: newSets, series: newSets.length }
+    patchExoLocal(realisationId, exoId, updates)
+    await saveExoField(exoId, updates)
+  }
+
+  async function removeSet(realisationId: string, exoId: string, exo: MPSeanceExercice, si: number) {
+    const newSets = (exo.sets_config || []).filter((_, i) => i !== si)
+    const updates = { sets_config: newSets.length ? newSets : null, series: newSets.length || null }
+    patchExoLocal(realisationId, exoId, updates as Partial<MPSeanceExercice>)
+    await saveExoField(exoId, updates)
+  }
+
+  function patchSet(realisationId: string, exoId: string, exo: MPSeanceExercice, si: number, key: keyof SetConfig, val: string) {
+    const current = exo.sets_config || []
+    const newSets = current.map((s, i) => i === si ? { ...s, [key]: val === '' ? undefined : Math.max(0, Number(val)) } : s)
+    patchExoLocal(realisationId, exoId, { sets_config: newSets })
+  }
+
+  async function flushSets(exoId: string, realisationId: string) {
+    const fresh = reals.find(r => r.id === realisationId)?.seances?.seance_exercices?.find(e => e.id === exoId)
+    if (fresh?.sets_config) await saveExoField(exoId, { sets_config: fresh.sets_config })
+  }
+
+  function patchSimple(realisationId: string, exoId: string, key: string, val: string) {
+    const v = val === '' ? undefined : Math.max(0, Number(val))
+    patchExoLocal(realisationId, exoId, { [key]: v })
+  }
+
+  async function flushSimple(exoId: string, realisationId: string, key: string) {
+    const fresh = reals.find(r => r.id === realisationId)?.seances?.seance_exercices?.find(e => e.id === exoId)
+    if (fresh) await saveExoField(exoId, { [key]: (fresh as Record<string, unknown>)[key] ?? null })
+  }
+
+  async function toggleUniPodal(realisationId: string, exo: MPSeanceExercice) {
+    const val = !exo.uni_podal
+    patchExoLocal(realisationId, exo.id, { uni_podal: val })
+    await saveExoField(exo.id, { uni_podal: val })
+  }
+
+  async function toggleLienSuivant(realisationId: string, exo: MPSeanceExercice) {
+    const val = !exo.lien_suivant
+    patchExoLocal(realisationId, exo.id, { lien_suivant: val })
+    await saveExoField(exo.id, { lien_suivant: val })
+  }
+
+  async function addExoToSession(realisationId: string, exercice: Exercice) {
+    const r = reals.find(rx => rx.id === realisationId)
+    if (!r?.seances) return
+    const ordre = (r.seances.seance_exercices?.length || 0) + 1
+    const { data } = await supabase.from('seance_exercices').insert({ seance_id: r.seance_id, exercice_id: exercice.id, ordre }).select('id').single()
+    if (data) {
+      const newExo: MPSeanceExercice = { id: data.id, ordre, exercices: { nom: exercice.nom, video_url: exercice.video_url || undefined, familles: exercice.familles } }
+      setReals(prev => prev.map(rx => rx.id !== realisationId ? rx : { ...rx, seances: { ...rx.seances!, seance_exercices: [...(rx.seances?.seance_exercices || []), newExo] } }))
+    }
+    setAddExoTo(null)
+    setRechercheExo('')
+  }
+
+  const weekLabel = (() => {
+    const d = new Date(weekStart + 'T12:00:00')
+    const fin = new Date(weekStart + 'T12:00:00'); fin.setDate(fin.getDate() + 6)
+    return `${d.getDate()} ${d.toLocaleDateString('fr-FR', { month: 'short' })} — ${fin.getDate()} ${fin.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}`
+  })()
+
+  const setInput = (style?: React.CSSProperties) => ({
+    type: 'number' as const,
+    style: { width: '100%', background: '#161616', border: '1px solid #1E1E1E', borderRadius: '3px', padding: '3px 2px', color: '#FFF', fontSize: '10px', outline: 'none', textAlign: 'center' as const, ...style },
+  })
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px', borderBottom: '1px solid #222', background: '#111', flexShrink: 0 }}>
+        <div style={{ fontWeight: '900', fontSize: '14px', letterSpacing: '-0.5px', whiteSpace: 'nowrap' }}>
+          <span style={{ color: '#1A6FFF' }}>▦</span> <span style={{ color: '#FFF' }}>MASTER PLANNER</span>
+        </div>
+        <div style={{ display: 'flex', gap: '3px' }}>
+          <button onClick={prevWeek} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '4px 10px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>‹</button>
+          <button onClick={nextWeek} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '4px 10px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>›</button>
+        </div>
+        <span style={{ color: '#555', fontSize: '11px', whiteSpace: 'nowrap' }}>{weekLabel}</span>
+        <input type="date" onChange={e => e.target.value && jumpToDate(e.target.value)}
+          style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '4px 8px', color: '#1A6FFF', fontSize: '11px', outline: 'none', cursor: 'pointer' }} />
+        <div style={{ flex: 1 }} />
+        <span style={{ color: '#444', fontSize: '11px' }}>{joueur.prenom} {joueur.nom}</span>
+        <button onClick={onClose} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '5px 10px', color: '#888', cursor: 'pointer', fontSize: '13px' }}>✕</button>
+      </div>
+
+      {/* Grid of day columns */}
+      {loading && (
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ color: '#1A6FFF', fontSize: '13px', letterSpacing: '2px' }}>CHARGEMENT...</span>
+        </div>
+      )}
+      <div style={{ flex: loading ? 0 : 1, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', background: '#1E1E1E', overflow: loading ? 'hidden' : 'hidden' }}>
+        {days.map((ds, di) => {
+          const isToday = ds === today
+          const dateObj = new Date(ds + 'T12:00:00')
+          const dateNum = dateObj.getDate()
+          const mois = dateObj.toLocaleDateString('fr-FR', { month: 'short' })
+          const dayReals = byDate[ds] || []
+
+          return (
+            <div key={ds} style={{ background: isToday ? '#0C0C14' : '#0D0D0D', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              {/* Day header */}
+              <div style={{ padding: '8px 10px 6px', borderBottom: '1px solid #1A1A1A', background: isToday ? '#111520' : '#111', flexShrink: 0, textAlign: 'center' }}>
+                <div style={{ color: '#444', fontSize: '9px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>{JOUR_NOMS[di]}</div>
+                <div style={{ color: isToday ? '#1A6FFF' : '#777', fontSize: '20px', fontWeight: '900', lineHeight: 1 }}>{dateNum}</div>
+                <div style={{ color: '#333', fontSize: '9px' }}>{mois}</div>
+              </div>
+
+              {/* Sessions scroll area */}
+              <div style={{ flex: 1, overflowY: 'auto', padding: '6px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {dayReals.map(r => {
+                  const exos = [...(r.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
+                  const typeLabel = (LABELS_TYPE[r.seances?.type || ''] || 'SÉANCE').toUpperCase()
+                  return (
+                    <div key={r.id} style={{ background: '#111', border: '1px solid #252525', borderRadius: '8px', overflow: 'hidden' }}>
+                      {/* Session header */}
+                      <div style={{ padding: '6px 10px', borderBottom: '1px solid #1E1E1E', display: 'flex', alignItems: 'center', gap: '6px', background: '#131313' }}>
+                        <div style={{ flex: 1, fontWeight: '700', fontSize: '11px', color: '#CCC', lineHeight: 1.3, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
+                        <span style={{ fontSize: '8px', fontWeight: '800', color: '#555', background: '#1A1A1A', border: '1px solid #222', borderRadius: '3px', padding: '2px 5px', whiteSpace: 'nowrap', flexShrink: 0 }}>{typeLabel}</span>
+                      </div>
+
+                      {/* Exercises */}
+                      {exos.map((exo, exoIdx) => {
+                        const fam = exo.exercices?.familles
+                        const couleur = fam?.couleur || '#555'
+                        const hasSets = exo.sets_config && exo.sets_config.length > 0
+                        const hasVideo = !!exo.exercices?.video_url
+                        const prevLinked = exoIdx > 0 && exos[exoIdx - 1].lien_suivant
+
+                        return (
+                          <div key={exo.id}>
+                            {prevLinked && (
+                              <div style={{ display: 'flex', alignItems: 'center', padding: '0 10px', background: '#1A6FFF06' }}>
+                                <div style={{ width: '1px', height: '8px', background: '#1A6FFF30', marginLeft: '12px' }} />
+                                {exo.recuperation_secondes ? <span style={{ color: '#2ECC7180', fontSize: '8px', marginLeft: '5px' }}>⏱ {exo.recuperation_secondes}s</span> : null}
+                              </div>
+                            )}
+
+                            <div style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !prevLinked ? '1px solid #1A1A1A' : 'none', background: prevLinked ? '#1A6FFF04' : 'transparent' }}>
+                              {/* Exercise header row */}
+                              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginBottom: '5px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0', flexShrink: 0, marginTop: '2px' }}>
+                                  <button onClick={() => moveExo(r.id, exo.id, -1)} style={{ background: 'none', border: 'none', color: '#2A2A2A', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▲</button>
+                                  <button onClick={() => moveExo(r.id, exo.id, 1)} style={{ background: 'none', border: 'none', color: '#2A2A2A', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▼</button>
+                                </div>
+                                {hasVideo ? (
+                                  <button onClick={() => window.open(exo.exercices!.video_url!.replace('vimeo.com/', 'player.vimeo.com/video/'), '_blank')}
+                                    style={{ width: '24px', height: '24px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '9px', color: '#1A6FFF' }}>▶</button>
+                                ) : (
+                                  <div style={{ width: '24px', height: '24px', background: couleur + '18', border: `1px solid ${couleur}30`, borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    <span style={{ color: couleur, fontSize: '8px', fontWeight: '900' }}>{exo.ordre}</span>
+                                  </div>
+                                )}
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  {fam && <div style={{ color: couleur, fontSize: '7px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1 }}>{fam.nom}</div>}
+                                  <div style={{ color: '#DDD', fontWeight: '700', fontSize: '10px', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
+                                  <button onClick={() => toggleUniPodal(r.id, exo)}
+                                    style={{ background: exo.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.uni_podal ? '#1A6FFF60' : '#252525'}`, color: exo.uni_podal ? '#1A6FFF' : '#333', fontSize: '7px', padding: '2px 4px', borderRadius: '3px', cursor: 'pointer', fontWeight: '700' }}>↔</button>
+                                  <button onClick={() => removeExo(r.id, exo.id)}
+                                    style={{ background: 'transparent', border: '1px solid #FF475718', color: '#FF475760', borderRadius: '3px', padding: '2px 4px', cursor: 'pointer', fontSize: '9px' }}>✕</button>
+                                </div>
+                              </div>
+
+                              {/* Set table */}
+                              <div style={{ marginBottom: '4px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '1px 2px', marginBottom: '1px' }}>
+                                  {['', 'Reps', 'Dur', 'Dist', 'Kg', 'Réc', ''].map((h, hi) => (
+                                    <div key={hi} style={{ color: '#2A2A2A', fontSize: '7px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
+                                  ))}
+                                </div>
+                                {hasSets ? (
+                                  exo.sets_config!.map((s, si) => (
+                                    <div key={si} style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '3px', alignItems: 'center', marginBottom: '1px' }}>
+                                      <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{si + 1}</div>
+                                      {(['reps', 'duree', 'dist', 'charge', 'recup'] as (keyof SetConfig)[]).map(key => (
+                                        <input key={key} {...setInput()}
+                                          placeholder="-"
+                                          value={s[key] ?? ''}
+                                          onChange={e => patchSet(r.id, exo.id, exo, si, key, e.target.value)}
+                                          onBlur={() => flushSets(exo.id, r.id)}
+                                        />
+                                      ))}
+                                      <button onClick={() => removeSet(r.id, exo.id, exo, si)}
+                                        style={{ background: 'transparent', border: 'none', color: '#FF475740', cursor: 'pointer', fontSize: '8px', padding: '0', lineHeight: 1 }}>✕</button>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', alignItems: 'center' }}>
+                                    <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{exo.series || '—'}</div>
+                                    {[
+                                      ['repetitions', exo.repetitions],
+                                      ['duree_secondes', exo.duree_secondes],
+                                      ['distance_metres', exo.distance_metres],
+                                      ['charge_kg', exo.charge_kg],
+                                      ['recuperation_secondes', exo.recuperation_secondes],
+                                    ].map(([key, val]) => (
+                                      <input key={key as string} {...setInput()}
+                                        placeholder="-"
+                                        value={(val as number) ?? ''}
+                                        onChange={e => patchSimple(r.id, exo.id, key as string, e.target.value)}
+                                        onBlur={() => flushSimple(exo.id, r.id, key as string)}
+                                      />
+                                    ))}
+                                    <div />
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Footer: + Série + count + superset */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <button onClick={() => addSet(r.id, exo.id, exo)}
+                                  style={{ background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 7px', color: '#666', cursor: 'pointer', fontSize: '8px', fontWeight: '600', whiteSpace: 'nowrap' }}>+ Série</button>
+                                <input type="number" placeholder="×" value={exo.series ?? ''}
+                                  onChange={async e => {
+                                    const val = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value))
+                                    patchExoLocal(r.id, exo.id, { series: val })
+                                    await saveExoField(exo.id, { series: val ?? null })
+                                  }}
+                                  style={{ width: '28px', background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 3px', color: '#888', fontSize: '9px', outline: 'none', textAlign: 'center' }}
+                                />
+                                <div style={{ flex: 1 }} />
+                                <button onClick={() => toggleLienSuivant(r.id, exo)}
+                                  title={exo.lien_suivant ? 'Délier' : 'Lier en superset'}
+                                  style={{ background: exo.lien_suivant ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#222'}`, borderRadius: '4px', padding: '2px 6px', color: exo.lien_suivant ? '#1A6FFF' : '#333', cursor: 'pointer', fontSize: '10px' }}>⇌</button>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+
+                      <div style={{ padding: '5px' }}>
+                        <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }}
+                          style={{ width: '100%', background: '#0D0D0D', border: '1px dashed #222', borderRadius: '5px', padding: '4px', color: '#333', cursor: 'pointer', fontSize: '10px' }}>
+                          + exercice
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+                {dayReals.length === 0 && (
+                  <div style={{ color: '#1A1A1A', fontSize: '12px', textAlign: 'center', paddingTop: '24px' }}>—</div>
+                )}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {addExoTo && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}>
+          <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: '700' }}>Ajouter un exercice</h3>
+              <button onClick={() => setAddExoTo(null)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '18px', cursor: 'pointer' }}>✕</button>
+            </div>
+            <input value={rechercheExo} onChange={e => setRechercheExo(e.target.value)} placeholder="Rechercher..."
+              autoFocus
+              style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '10px 14px', color: '#FFF', fontSize: '14px', outline: 'none', marginBottom: '10px' }} />
+            <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {exercices.filter(e => e.nom.toLowerCase().includes(rechercheExo.toLowerCase())).map(ex => (
+                <button key={ex.id} onClick={() => addExoToSession(addExoTo, ex)}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '10px 14px', cursor: 'pointer', textAlign: 'left' }}>
+                  <span style={{ color: '#FFF', fontSize: '13px', fontWeight: '600' }}>{ex.nom}</span>
+                  {ex.familles && <span style={{ fontSize: '10px', color: ex.familles.couleur, background: ex.familles.couleur + '20', padding: '2px 8px', borderRadius: '8px' }}>{ex.familles.nom}</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }) {
   const today = new Date().toISOString().split('T')[0]
   const [onglet, setOnglet] = useState<'calendrier' | 'favoris' | 'graphiques' | 'messages'>('calendrier')
+  const [showMasterPlanner, setShowMasterPlanner] = useState(false)
   const [coachId, setCoachId] = useState<string | null>(null)
   const [joueurAuthId, setJoueurAuthId] = useState<string | null>(null)
 
@@ -1853,11 +2350,16 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
       {onglet === 'calendrier' && (
         <div>
           {/* Navigation plage */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <button onClick={allerAujourdhui} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap' }}>Aujourd'hui</button>
-            <button onClick={() => decalerRange(-7)} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>‹</button>
-            <button onClick={() => decalerRange(7)} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>›</button>
-            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+            {/* Ligne 1 : nav + Master Planner */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <button onClick={allerAujourdhui} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap' }}>Aujourd'hui</button>
+              <button onClick={() => decalerRange(-7)} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>‹</button>
+              <button onClick={() => decalerRange(7)} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>›</button>
+              <button onClick={() => setShowMasterPlanner(true)} style={{ background: '#1A6FFF20', border: '1px solid #1A6FFF50', borderRadius: '8px', padding: '7px 14px', color: '#1A6FFF', cursor: 'pointer', fontSize: '12px', fontWeight: '700', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>▦ Master Planner</button>
+            </div>
+            {/* Ligne 2 : plage de dates */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span style={{ color: '#555', fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px' }}>DE</span>
               <input type="date" value={rangeDebut} onChange={e => setRangeDebut(e.target.value)}
                 style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', fontSize: '13px', fontWeight: '600', outline: 'none', cursor: 'pointer' }} />
@@ -2160,6 +2662,18 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
             </button>
           </div>
         </div>
+      )}
+
+      {/* Master Planner overlay */}
+      {showMasterPlanner && (
+        <MasterPlannerView
+          joueur={joueur}
+          realisations={realisations as unknown as MPRealisation[]}
+          exercices={exercices}
+          weekStart={rangeDebut}
+          onClose={() => setShowMasterPlanner(false)}
+          onReload={loadData}
+        />
       )}
 
       {/* Modal ajouter une séance */}
