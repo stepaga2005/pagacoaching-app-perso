@@ -2064,9 +2064,11 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                             return (
                               <div key={exo.id}>
                                 {insideGroup && exoIdx > 0 && (
-                                  <div style={{ display: 'flex', alignItems: 'center', padding: '0 8px', gap: '6px' }}>
-                                    <div style={{ width: '2px', height: '10px', background: '#1A6FFF60', marginLeft: '9px', borderRadius: '1px' }} />
-                                    {exo.recuperation_secondes ? <span style={{ color: '#2ECC7180', fontSize: '8px' }}>⏱ {exo.recuperation_secondes}s</span> : null}
+                                  <div style={{ display: 'flex', alignItems: 'center', padding: '2px 8px', gap: '6px', background: '#1A6FFF08' }}>
+                                    <div style={{ width: '2px', height: '12px', background: '#1A6FFF', marginLeft: '9px', borderRadius: '1px' }} />
+                                    {exo.recuperation_secondes
+                                      ? <span style={{ color: '#2ECC71', fontSize: '9px', fontWeight: '700' }}>⏱ {exo.recuperation_secondes}s</span>
+                                      : <span style={{ color: '#1A6FFF80', fontSize: '8px' }}>enchaîner</span>}
                                   </div>
                                 )}
 
@@ -2182,15 +2184,14 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
 
                           return (
                             <div key={`bloc-${blocIdx}`} style={isGroup ? {
-                              border: '2px solid #1A6FFF60',
-                              borderRadius: '8px',
-                              background: '#1A6FFF08',
+                              borderLeft: '4px solid #1A6FFF',
+                              background: '#1A6FFF12',
                               margin: '4px 0',
-                              overflow: 'hidden',
-                            } : {}}>
+                              borderRadius: '0 6px 6px 0',
+                            } : { marginTop: blocIdx > 0 ? '1px' : '0' }}>
                               {isGroup && (
-                                <div style={{ padding: '3px 8px', background: '#1A6FFF25', borderBottom: '1px solid #1A6FFF40', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                  <span style={{ color: '#1A6FFF', fontSize: '8px', fontWeight: '900', letterSpacing: '1px' }}>⇌ {groupLabel}</span>
+                                <div style={{ padding: '4px 8px', background: '#1A6FFF30', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                  <span style={{ color: '#6AAEFF', fontSize: '9px', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>⇌ {groupLabel}</span>
                                 </div>
                               )}
                               {bloc.map((exo, ei) => renderExo(exo, ei, isGroup))}
