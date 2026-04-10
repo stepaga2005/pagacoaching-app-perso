@@ -120,6 +120,11 @@ body {
   .topbar-title {
     font-size: 16px;
   }
+  /* Messages : desktop = 2 colonnes, mobile = caché */
+  .msg-desktop { display: flex !important; }
+  .msg-mobile  { display: none !important; }
+  /* Messages : bouton retour caché sur desktop */
+  .msg-back-btn { display: none !important; }
 }
 
 /* ─── Mobile : sidebar masquée par défaut ─── */
@@ -127,6 +132,9 @@ body {
   .main-content {
     margin-left: 0;
   }
+  /* Messages : mobile = plein écran, desktop = caché */
+  .msg-desktop { display: none !important; }
+  .msg-mobile  { display: block !important; }
 }
 
 /* ─────────────────────────────────────────────

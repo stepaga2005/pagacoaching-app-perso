@@ -4137,75 +4137,87 @@ function Messages({ coachId, onUnreadChange }: { coachId: string | null; onUnrea
     return bHas - aHas
   })
 
-  return (
-    <div>
-      <h1 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '24px' }}>Messages</h1>
-      <div style={{ display: 'flex', gap: '16px', height: 'calc(100vh - 140px)', background: '#111', borderRadius: '16px', overflow: 'hidden', border: '1px solid #2A2A2A' }}>
+  // Sur mobile : si une conversation est ouverte, afficher plein écran
+  const showChat = selectedJoueur && coachId && selectedJoueur.auth_id
 
-        {/* Liste conversations */}
-        <div style={{ width: '260px', borderRight: '1px solid #1E1E1E', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-          <div style={{ padding: '16px', borderBottom: '1px solid #1E1E1E' }}>
-            <div style={{ color: '#555', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Conversations</div>
-          </div>
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            {joueurs.length === 0 && (
-              <div style={{ padding: '24px 16px', color: '#333', fontSize: '13px' }}>Aucun joueur actif</div>
-            )}
-            {joueursSorted.map(j => {
-              const last = j.auth_id ? lastMsgs[j.auth_id] : undefined
-              const nbUnread = j.auth_id ? (unread[j.auth_id] || 0) : 0
-              const isSelected = selectedId === j.id
-              const hasAccount = !!j.auth_id
-              return (
-                <div key={j.id} onClick={() => {
-                  if (!hasAccount) return
-                  setSelectedId(j.id)
-                  if (j.auth_id) {
-                    setUnread(prev => { const u = { ...prev }; delete u[j.auth_id!]; return u })
-                    onUnreadChange(Math.max(0, Object.values({ ...unread, [j.auth_id!]: 0 }).reduce((a, b) => a + b, 0)))
-                  }
-                }} style={{
-                  padding: '14px 16px', cursor: hasAccount ? 'pointer' : 'default',
-                  borderBottom: '1px solid #161616',
-                  background: isSelected ? '#1A6FFF12' : 'transparent',
-                  borderLeft: `3px solid ${isSelected ? '#1A6FFF' : 'transparent'}`,
-                  opacity: hasAccount ? 1 : 0.4,
-                  transition: 'all 0.1s',
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <div style={{ fontWeight: '700', fontSize: '14px', color: isSelected ? '#1A6FFF' : '#DDD' }}>{j.prenom} {j.nom}</div>
-                    {nbUnread > 0 && (
-                      <span style={{ background: '#FF4757', color: '#FFF', borderRadius: '10px', fontSize: '10px', fontWeight: '800', padding: '2px 7px' }}>{nbUnread}</span>
-                    )}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#444', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {!hasAccount ? 'Pas encore connecté' : last ? `${last.expediteur_id === coachId ? 'Vous : ' : ''}${fmtLast(last)}` : 'Démarrer la conversation'}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
+  function selectJoueur(j: JoueurMsg) {
+    if (!j.auth_id) return
+    setSelectedId(j.id)
+    setUnread(prev => { const u = { ...prev }; delete u[j.auth_id!]; return u })
+    onUnreadChange(Math.max(0, Object.values({ ...unread, [j.auth_id!]: 0 }).reduce((a, b) => a + b, 0)))
+  }
 
-        {/* Zone chat */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          {selectedJoueur && coachId && selectedJoueur.auth_id ? (
-            <>
-              <div style={{ padding: '14px 20px', borderBottom: '1px solid #1E1E1E', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '12px', background: '#1A6FFF25', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '14px', color: '#1A6FFF' }}>
-                  {selectedJoueur.prenom[0]}{selectedJoueur.nom[0]}
-                </div>
-                <div style={{ fontWeight: '700', fontSize: '15px' }}>{selectedJoueur.prenom} {selectedJoueur.nom}</div>
+  const listeConversations = (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid #1A1A22', flexShrink: 0 }}>
+        <div className="section-label">Conversations</div>
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        {joueurs.length === 0 && (
+          <div className="empty-state"><div className="empty-state-text">Aucun joueur actif</div></div>
+        )}
+        {joueursSorted.map(j => {
+          const last = j.auth_id ? lastMsgs[j.auth_id] : undefined
+          const nbUnread = j.auth_id ? (unread[j.auth_id] || 0) : 0
+          const isSelected = selectedId === j.id
+          const hasAccount = !!j.auth_id
+          return (
+            <div key={j.id} onClick={() => selectJoueur(j)} style={{
+              padding: '13px 16px', cursor: hasAccount ? 'pointer' : 'default',
+              borderBottom: '1px solid #111115',
+              background: isSelected ? '#1A6FFF0C' : 'transparent',
+              borderLeft: `3px solid ${isSelected ? '#1A6FFF' : 'transparent'}`,
+              opacity: hasAccount ? 1 : 0.35,
+              transition: 'all 0.15s',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '3px' }}>
+                <div style={{ fontWeight: '700', fontSize: '14px', color: isSelected ? '#5599FF' : '#DDD' }}>{j.prenom} {j.nom}</div>
+                {nbUnread > 0 && <span className="nav-badge">{nbUnread}</span>}
               </div>
-              <ChatView key={selectedJoueur.auth_id} myId={coachId} otherId={selectedJoueur.auth_id} height="calc(100vh - 225px)" />
-            </>
-          ) : (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px', color: '#333' }}>
-              <div style={{ fontSize: '32px' }}>💬</div>
-              <div style={{ fontSize: '14px' }}>Sélectionne un joueur</div>
+              <div style={{ fontSize: '12px', color: '#444', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {!hasAccount ? 'Pas encore connecté' : last ? `${last.expediteur_id === coachId ? 'Vous : ' : ''}${fmtLast(last)}` : 'Démarrer la conversation'}
+              </div>
             </div>
-          )}
+          )
+        })}
+      </div>
+    </div>
+  )
+
+  const chatView = showChat ? (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid #1A1A22', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+        {/* Bouton retour — visible uniquement sur mobile */}
+        <button onClick={() => setSelectedId(null)} className="btn btn-ghost btn-sm msg-back-btn">← Retour</button>
+        <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: '#1A6FFF20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '13px', color: '#5599FF', flexShrink: 0 }}>
+          {selectedJoueur.prenom[0]}{selectedJoueur.nom[0]}
         </div>
+        <div style={{ fontWeight: '700', fontSize: '15px' }}>{selectedJoueur.prenom} {selectedJoueur.nom}</div>
+      </div>
+      <ChatView key={selectedJoueur.auth_id!} myId={coachId!} otherId={selectedJoueur.auth_id!} height="calc(100svh - 220px)" />
+    </div>
+  ) : (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px', color: '#333' }}>
+      <div style={{ fontSize: '36px' }}>💬</div>
+      <div style={{ fontSize: '13px' }}>Sélectionne un joueur</div>
+    </div>
+  )
+
+  return (
+    <div className="page-section">
+      {/* ── Desktop : 2 colonnes ── */}
+      <div className="msg-desktop" style={{ display: 'flex', height: 'calc(100svh - 130px)', background: '#0D0D10', borderRadius: '16px', overflow: 'hidden', border: '1px solid #1A1A22' }}>
+        <div style={{ width: '260px', borderRight: '1px solid #1A1A22', flexShrink: 0 }}>
+          {listeConversations}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {chatView}
+        </div>
+      </div>
+
+      {/* ── Mobile : liste OU chat (pas les deux) ── */}
+      <div className="msg-mobile" style={{ background: '#0D0D10', borderRadius: '16px', overflow: 'hidden', border: '1px solid #1A1A22', height: 'calc(100svh - 130px)' }}>
+        {showChat ? chatView : listeConversations}
       </div>
     </div>
   )
