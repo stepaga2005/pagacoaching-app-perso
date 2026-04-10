@@ -1410,19 +1410,34 @@ function getYoutubeId(url: string): string | null {
   return m ? m[1] : null
 }
 
+// ─── Emojis par famille ─────────────────────────────────────────────
+const FAMILLE_EMOJI: Record<string, string> = {
+  'Vitesse': '⚡', 'Accélération': '🏃', 'Décélération': '🛑',
+  'Force': '💪', 'Puissance': '🔥', 'Pliométrie': '🦘',
+  'Coordination': '🎯', 'Appuis': '👟', 'COD': '↩️',
+  'Mobilité': '🔄', 'Stretch': '🧘', 'Prévention': '🛡️',
+  'Cardio': '❤️', 'Proprioception': '⚖️',
+  'Technique de base': '🎓', 'Technique athlétique': '🏆',
+}
+
 // ─── Vignette vidéo ────────────────────────────────────────────────
-function VideoThumb({ url, size = 72 }: { url?: string | null; size?: number }) {
+function VideoThumb({ url, size = 72, famille }: { url?: string | null; size?: number; famille?: Famille }) {
   const [hovered, setHovered] = useState(false)
   const ytId = url ? getYoutubeId(url) : null
 
   if (!url) {
+    const color = famille?.couleur || '#6B7280'
+    const emoji = famille ? (FAMILLE_EMOJI[famille.nom] || '🏅') : '▷'
     return (
       <div style={{
-        width: size, height: size * 0.56, borderRadius: '6px',
-        background: '#1A1A22', border: '1px solid #2A2A2A',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0, color: '#333', fontSize: '18px',
-      }}>▷</div>
+        width: size, height: size * 0.75, borderRadius: '8px',
+        background: `linear-gradient(135deg, ${color}33 0%, ${color}18 100%)`,
+        border: `1px solid ${color}44`,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0, gap: '2px',
+      }}>
+        <span style={{ fontSize: size * 0.28, lineHeight: 1 }}>{emoji}</span>
+      </div>
     )
   }
 
@@ -1521,7 +1536,7 @@ function ExercicePicker({ exercices, recherche, onRecherche, onSelect, onClose }
               style={{ gap: '12px', alignItems: 'center', border: '1px solid #1A1A22', padding: '10px 12px' }}>
 
               {/* Vignette vidéo */}
-              <VideoThumb url={ex.video_url} size={80} />
+              <VideoThumb url={ex.video_url} size={80} famille={ex.familles} />
 
               {/* Infos */}
               <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
