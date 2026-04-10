@@ -1798,6 +1798,16 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
   const [addExoTo, setAddExoTo] = useState<string | null>(null)
   const [rechercheExo, setRechercheExo] = useState('')
   const [loading, setLoading] = useState(true)
+  const [windowWidth, setWindowWidth] = useState(() => typeof window !== 'undefined' ? window.innerWidth : 1200)
+
+  useEffect(() => {
+    const handler = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+
+  const isMobile = windowWidth < 640
+  const nbDays = isMobile ? 3 : 7
 
   const JOUR_NOMS = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM']
 
@@ -1815,7 +1825,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
       })
   }, [joueur.id])
 
-  const days = Array.from({ length: 7 }, (_, i) => {
+  const days = Array.from({ length: nbDays }, (_, i) => {
     const d = new Date(weekStart + 'T12:00:00')
     d.setDate(d.getDate() + i)
     return d.toISOString().split('T')[0]
@@ -1829,18 +1839,22 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
   }, {} as Record<string, MPRealisation[]>)
 
   function prevWeek() {
-    const d = new Date(weekStart + 'T12:00:00'); d.setDate(d.getDate() - 7)
+    const d = new Date(weekStart + 'T12:00:00'); d.setDate(d.getDate() - nbDays)
     setWeekStart(d.toISOString().split('T')[0])
   }
   function nextWeek() {
-    const d = new Date(weekStart + 'T12:00:00'); d.setDate(d.getDate() + 7)
+    const d = new Date(weekStart + 'T12:00:00'); d.setDate(d.getDate() + nbDays)
     setWeekStart(d.toISOString().split('T')[0])
   }
   function jumpToDate(ds: string) {
-    const d = new Date(ds + 'T12:00:00')
-    const day = d.getDay()
-    d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day))
-    setWeekStart(d.toISOString().split('T')[0])
+    if (isMobile) {
+      setWeekStart(ds)
+    } else {
+      const d = new Date(ds + 'T12:00:00')
+      const day = d.getDay()
+      d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day))
+      setWeekStart(d.toISOString().split('T')[0])
+    }
   }
 
   function patchExoLocal(realisationId: string, exoId: string, updates: Partial<MPSeanceExercice>) {
@@ -1942,7 +1956,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
 
   const weekLabel = (() => {
     const d = new Date(weekStart + 'T12:00:00')
-    const fin = new Date(weekStart + 'T12:00:00'); fin.setDate(fin.getDate() + 6)
+    const fin = new Date(weekStart + 'T12:00:00'); fin.setDate(fin.getDate() + nbDays - 1)
     return `${d.getDate()} ${d.toLocaleDateString('fr-FR', { month: 'short' })} — ${fin.getDate()} ${fin.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}`
   })()
 
@@ -1976,7 +1990,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           <span style={{ color: '#1A6FFF', fontSize: '13px', letterSpacing: '2px' }}>CHARGEMENT...</span>
         </div>
       )}
-      <div style={{ flex: loading ? 0 : 1, display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', background: '#1E1E1E', overflow: loading ? 'hidden' : 'hidden' }}>
+      <div style={{ flex: loading ? 0 : 1, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, 1fr)`, gap: '1px', background: '#1E1E1E', overflow: loading ? 'hidden' : 'hidden' }}>
         {days.map((ds, di) => {
           const isToday = ds === today
           const dateObj = new Date(ds + 'T12:00:00')
