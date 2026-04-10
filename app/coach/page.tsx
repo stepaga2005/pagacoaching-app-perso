@@ -2021,59 +2021,71 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                         <span style={{ fontSize: '8px', fontWeight: '800', color: '#555', background: '#1A1A1A', border: '1px solid #222', borderRadius: '3px', padding: '2px 5px', whiteSpace: 'nowrap', flexShrink: 0 }}>{typeLabel}</span>
                       </div>
 
-                      {/* Exercises */}
-                      {exos.map((exo, exoIdx) => {
-                        const fam = exo.exercices?.familles
-                        const couleur = fam?.couleur || '#555'
-                        const hasSets = exo.sets_config && exo.sets_config.length > 0
-                        const hasVideo = !!exo.exercices?.video_url
-                        const prevLinked = exoIdx > 0 && exos[exoIdx - 1].lien_suivant
+                      {/* Exercises — groupés en blocs (superset / circuit) */}
+                      {(() => {
+                        // Construire les blocs de supersets
+                        const blocs: MPSeanceExercice[][] = []
+                        let current: MPSeanceExercice[] = []
+                        for (const exo of exos) {
+                          current.push(exo)
+                          if (!exo.lien_suivant) { blocs.push(current); current = [] }
+                        }
+                        if (current.length > 0) blocs.push(current)
 
-                        // Résumé compact pour mobile
-                        const seriesSummary = (() => {
-                          if (hasSets && exo.sets_config!.length > 0) {
-                            const s = exo.sets_config![0]
-                            const parts = []
-                            if (s.reps) parts.push(`${s.reps}r`)
-                            if (s.duree) parts.push(`${s.duree}s`)
-                            if (s.dist) parts.push(`${s.dist}m`)
-                            if (s.charge) parts.push(`${s.charge}kg`)
-                            return `${exo.sets_config!.length}×${parts.join(' ')}`
-                          }
-                          const parts = []
-                          if (exo.repetitions) parts.push(`${exo.repetitions}r`)
-                          if (exo.duree_secondes) parts.push(`${exo.duree_secondes}s`)
-                          if (exo.distance_metres) parts.push(`${exo.distance_metres}m`)
-                          if (exo.charge_kg) parts.push(`${exo.charge_kg}kg`)
-                          const base = parts.join(' ')
-                          return exo.series ? `${exo.series}×${base || '—'}` : base || '—'
-                        })()
+                        return blocs.map((bloc, blocIdx) => {
+                          const isGroup = bloc.length > 1
+                          const groupLabel = bloc.length > 2 ? 'CIRCUIT' : 'SUPERSET'
 
-                        return (
-                          <div key={exo.id}>
-                            {prevLinked && (
-                              <div style={{ display: 'flex', alignItems: 'center', padding: '0 10px', background: '#1A6FFF06' }}>
-                                <div style={{ width: '1px', height: '8px', background: '#1A6FFF30', marginLeft: '12px' }} />
-                                {exo.recuperation_secondes ? <span style={{ color: '#2ECC7180', fontSize: '8px', marginLeft: '5px' }}>⏱ {exo.recuperation_secondes}s</span> : null}
-                              </div>
-                            )}
+                          const renderExo = (exo: MPSeanceExercice, exoIdx: number, insideGroup: boolean) => {
+                            const fam = exo.exercices?.familles
+                            const couleur = fam?.couleur || '#555'
+                            const hasSets = exo.sets_config && exo.sets_config.length > 0
+                            const hasVideo = !!exo.exercices?.video_url
 
-                            {isMobile ? (
-                              /* ── MOBILE : carte compacte tappable ── */
-                              <div onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
-                                style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !prevLinked ? '1px solid #1A1A1A' : 'none', background: prevLinked ? '#1A6FFF04' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <div style={{ width: '20px', height: '20px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                  <span style={{ color: couleur, fontSize: '8px', fontWeight: '900' }}>{exo.ordre}</span>
-                                </div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ color: '#DDD', fontWeight: '700', fontSize: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
-                                  <div style={{ color: '#555', fontSize: '9px' }}>{seriesSummary}</div>
-                                </div>
-                                <span style={{ color: '#333', fontSize: '12px' }}>›</span>
-                              </div>
-                            ) : (
+                            const seriesSummary = (() => {
+                              if (hasSets && exo.sets_config!.length > 0) {
+                                const s = exo.sets_config![0]
+                                const parts = []
+                                if (s.reps) parts.push(`${s.reps}r`)
+                                if (s.duree) parts.push(`${s.duree}s`)
+                                if (s.dist) parts.push(`${s.dist}m`)
+                                if (s.charge) parts.push(`${s.charge}kg`)
+                                return `${exo.sets_config!.length}×${parts.join(' ')}`
+                              }
+                              const parts = []
+                              if (exo.repetitions) parts.push(`${exo.repetitions}r`)
+                              if (exo.duree_secondes) parts.push(`${exo.duree_secondes}s`)
+                              if (exo.distance_metres) parts.push(`${exo.distance_metres}m`)
+                              if (exo.charge_kg) parts.push(`${exo.charge_kg}kg`)
+                              const base = parts.join(' ')
+                              return exo.series ? `${exo.series}×${base || '—'}` : base || '—'
+                            })()
+
+                            return (
+                              <div key={exo.id}>
+                                {insideGroup && exoIdx > 0 && (
+                                  <div style={{ display: 'flex', alignItems: 'center', padding: '0 8px', gap: '6px' }}>
+                                    <div style={{ width: '2px', height: '10px', background: '#1A6FFF60', marginLeft: '9px', borderRadius: '1px' }} />
+                                    {exo.recuperation_secondes ? <span style={{ color: '#2ECC7180', fontSize: '8px' }}>⏱ {exo.recuperation_secondes}s</span> : null}
+                                  </div>
+                                )}
+
+                                {isMobile ? (
+                                  /* ── MOBILE : carte compacte tappable ── */
+                                  <div onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
+                                    style={{ padding: '7px 8px', borderTop: !insideGroup && exoIdx > 0 ? '1px solid #1A1A1A' : 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <div style={{ width: '20px', height: '20px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                      <span style={{ color: couleur, fontSize: '8px', fontWeight: '900' }}>{exo.ordre}</span>
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div style={{ color: '#DDD', fontWeight: '700', fontSize: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
+                                      <div style={{ color: '#555', fontSize: '9px' }}>{seriesSummary}</div>
+                                    </div>
+                                    <span style={{ color: '#333', fontSize: '12px' }}>›</span>
+                                  </div>
+                                ) : (
                               /* ── DESKTOP : édition inline complète ── */
-                              <div style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !prevLinked ? '1px solid #1A1A1A' : 'none', background: prevLinked ? '#1A6FFF04' : 'transparent' }}>
+                              <div style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !insideGroup ? '1px solid #1A1A1A' : 'none', background: 'transparent' }}>
                                 {/* Exercise header row */}
                                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginBottom: '5px' }}>
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0', flexShrink: 0, marginTop: '2px' }}>
@@ -2166,7 +2178,26 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                             )}
                           </div>
                         )
-                      })}
+                          } // fin renderExo
+
+                          return (
+                            <div key={`bloc-${blocIdx}`} style={isGroup ? {
+                              border: '2px solid #1A6FFF60',
+                              borderRadius: '8px',
+                              background: '#1A6FFF08',
+                              margin: '4px 0',
+                              overflow: 'hidden',
+                            } : {}}>
+                              {isGroup && (
+                                <div style={{ padding: '3px 8px', background: '#1A6FFF25', borderBottom: '1px solid #1A6FFF40', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                  <span style={{ color: '#1A6FFF', fontSize: '8px', fontWeight: '900', letterSpacing: '1px' }}>⇌ {groupLabel}</span>
+                                </div>
+                              )}
+                              {bloc.map((exo, ei) => renderExo(exo, ei, isGroup))}
+                            </div>
+                          )
+                        }) // fin blocs.map
+                      })()}
 
                       <div style={{ padding: '5px' }}>
                         <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }}
