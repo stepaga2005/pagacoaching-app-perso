@@ -883,11 +883,17 @@ function Modeles() {
 
   async function creerProgramme() {
     if (!newProgNom.trim()) return
-    const { data } = await supabase.from('programmes')
+    const { data, error } = await supabase.from('programmes')
       .insert({ nom: newProgNom.trim(), objectif: newProgObj.trim() || null })
       .select().single()
+    setShowNewProg(false)
+    setNewProgNom('')
+    setNewProgObj('')
+    if (error) {
+      alert(`Erreur création modèle : ${error.message}\n\nVérifie que la table "programmes" existe dans Supabase (voir DEBUG.md §5).`)
+      return
+    }
     if (data) {
-      setNewProgNom(''); setNewProgObj(''); setShowNewProg(false)
       await loadProgrammes()
       setSelectedProg(data)
     }
@@ -972,7 +978,7 @@ function Modeles() {
   }
 
   return (
-    <div className="page-section" style={{ display: 'flex', gap: '0', height: 'calc(100vh - 100px)', overflow: 'hidden', borderRadius: '16px', border: '1px solid #1A1A22', background: '#0D0D10' }}>
+    <div className="page-section" style={{ display: 'flex', gap: '0', height: 'calc(100svh - 130px)', minHeight: '400px', overflow: 'hidden', borderRadius: '16px', border: '1px solid #1A1A22', background: '#0D0D10' }}>
 
       {/* ─── Panneau gauche : liste des modèles ─── */}
       <div style={{
