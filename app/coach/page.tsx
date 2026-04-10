@@ -2744,21 +2744,31 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                       <div style={{ flex: 1, padding: '4px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
                         {realsJour.map(r => {
                           const isWellness = !r.seances
-                          if (isWellness) return (
-                            <div key={r.id} onClick={() => setSeanceDetail(r)} style={{
-                              background: '#2ECC7110', borderLeft: '3px solid #2ECC71',
-                              borderTop: '1px solid #2ECC7130', borderBottom: '1px solid #2ECC7130', borderRight: '1px solid #2ECC7130',
-                              borderRadius: '4px', padding: '4px 6px', cursor: 'pointer',
-                            }}>
-                              <div style={{ fontSize: '10px', fontWeight: '700', color: '#2ECC71' }}>💚 Wellness</div>
-                              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '2px' }}>
-                                {r.fatigue != null && <span style={{ fontSize: '9px', color: '#FF475790' }}>F:{r.fatigue}</span>}
-                                {r.rpe != null && <span style={{ fontSize: '9px', color: '#1A6FFF90' }}>R:{r.rpe}</span>}
-                                {r.qualite_sommeil != null && <span style={{ fontSize: '9px', color: '#2ECC7190' }}>S:{r.qualite_sommeil}</span>}
-                                {r.courbatures != null && <span style={{ fontSize: '9px', color: '#FF6B3590' }}>C:{r.courbatures}</span>}
+                          if (isWellness) {
+                            // Couleur par valeur: fatigue/rpe/courbatures = vert→rouge, sommeil = rouge→vert
+                            const wColor = (v: number, inverted = false) => {
+                              const n = inverted ? 11 - v : v
+                              if (n <= 3) return '#2ECC71'
+                              if (n <= 5) return '#F39C12'
+                              if (n <= 7) return '#FF6B35'
+                              return '#FF4757'
+                            }
+                            return (
+                              <div key={r.id} onClick={() => setSeanceDetail(r)} style={{
+                                background: '#2ECC7110', borderLeft: '3px solid #2ECC71',
+                                borderTop: '1px solid #2ECC7130', borderBottom: '1px solid #2ECC7130', borderRight: '1px solid #2ECC7130',
+                                borderRadius: '4px', padding: '4px 6px', cursor: 'pointer',
+                              }}>
+                                <div style={{ fontSize: '10px', fontWeight: '700', color: '#2ECC71' }}>💚 Wellness</div>
+                                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '2px' }}>
+                                  {r.fatigue != null && <span style={{ fontSize: '9px', fontWeight: '700', color: wColor(r.fatigue) }}>F:{r.fatigue}</span>}
+                                  {r.rpe != null && <span style={{ fontSize: '9px', fontWeight: '700', color: wColor(r.rpe) }}>R:{r.rpe}</span>}
+                                  {r.qualite_sommeil != null && <span style={{ fontSize: '9px', fontWeight: '700', color: wColor(r.qualite_sommeil, true) }}>S:{r.qualite_sommeil}</span>}
+                                  {r.courbatures != null && <span style={{ fontSize: '9px', fontWeight: '700', color: wColor(r.courbatures) }}>C:{r.courbatures}</span>}
+                                </div>
                               </div>
-                            </div>
-                          )
+                            )
+                          }
                           const couleur = r.completee ? '#2ECC71' : isPast ? '#FF4757' : '#1A6FFF'
                           return (
                             <div key={r.id} onClick={() => setSeanceDetail(r)} style={{
@@ -2972,44 +2982,41 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
             })()}
 
             {/* Données renseignées par le joueur */}
-            {(seanceDetail.rpe || seanceDetail.fatigue || seanceDetail.courbatures || seanceDetail.qualite_sommeil || seanceDetail.notes_joueur) && (
-              <div style={{ background: '#0D0D0D', borderRadius: '12px', padding: '14px', marginBottom: '16px' }}>
-                <div style={{ color: '#555', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Ressenti joueur</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: seanceDetail.notes_joueur ? '10px' : '0' }}>
-                  {seanceDetail.fatigue != null && (
-                    <div style={{ background: '#FF475720', borderRadius: '8px', padding: '6px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                      <span style={{ color: '#888', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase' }}>Fatigue</span>
-                      <span style={{ color: '#FF4757', fontWeight: '800', fontSize: '18px' }}>{seanceDetail.fatigue}</span>
-                      <span style={{ color: '#555', fontSize: '9px' }}>/10</span>
-                    </div>
-                  )}
-                  {seanceDetail.courbatures != null && (
-                    <div style={{ background: '#FF6B3520', borderRadius: '8px', padding: '6px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                      <span style={{ color: '#888', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase' }}>Courbatures</span>
-                      <span style={{ color: '#FF6B35', fontWeight: '800', fontSize: '18px' }}>{seanceDetail.courbatures}</span>
-                      <span style={{ color: '#555', fontSize: '9px' }}>/10</span>
-                    </div>
-                  )}
-                  {seanceDetail.rpe != null && (
-                    <div style={{ background: '#1A6FFF20', borderRadius: '8px', padding: '6px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                      <span style={{ color: '#888', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase' }}>Effort</span>
-                      <span style={{ color: '#1A6FFF', fontWeight: '800', fontSize: '18px' }}>{seanceDetail.rpe}</span>
-                      <span style={{ color: '#555', fontSize: '9px' }}>/10</span>
-                    </div>
-                  )}
-                  {seanceDetail.qualite_sommeil != null && (
-                    <div style={{ background: '#2ECC7120', borderRadius: '8px', padding: '6px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                      <span style={{ color: '#888', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase' }}>Sommeil</span>
-                      <span style={{ color: '#2ECC71', fontWeight: '800', fontSize: '18px' }}>{seanceDetail.qualite_sommeil}</span>
-                      <span style={{ color: '#555', fontSize: '9px' }}>/10</span>
-                    </div>
+            {(seanceDetail.rpe || seanceDetail.fatigue || seanceDetail.courbatures || seanceDetail.qualite_sommeil || seanceDetail.notes_joueur) && (() => {
+              const wc = (v: number, inv = false) => {
+                const n = inv ? 11 - v : v
+                if (n <= 3) return '#2ECC71'
+                if (n <= 5) return '#F39C12'
+                if (n <= 7) return '#FF6B35'
+                return '#FF4757'
+              }
+              const items = [
+                { label: 'Fatigue', val: seanceDetail.fatigue, inv: false },
+                { label: 'Courbatures', val: seanceDetail.courbatures, inv: false },
+                { label: 'Effort', val: seanceDetail.rpe, inv: false },
+                { label: 'Sommeil', val: seanceDetail.qualite_sommeil, inv: true },
+              ].filter(x => x.val != null)
+              return (
+                <div style={{ background: '#0D0D0D', borderRadius: '12px', padding: '14px', marginBottom: '16px' }}>
+                  <div style={{ color: '#555', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Ressenti joueur</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: seanceDetail.notes_joueur ? '10px' : '0' }}>
+                    {items.map(({ label, val, inv }) => {
+                      const c = wc(val!, inv)
+                      return (
+                        <div key={label} style={{ background: c + '20', border: `1px solid ${c}40`, borderRadius: '10px', padding: '8px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', minWidth: '64px' }}>
+                          <span style={{ color: '#888', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase' }}>{label}</span>
+                          <span style={{ color: c, fontWeight: '900', fontSize: '22px', lineHeight: 1 }}>{val}</span>
+                          <span style={{ color: c + '80', fontSize: '9px' }}>/10</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  {seanceDetail.notes_joueur && (
+                    <div style={{ color: '#AAA', fontSize: '13px', fontStyle: 'italic', borderTop: '1px solid #1E1E1E', paddingTop: '10px' }}>"{seanceDetail.notes_joueur}"</div>
                   )}
                 </div>
-                {seanceDetail.notes_joueur && (
-                  <div style={{ color: '#AAA', fontSize: '13px', fontStyle: 'italic', borderTop: '1px solid #1E1E1E', paddingTop: '10px' }}>"{seanceDetail.notes_joueur}"</div>
-                )}
-              </div>
-            )}
+              )
+            })()}
 
             {/* Supprimer du planning */}
             <button onClick={() => supprimerRealisation(seanceDetail.id)} style={{ width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #FF475730', background: '#FF475710', color: '#FF4757', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}>
