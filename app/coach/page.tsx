@@ -978,144 +978,110 @@ function Modeles() {
   }
 
   return (
-    <div className="page-section" style={{ display: 'flex', gap: '0', height: 'calc(100svh - 130px)', minHeight: '400px', overflow: 'hidden', borderRadius: '16px', border: '1px solid #1A1A22', background: '#0D0D10' }}>
+    <div className="page-section">
 
-      {/* ─── Panneau gauche : liste des modèles ─── */}
-      <div style={{
-        width: '220px', flexShrink: 0,
-        background: 'linear-gradient(180deg, #0E0E12, #0B0B0E)',
-        borderRight: '1px solid #1A1A22',
-        display: 'flex', flexDirection: 'column', overflow: 'hidden',
-      }}>
-        <div style={{ padding: '16px 14px 12px', borderBottom: '1px solid #1A1A22' }}>
-          <div className="section-label" style={{ marginBottom: '10px' }}>Modèles</div>
-          <button onClick={() => setShowNewProg(true)} className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '9px 12px', borderRadius: '8px', fontSize: '13px' }}>
-            + Nouveau modèle
-          </button>
-        </div>
-
-        <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
-          {programmes.length === 0 && (
-            <div className="empty-state" style={{ padding: '24px 8px' }}>
-              <div style={{ fontSize: '24px' }}>🗓️</div>
-              <div style={{ fontSize: '12px', color: '#3A3A48' }}>Aucun modèle.<br />Crée-en un !</div>
-            </div>
+      {/* ─── Barre du haut : sélecteur + nouveau ─── */}
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: '160px' }}>
+          {programmes.length === 0 ? (
+            <div style={{ color: '#444', fontSize: '13px' }}>Aucun modèle — crée-en un !</div>
+          ) : (
+            <select
+              value={selectedProg?.id || ''}
+              onChange={e => {
+                const p = programmes.find(x => x.id === e.target.value)
+                if (p) setSelectedProg(p)
+              }}
+              className="select"
+              style={{ width: '100%', fontWeight: '700' }}
+            >
+              {programmes.map(p => (
+                <option key={p.id} value={p.id}>{p.nom}</option>
+              ))}
+            </select>
           )}
-          {programmes.map(p => {
-            const active = selectedProg?.id === p.id
-            return (
-              <div key={p.id} style={{ position: 'relative', marginBottom: '2px' }}>
-                <button onClick={() => setSelectedProg(p)} className={`nav-item${active ? ' active' : ''}`} style={{ fontSize: '12px', padding: '9px 10px', paddingRight: active ? '26px' : '10px' }}>
-                  <div className="truncate">{p.nom}</div>
-                </button>
-                {active && (
-                  <button onClick={() => supprimerProgramme(p.id)} style={{
-                    position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)',
-                    background: 'transparent', border: 'none', color: '#3A3A48', cursor: 'pointer',
-                    fontSize: '13px', padding: '2px 4px', lineHeight: 1, transition: 'color 0.15s',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#FF4757')}
-                  onMouseLeave={e => (e.currentTarget.style.color = '#3A3A48')}
-                  >✕</button>
-                )}
-              </div>
-            )
-          })}
         </div>
-      </div>
-
-      {/* ─── Zone principale : grille semaine ─── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-
-        {!selectedProg ? (
-          <div className="empty-state" style={{ flex: 1 }}>
-            <div className="empty-state-icon">🗓️</div>
-            <div className="empty-state-text">Sélectionne ou crée un modèle<br />dans le panneau de gauche</div>
-          </div>
-        ) : (
+        <button onClick={() => setShowNewProg(true)} className="btn btn-primary btn-sm">+ Nouveau</button>
+        {selectedProg && (
           <>
-            {/* Header */}
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid #1A1A22', display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0, background: 'linear-gradient(180deg, #111115, #0D0D10)' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: '800', fontSize: '16px' }}>{selectedProg.nom}</div>
-                {selectedProg.objectif && <div style={{ color: '#666', fontSize: '12px', marginTop: '2px' }}>{selectedProg.objectif}</div>}
-              </div>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <button onClick={() => setNbSemaines(n => n - 1)} disabled={nbSemaines <= 1}
-                  style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#888', borderRadius: '6px', padding: '6px 10px', cursor: 'pointer', fontSize: '13px' }}>−</button>
-                <span style={{ color: '#FFF', fontSize: '13px', fontWeight: '600', minWidth: '70px', textAlign: 'center' }}>{nbSemaines} semaine{nbSemaines > 1 ? 's' : ''}</span>
-                <button onClick={() => setNbSemaines(n => n + 1)}
-                  style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#888', borderRadius: '6px', padding: '6px 10px', cursor: 'pointer', fontSize: '13px' }}>+</button>
-                <button onClick={() => setShowAssign(true)} style={{
-                  background: '#2ECC71', color: '#FFF', border: 'none', borderRadius: '8px',
-                  padding: '9px 16px', cursor: 'pointer', fontSize: '13px', fontWeight: '700',
-                }}>Attribuer aux joueurs →</button>
-              </div>
-            </div>
-
-            {/* Grille */}
-            <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
-              <table className="data-table" style={{ minWidth: '700px' }}>
-                <thead>
-                  <tr>
-                    <th style={{ width: '60px', textAlign: 'left' }}>SEM.</th>
-                    {JOURS_FULL.map(j => (
-                      <th key={j} style={{ textAlign: 'center' }}>{j}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {Array.from({ length: nbSemaines }, (_, si) => {
-                    const sem = si + 1
-                    return (
-                      <tr key={sem}>
-                        <td style={{ verticalAlign: 'top', background: '#0B0B0E', padding: '8px' }}>
-                          <div style={{ fontSize: '11px', fontWeight: '900', color: '#3A3A50', letterSpacing: '0.5px' }}>S{sem}</div>
-                        </td>
-                        {Array.from({ length: 7 }, (_, ji) => {
-                          const jour = ji + 1
-                          const sessions = grid[sem]?.[jour] || []
-                          return (
-                            <td key={jour} className="cal-cell" style={{ verticalAlign: 'top', minWidth: '100px' }}>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                {sessions.map(s => {
-                                  const tc = TYPE_COLORS[s.type] || TYPE_COLORS.complete
-                                  return (
-                                    <div key={s.id} className="cal-session-card"
-                                      style={{ background: tc.bg, border: `1px solid ${tc.border}`, display: 'flex', alignItems: 'flex-start', gap: '4px' }}>
-                                      <div style={{ flex: 1, color: tc.text, fontWeight: '700', lineHeight: 1.3, cursor: 'pointer' }}
-                                        onClick={() => setEditingSeanceProg(s)}>
-                                        {s.nom}
-                                        {s.seance_exercices && s.seance_exercices.length > 0 && (
-                                          <div style={{ color: '#555', fontSize: '10px', fontWeight: '400', marginTop: '2px' }}>
-                                            {s.seance_exercices.length} exo{s.seance_exercices.length > 1 ? 's' : ''}
-                                          </div>
-                                        )}
-                                      </div>
-                                      <button onClick={() => supprimerSessionSlot(s.id)} style={{
-                                        background: 'transparent', border: 'none', color: '#2A2A3A',
-                                        cursor: 'pointer', fontSize: '11px', padding: '0 1px', lineHeight: 1, flexShrink: 0, transition: 'color 0.15s',
-                                      }}
-                                      onMouseEnter={e => (e.currentTarget.style.color = '#FF4757')}
-                                      onMouseLeave={e => (e.currentTarget.style.color = '#2A2A3A')}
-                                      >✕</button>
-                                    </div>
-                                  )
-                                })}
-                                <button className="cal-add-btn" onClick={() => { setShowPicker({ semaine: sem, jour }); setRechercheTemplate('') }}>+</button>
-                              </div>
-                            </td>
-                          )
-                        })}
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <button onClick={() => setNbSemaines(n => Math.max(1, n - 1))} className="btn btn-ghost btn-sm">−</button>
+            <span style={{ color: '#888', fontSize: '13px', fontWeight: '600', whiteSpace: 'nowrap' }}>{nbSemaines} sem.</span>
+            <button onClick={() => setNbSemaines(n => n + 1)} className="btn btn-ghost btn-sm">+</button>
+            <button onClick={() => setShowAssign(true)} className="btn btn-success btn-sm">Attribuer →</button>
+            <button onClick={() => supprimerProgramme(selectedProg.id)} className="btn btn-danger btn-sm">✕</button>
           </>
         )}
       </div>
+
+      {/* ─── Grille plein écran ─── */}
+      {!selectedProg ? (
+        <div className="card">
+          <div className="empty-state">
+            <div className="empty-state-icon">🗓️</div>
+            <div className="empty-state-text">Sélectionne ou crée un modèle</div>
+          </div>
+        </div>
+      ) : (
+        <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: 'calc(100svh - 200px)', borderRadius: '12px', border: '1px solid #1A1A22', background: '#0D0D10' }}>
+          <table className="data-table" style={{ minWidth: '640px', width: '100%' }}>
+            <thead>
+              <tr>
+                <th style={{ width: '44px', textAlign: 'left' }}>SEM.</th>
+                {JOURS_FULL.map(j => (
+                  <th key={j} style={{ textAlign: 'center', minWidth: '90px' }}>{j}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: nbSemaines }, (_, si) => {
+                const sem = si + 1
+                return (
+                  <tr key={sem}>
+                    <td style={{ verticalAlign: 'top', background: '#0B0B0E', padding: '8px 6px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: '900', color: '#3A3A50' }}>S{sem}</div>
+                    </td>
+                    {Array.from({ length: 7 }, (_, ji) => {
+                      const jour = ji + 1
+                      const sessions = grid[sem]?.[jour] || []
+                      return (
+                        <td key={jour} className="cal-cell" style={{ verticalAlign: 'top' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            {sessions.map(s => {
+                              const tc = TYPE_COLORS[s.type] || TYPE_COLORS.complete
+                              return (
+                                <div key={s.id} className="cal-session-card"
+                                  style={{ background: tc.bg, border: `1px solid ${tc.border}`, display: 'flex', alignItems: 'flex-start', gap: '4px' }}>
+                                  <div style={{ flex: 1, color: tc.text, fontWeight: '700', lineHeight: 1.3, cursor: 'pointer', fontSize: '11px' }}
+                                    onClick={() => setEditingSeanceProg(s)}>
+                                    {s.nom}
+                                    {s.seance_exercices && s.seance_exercices.length > 0 && (
+                                      <div style={{ color: '#555', fontSize: '10px', fontWeight: '400', marginTop: '2px' }}>
+                                        {s.seance_exercices.length} exo{s.seance_exercices.length > 1 ? 's' : ''}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <button onClick={() => supprimerSessionSlot(s.id)} style={{
+                                    background: 'transparent', border: 'none', color: '#2A2A3A',
+                                    cursor: 'pointer', fontSize: '11px', padding: '0 1px', lineHeight: 1, flexShrink: 0, transition: 'color 0.15s',
+                                  }}
+                                  onMouseEnter={e => (e.currentTarget.style.color = '#FF4757')}
+                                  onMouseLeave={e => (e.currentTarget.style.color = '#2A2A3A')}
+                                  >✕</button>
+                                </div>
+                              )
+                            })}
+                            <button className="cal-add-btn" onClick={() => { setShowPicker({ semaine: sem, jour }); setRechercheTemplate('') }}>+</button>
+                          </div>
+                        </td>
+                      )
+                    })}
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* ─── Modal nouveau programme ─── */}
       {showNewProg && (
