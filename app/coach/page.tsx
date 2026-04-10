@@ -9,7 +9,8 @@ const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'joueurs', label: 'Joueurs', icon: '👥' },
   { id: 'exercices', label: 'Exercices', icon: '⚡' },
-  { id: 'programmes', label: 'Programmes', icon: '📋' },
+  { id: 'modeles', label: 'Modèles', icon: '🗓️' },
+  { id: 'programmes', label: 'Séances', icon: '📋' },
   { id: 'messages', label: 'Messages', icon: '💬' },
 ]
 
@@ -63,115 +64,78 @@ export default function CoachPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex' }}>
+    <div className="app-shell">
 
       {/* Backdrop mobile */}
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
-            zIndex: 40, display: 'block',
-          }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', zIndex: 40 }}
         />
       )}
 
       {/* Sidebar */}
-      <div style={{
+      <div className="sidebar" style={{
         width: '220px',
-        background: '#111',
-        borderRight: '1px solid #2A2A2A',
         display: 'flex',
         flexDirection: 'column',
-        padding: '24px 16px',
+        padding: '20px 12px',
         position: 'fixed',
         height: '100vh',
         zIndex: 50,
         transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
-        transition: 'transform 0.25s ease',
+        transition: 'transform 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
       }}>
-        <div style={{ marginBottom: '40px', paddingLeft: '8px' }}>
-          <div style={{ fontSize: '18px', fontWeight: '900', letterSpacing: '-0.5px' }}>
-            <span style={{ color: '#FFF' }}>PAGA</span>
-            <span style={{ color: '#1A6FFF' }}>COACHING</span>
+        <div style={{ marginBottom: '24px', paddingLeft: '6px', flexShrink: 0 }}>
+          <div className="sidebar-logo">
+            <span className="sidebar-logo-paga">PAGA</span>
+            <span className="sidebar-logo-coaching">COACHING</span>
           </div>
-          <div style={{ width: '24px', height: '2px', background: '#C9A84C', marginTop: '6px', borderRadius: '1px' }} />
+          <div className="sidebar-accent" />
         </div>
 
-        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
           {NAV_ITEMS.map(item => (
             <button
               key={item.id}
               onClick={() => navTo(item.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '12px 12px',
-                borderRadius: '10px',
-                border: 'none',
-                cursor: 'pointer',
-                background: activeTab === item.id ? '#1A6FFF20' : 'transparent',
-                color: activeTab === item.id ? '#1A6FFF' : '#888',
-                fontSize: '14px',
-                fontWeight: activeTab === item.id ? '600' : '400',
-                textAlign: 'left',
-                transition: 'all 0.15s',
-              }}
+              className={`nav-item${activeTab === item.id ? ' active' : ''}`}
             >
-              <span>{item.icon}</span>
+              <span className="nav-icon">{item.icon}</span>
               <span style={{ flex: 1 }}>{item.label}</span>
               {item.id === 'messages' && unreadMessages > 0 && (
-                <span style={{ background: '#FF4757', color: '#FFF', borderRadius: '10px', fontSize: '10px', fontWeight: '800', padding: '2px 7px', lineHeight: 1.4 }}>{unreadMessages}</span>
+                <span className="nav-badge">{unreadMessages}</span>
               )}
             </button>
           ))}
         </nav>
 
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: '12px',
-            borderRadius: '10px',
-            border: '1px solid #2A2A2A',
-            background: 'transparent',
-            color: '#888',
-            fontSize: '14px',
-            cursor: 'pointer',
-            textAlign: 'left',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}
-        >
-          <span>🚪</span> Déconnexion
-        </button>
+        <div style={{ flexShrink: 0, paddingTop: '8px' }}>
+          <button onClick={handleLogout} className="btn-logout">
+            <span>🚪</span> Déconnexion
+          </button>
+        </div>
       </div>
 
       {/* Contenu principal */}
-      <div style={{ flex: 1, padding: '20px 20px 32px' }}>
+      <div className="main-content" style={{ flex: 1, padding: '20px 20px 32px', minWidth: 0 }}>
         {/* Barre top avec hamburger */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-          <button
-            onClick={() => setSidebarOpen(true)}
-            style={{
-              background: '#111', border: '1px solid #2A2A2A', borderRadius: '10px',
-              padding: '10px 12px', cursor: 'pointer', display: 'flex', flexDirection: 'column',
-              gap: '5px', flexShrink: 0,
-            }}
-          >
-            <span style={{ display: 'block', width: '20px', height: '2px', background: '#FFF', borderRadius: '1px' }} />
-            <span style={{ display: 'block', width: '20px', height: '2px', background: '#FFF', borderRadius: '1px' }} />
-            <span style={{ display: 'block', width: '20px', height: '2px', background: '#FFF', borderRadius: '1px' }} />
+        <div className="topbar">
+          <button onClick={() => setSidebarOpen(true)} className="btn-hamburger">
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
           </button>
-          <div style={{ fontSize: '16px', fontWeight: '700', color: '#FFF' }}>
-            {NAV_ITEMS.find(n => n.id === activeTab)?.icon} {NAV_ITEMS.find(n => n.id === activeTab)?.label}
+          <div className="topbar-title">
+            {NAV_ITEMS.find(n => n.id === activeTab)?.icon}{' '}
+            {NAV_ITEMS.find(n => n.id === activeTab)?.label}
           </div>
         </div>
 
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'joueurs' && <Joueurs />}
         {activeTab === 'exercices' && <Exercices />}
+        {activeTab === 'modeles' && <Modeles />}
         {activeTab === 'programmes' && <Programmes />}
         {activeTab === 'messages' && <Messages coachId={coachId} onUnreadChange={setUnreadMessages} />}
       </div>
@@ -181,38 +145,42 @@ export default function CoachPage() {
 
 function Dashboard() {
   return (
-    <div>
-      <h1 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '8px' }}>Bonjour Stéphane 👋</h1>
-      <p style={{ color: '#888', marginBottom: '32px' }}>Voici l'activité de tes joueurs aujourd'hui</p>
+    <div className="page-section">
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '26px', fontWeight: '900', letterSpacing: '-0.5px', marginBottom: '6px' }}>
+          Bonjour Stéphane 👋
+        </h1>
+        <p style={{ color: '#666', fontSize: '14px' }}>Voici l'activité de tes joueurs aujourd'hui</p>
+      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', marginBottom: '28px' }}>
         {[
-          { label: 'Joueurs actifs', value: '0', color: '#1A6FFF' },
-          { label: 'Séances du jour', value: '0', color: '#C9A84C' },
-          { label: 'Séances complétées', value: '0', color: '#2ECC71' },
+          { label: 'Joueurs actifs',     value: '0', color: '#5599FF', icon: '👥', glow: '#1A6FFF' },
+          { label: 'Séances du jour',    value: '0', color: '#D4AF60', icon: '📅', glow: '#C9A84C' },
+          { label: 'Séances complétées', value: '0', color: '#3DD68C', icon: '✓',  glow: '#2ECC71' },
         ].map(stat => (
-          <div key={stat.label} style={{
-            background: '#111',
-            border: '1px solid #2A2A2A',
-            borderRadius: '12px',
-            padding: '24px',
-          }}>
-            <div style={{ fontSize: '36px', fontWeight: '900', color: stat.color }}>{stat.value}</div>
-            <div style={{ color: '#888', fontSize: '13px', marginTop: '4px' }}>{stat.label}</div>
+          <div key={stat.label} className="stat-card" style={{ color: stat.color }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+              <div style={{ fontSize: '22px', opacity: 0.8 }}>{stat.icon}</div>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: stat.glow, boxShadow: `0 0 8px ${stat.glow}` }} />
+            </div>
+            <div style={{ fontSize: '40px', fontWeight: '900', lineHeight: 1, letterSpacing: '-1px' }}>{stat.value}</div>
+            <div style={{ color: '#666', fontSize: '12px', fontWeight: '600', marginTop: '8px', letterSpacing: '0.3px', textTransform: 'uppercase' }}>{stat.label}</div>
           </div>
         ))}
       </div>
 
-      <div style={{
-        background: '#111',
-        border: '1px solid #2A2A2A',
-        borderRadius: '12px',
-        padding: '24px',
-      }}>
-        <h2 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px', color: '#C9A84C' }}>
-          Activité joueurs — Aujourd'hui
-        </h2>
-        <p style={{ color: '#555', fontSize: '14px' }}>Aucun joueur ajouté pour l'instant.</p>
+      <div className="card" style={{ padding: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+          <div style={{ width: '3px', height: '20px', background: 'linear-gradient(180deg, #C9A84C, transparent)', borderRadius: '2px' }} />
+          <h2 style={{ fontSize: '14px', fontWeight: '700', color: '#D4AF60', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+            Activité joueurs — Aujourd'hui
+          </h2>
+        </div>
+        <div className="empty-state">
+          <div className="empty-state-icon">🏃</div>
+          <div className="empty-state-text">Aucun joueur ajouté pour l'instant.<br />Commence par créer ton premier joueur.</div>
+        </div>
       </div>
     </div>
   )
@@ -831,11 +799,497 @@ type Seance = {
   seance_exercices?: SeanceExercice[]
 }
 
+type Programme = {
+  id: string
+  nom: string
+  description?: string
+  objectif?: string
+}
+
+type SeanceProg = {
+  id: string
+  nom: string
+  type: string
+  jour_semaine: number
+  semaine: number
+  seance_exercices?: { id: string }[]
+}
+
 const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+const JOURS_FULL = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
 const TYPES_SEANCE = ['complete', 'echauffement', 'corps', 'retour_au_calme']
 const LABELS_TYPE: Record<string, string> = {
   complete: 'Complète', echauffement: 'Échauffement',
   corps: 'Corps de séance', retour_au_calme: 'Retour au calme',
+}
+
+// ─── COULEURS PAR TYPE ────────────────────────────────────────────
+const TYPE_COLORS: Record<string, { bg: string; border: string; text: string }> = {
+  complete:         { bg: '#1A6FFF18', border: '#1A6FFF50', text: '#6AAEFF' },
+  echauffement:     { bg: '#2ECC7118', border: '#2ECC7150', text: '#2ECC71' },
+  corps:            { bg: '#C9A84C18', border: '#C9A84C50', text: '#C9A84C' },
+  retour_au_calme:  { bg: '#9B59B618', border: '#9B59B650', text: '#C39BD3' },
+}
+
+// ─── MODELES COMPONENT ────────────────────────────────────────────
+function Modeles() {
+  const [programmes, setProgrammes] = useState<Programme[]>([])
+  const [selectedProg, setSelectedProg] = useState<Programme | null>(null)
+  const [seancesProg, setSeancesProg] = useState<SeanceProg[]>([])
+  const [templates, setTemplates] = useState<Seance[]>([])
+  const [exercices, setExercices] = useState<Exercice[]>([])
+  const [nbSemaines, setNbSemaines] = useState(4)
+  const [showNewProg, setShowNewProg] = useState(false)
+  const [newProgNom, setNewProgNom] = useState('')
+  const [newProgObj, setNewProgObj] = useState('')
+  const [showPicker, setShowPicker] = useState<{ semaine: number; jour: number } | null>(null)
+  const [showAssign, setShowAssign] = useState(false)
+  const [editingSeanceProg, setEditingSeanceProg] = useState<SeanceProg | null>(null)
+  const [rechercheTemplate, setRechercheTemplate] = useState('')
+
+  useEffect(() => { loadProgrammes() }, [])
+
+  useEffect(() => {
+    if (selectedProg) loadSeancesProg(selectedProg.id)
+  }, [selectedProg])
+
+  async function loadProgrammes() {
+    const { data } = await supabase.from('programmes').select('*').order('nom')
+    if (data) {
+      setProgrammes(data)
+      if (data.length > 0 && !selectedProg) setSelectedProg(data[0])
+    }
+    const [{ data: tpls }, { data: exs }] = await Promise.all([
+      supabase.from('seances').select('*, seance_exercices(id)').eq('est_template', true).order('nom'),
+      supabase.from('exercices').select('*, familles(nom, couleur)').order('nom'),
+    ])
+    if (tpls) setTemplates(tpls)
+    if (exs) setExercices(exs)
+  }
+
+  async function loadSeancesProg(progId: string) {
+    const { data } = await supabase
+      .from('seances')
+      .select('id, nom, type, jour_semaine, semaine, seance_exercices(id)')
+      .eq('programme_id', progId)
+      .order('semaine').order('jour_semaine')
+    if (data) {
+      setSeancesProg(data as SeanceProg[])
+      // compute nb semaines
+      const max = data.reduce((m, s) => Math.max(m, s.semaine || 1), 1)
+      setNbSemaines(Math.max(max, 4))
+    }
+  }
+
+  async function creerProgramme() {
+    if (!newProgNom.trim()) return
+    const { data } = await supabase.from('programmes')
+      .insert({ nom: newProgNom.trim(), objectif: newProgObj.trim() || null })
+      .select().single()
+    if (data) {
+      setNewProgNom(''); setNewProgObj(''); setShowNewProg(false)
+      await loadProgrammes()
+      setSelectedProg(data)
+    }
+  }
+
+  async function supprimerProgramme(id: string) {
+    if (!confirm('Supprimer ce modèle et toutes ses séances ?')) return
+    await supabase.from('seances').delete().eq('programme_id', id)
+    await supabase.from('programmes').delete().eq('id', id)
+    setSelectedProg(null)
+    loadProgrammes()
+  }
+
+  async function ajouterSessionSlot(semaine: number, jour: number, template: Seance) {
+    if (!selectedProg) return
+    // Créer une nouvelle séance liée au programme
+    const { data: newSeance } = await supabase.from('seances')
+      .insert({ nom: template.nom, type: template.type, programme_id: selectedProg.id, jour_semaine: jour, semaine, est_template: false })
+      .select().single()
+    if (!newSeance) return
+
+    // Copier les exercices du template
+    if (template.seance_exercices && template.seance_exercices.length > 0) {
+      const { data: exos } = await supabase
+        .from('seance_exercices')
+        .select('*')
+        .eq('seance_id', template.id)
+        .order('ordre')
+      if (exos && exos.length > 0) {
+        await supabase.from('seance_exercices').insert(
+          exos.map(e => ({
+            seance_id: newSeance.id, exercice_id: e.exercice_id, ordre: e.ordre,
+            series: e.series, repetitions: e.repetitions, duree_secondes: e.duree_secondes,
+            distance_metres: e.distance_metres, charge_kg: e.charge_kg,
+            recuperation_secondes: e.recuperation_secondes, lien_suivant: e.lien_suivant,
+            uni_podal: e.uni_podal, notes: e.notes, sets_config: e.sets_config,
+          }))
+        )
+      }
+    }
+    setShowPicker(null)
+    loadSeancesProg(selectedProg.id)
+  }
+
+  async function supprimerSessionSlot(seanceId: string) {
+    await supabase.from('seances').delete().eq('id', seanceId)
+    if (selectedProg) loadSeancesProg(selectedProg.id)
+  }
+
+  const templatesFiltres = templates.filter(t =>
+    t.nom.toLowerCase().includes(rechercheTemplate.toLowerCase())
+  )
+
+  // Organiser sessions par [semaine][jour]
+  const grid: Record<number, Record<number, SeanceProg[]>> = {}
+  for (let s = 1; s <= nbSemaines; s++) {
+    grid[s] = {}
+    for (let j = 1; j <= 7; j++) grid[s][j] = []
+  }
+  for (const s of seancesProg) {
+    if (s.semaine && s.jour_semaine) {
+      if (!grid[s.semaine]) grid[s.semaine] = {}
+      if (!grid[s.semaine][s.jour_semaine]) grid[s.semaine][s.jour_semaine] = []
+      grid[s.semaine][s.jour_semaine].push(s)
+    }
+  }
+
+  if (editingSeanceProg) {
+    const seanceFull: Seance = {
+      id: editingSeanceProg.id, nom: editingSeanceProg.nom,
+      type: editingSeanceProg.type, est_template: false, seance_exercices: [],
+    }
+    return <EditeurSeance
+      seance={seanceFull}
+      exercices={exercices}
+      onSave={async () => {
+        setEditingSeanceProg(null)
+        if (selectedProg) loadSeancesProg(selectedProg.id)
+      }}
+      onCancel={() => setEditingSeanceProg(null)}
+    />
+  }
+
+  return (
+    <div className="page-section" style={{ display: 'flex', gap: '0', height: 'calc(100vh - 100px)', overflow: 'hidden', borderRadius: '16px', border: '1px solid #1A1A22', background: '#0D0D10' }}>
+
+      {/* ─── Panneau gauche : liste des modèles ─── */}
+      <div style={{
+        width: '220px', flexShrink: 0,
+        background: 'linear-gradient(180deg, #0E0E12, #0B0B0E)',
+        borderRight: '1px solid #1A1A22',
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+      }}>
+        <div style={{ padding: '16px 14px 12px', borderBottom: '1px solid #1A1A22' }}>
+          <div className="section-label" style={{ marginBottom: '10px' }}>Modèles</div>
+          <button onClick={() => setShowNewProg(true)} className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '9px 12px', borderRadius: '8px', fontSize: '13px' }}>
+            + Nouveau modèle
+          </button>
+        </div>
+
+        <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+          {programmes.length === 0 && (
+            <div className="empty-state" style={{ padding: '24px 8px' }}>
+              <div style={{ fontSize: '24px' }}>🗓️</div>
+              <div style={{ fontSize: '12px', color: '#3A3A48' }}>Aucun modèle.<br />Crée-en un !</div>
+            </div>
+          )}
+          {programmes.map(p => {
+            const active = selectedProg?.id === p.id
+            return (
+              <div key={p.id} style={{ position: 'relative', marginBottom: '2px' }}>
+                <button onClick={() => setSelectedProg(p)} className={`nav-item${active ? ' active' : ''}`} style={{ fontSize: '12px', padding: '9px 10px', paddingRight: active ? '26px' : '10px' }}>
+                  <div className="truncate">{p.nom}</div>
+                </button>
+                {active && (
+                  <button onClick={() => supprimerProgramme(p.id)} style={{
+                    position: 'absolute', right: '6px', top: '50%', transform: 'translateY(-50%)',
+                    background: 'transparent', border: 'none', color: '#3A3A48', cursor: 'pointer',
+                    fontSize: '13px', padding: '2px 4px', lineHeight: 1, transition: 'color 0.15s',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#FF4757')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#3A3A48')}
+                  >✕</button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ─── Zone principale : grille semaine ─── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+        {!selectedProg ? (
+          <div className="empty-state" style={{ flex: 1 }}>
+            <div className="empty-state-icon">🗓️</div>
+            <div className="empty-state-text">Sélectionne ou crée un modèle<br />dans le panneau de gauche</div>
+          </div>
+        ) : (
+          <>
+            {/* Header */}
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid #1A1A22', display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0, background: 'linear-gradient(180deg, #111115, #0D0D10)' }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: '800', fontSize: '16px' }}>{selectedProg.nom}</div>
+                {selectedProg.objectif && <div style={{ color: '#666', fontSize: '12px', marginTop: '2px' }}>{selectedProg.objectif}</div>}
+              </div>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <button onClick={() => setNbSemaines(n => n - 1)} disabled={nbSemaines <= 1}
+                  style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#888', borderRadius: '6px', padding: '6px 10px', cursor: 'pointer', fontSize: '13px' }}>−</button>
+                <span style={{ color: '#FFF', fontSize: '13px', fontWeight: '600', minWidth: '70px', textAlign: 'center' }}>{nbSemaines} semaine{nbSemaines > 1 ? 's' : ''}</span>
+                <button onClick={() => setNbSemaines(n => n + 1)}
+                  style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#888', borderRadius: '6px', padding: '6px 10px', cursor: 'pointer', fontSize: '13px' }}>+</button>
+                <button onClick={() => setShowAssign(true)} style={{
+                  background: '#2ECC71', color: '#FFF', border: 'none', borderRadius: '8px',
+                  padding: '9px 16px', cursor: 'pointer', fontSize: '13px', fontWeight: '700',
+                }}>Attribuer aux joueurs →</button>
+              </div>
+            </div>
+
+            {/* Grille */}
+            <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
+              <table className="data-table" style={{ minWidth: '700px' }}>
+                <thead>
+                  <tr>
+                    <th style={{ width: '60px', textAlign: 'left' }}>SEM.</th>
+                    {JOURS_FULL.map(j => (
+                      <th key={j} style={{ textAlign: 'center' }}>{j}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: nbSemaines }, (_, si) => {
+                    const sem = si + 1
+                    return (
+                      <tr key={sem}>
+                        <td style={{ verticalAlign: 'top', background: '#0B0B0E', padding: '8px' }}>
+                          <div style={{ fontSize: '11px', fontWeight: '900', color: '#3A3A50', letterSpacing: '0.5px' }}>S{sem}</div>
+                        </td>
+                        {Array.from({ length: 7 }, (_, ji) => {
+                          const jour = ji + 1
+                          const sessions = grid[sem]?.[jour] || []
+                          return (
+                            <td key={jour} className="cal-cell" style={{ verticalAlign: 'top', minWidth: '100px' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                {sessions.map(s => {
+                                  const tc = TYPE_COLORS[s.type] || TYPE_COLORS.complete
+                                  return (
+                                    <div key={s.id} className="cal-session-card"
+                                      style={{ background: tc.bg, border: `1px solid ${tc.border}`, display: 'flex', alignItems: 'flex-start', gap: '4px' }}>
+                                      <div style={{ flex: 1, color: tc.text, fontWeight: '700', lineHeight: 1.3, cursor: 'pointer' }}
+                                        onClick={() => setEditingSeanceProg(s)}>
+                                        {s.nom}
+                                        {s.seance_exercices && s.seance_exercices.length > 0 && (
+                                          <div style={{ color: '#555', fontSize: '10px', fontWeight: '400', marginTop: '2px' }}>
+                                            {s.seance_exercices.length} exo{s.seance_exercices.length > 1 ? 's' : ''}
+                                          </div>
+                                        )}
+                                      </div>
+                                      <button onClick={() => supprimerSessionSlot(s.id)} style={{
+                                        background: 'transparent', border: 'none', color: '#2A2A3A',
+                                        cursor: 'pointer', fontSize: '11px', padding: '0 1px', lineHeight: 1, flexShrink: 0, transition: 'color 0.15s',
+                                      }}
+                                      onMouseEnter={e => (e.currentTarget.style.color = '#FF4757')}
+                                      onMouseLeave={e => (e.currentTarget.style.color = '#2A2A3A')}
+                                      >✕</button>
+                                    </div>
+                                  )
+                                })}
+                                <button className="cal-add-btn" onClick={() => { setShowPicker({ semaine: sem, jour }); setRechercheTemplate('') }}>+</button>
+                              </div>
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* ─── Modal nouveau programme ─── */}
+      {showNewProg && (
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: '420px' }}>
+            <div className="modal-title">Nouveau modèle</div>
+            <div className="modal-subtitle">Crée un plan type (semaine, mois) à attribuer à tes joueurs</div>
+            <input value={newProgNom} onChange={e => setNewProgNom(e.target.value)}
+              className="input" placeholder="Nom du modèle (ex: Accompagnement CYCLE 1) *"
+              style={{ marginBottom: '10px' }} />
+            <input value={newProgObj} onChange={e => setNewProgObj(e.target.value)}
+              className="input" placeholder="Objectif (optionnel)"
+              style={{ marginBottom: '24px' }} />
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowNewProg(false)} className="btn btn-ghost">Annuler</button>
+              <button onClick={creerProgramme} className="btn btn-primary">Créer le modèle</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Modal picker séance template ─── */}
+      {showPicker && (
+        <div className="modal-overlay">
+          <div className="modal-box" style={{ maxWidth: '480px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+              <div style={{ flex: 1 }}>
+                <div className="modal-title" style={{ marginBottom: '2px' }}>Ajouter une séance</div>
+                <div style={{ color: '#5599FF', fontSize: '12px', fontWeight: '600' }}>
+                  {JOURS_FULL[showPicker.jour - 1]} · Semaine {showPicker.semaine}
+                </div>
+              </div>
+              <button onClick={() => setShowPicker(null)} className="btn btn-ghost btn-sm" style={{ fontSize: '16px', padding: '6px 10px' }}>✕</button>
+            </div>
+            <input value={rechercheTemplate} onChange={e => setRechercheTemplate(e.target.value)}
+              className="input" placeholder="Rechercher une séance..."
+              style={{ marginBottom: '12px' }} />
+            <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {templatesFiltres.length === 0 && (
+                <div className="empty-state">
+                  <div className="empty-state-icon">📋</div>
+                  <div className="empty-state-text">Aucune séance template trouvée.<br />Crée-en une dans l'onglet <strong>Séances</strong>.</div>
+                </div>
+              )}
+              {templatesFiltres.map(t => {
+                const tc = TYPE_COLORS[t.type] || TYPE_COLORS.complete
+                return (
+                  <button key={t.id} onClick={() => ajouterSessionSlot(showPicker.semaine, showPicker.jour, t)}
+                    className="list-item" style={{ textAlign: 'left', border: '1px solid #1A1A22' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: tc.text, flexShrink: 0, boxShadow: `0 0 6px ${tc.text}60` }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ color: '#F0F0F8', fontSize: '13px', fontWeight: '700' }}>{t.nom}</div>
+                      <div style={{ color: '#555', fontSize: '11px', marginTop: '2px' }}>
+                        {LABELS_TYPE[t.type]} · {t.seance_exercices?.length || 0} exercice{(t.seance_exercices?.length || 0) > 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── Modal attribution ─── */}
+      {showAssign && selectedProg && (
+        <AssignProgrammeModal
+          programme={selectedProg}
+          seances={seancesProg}
+          onClose={() => setShowAssign(false)}
+        />
+      )}
+    </div>
+  )
+}
+
+function AssignProgrammeModal({ programme, seances, onClose }: {
+  programme: Programme
+  seances: SeanceProg[]
+  onClose: () => void
+}) {
+  const [joueurs, setJoueurs] = useState<{ id: string; nom: string; prenom: string }[]>([])
+  const [selectedJoueurs, setSelectedJoueurs] = useState<Set<string>>(new Set())
+  const [dateDebut, setDateDebut] = useState(() => new Date().toISOString().split('T')[0])
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    supabase.from('joueurs').select('id, nom, prenom').eq('actif', true).order('nom').then(({ data }) => {
+      if (data) setJoueurs(data)
+    })
+  }, [])
+
+  function toggleJoueur(id: string) {
+    setSelectedJoueurs(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
+
+  async function confirmer() {
+    if (selectedJoueurs.size === 0) return
+    setSaving(true)
+    const debut = new Date(dateDebut + 'T12:00:00')
+
+    for (const joueurId of selectedJoueurs) {
+      // Créer l'entrée joueur_programme
+      await supabase.from('joueur_programmes').insert({
+        joueur_id: joueurId, programme_id: programme.id,
+        date_debut: dateDebut, actif: true,
+      })
+
+      // Créer les réalisations pour chaque séance
+      if (seances.length > 0) {
+        const rows = seances.map(s => {
+          const d = new Date(debut)
+          d.setDate(d.getDate() + (s.semaine - 1) * 7 + (s.jour_semaine - 1))
+          return {
+            joueur_id: joueurId, seance_id: s.id,
+            date_realisation: d.toISOString().split('T')[0], completee: false,
+          }
+        })
+        await supabase.from('realisations').insert(rows)
+      }
+    }
+
+    setSaving(false)
+    onClose()
+    alert(`✓ Modèle "${programme.nom}" attribué à ${selectedJoueurs.size} joueur${selectedJoueurs.size > 1 ? 's' : ''}`)
+  }
+
+  return (
+    <div className="modal-overlay" style={{ zIndex: 400 }}>
+      <div className="modal-box" style={{ maxWidth: '500px' }}>
+        <div className="modal-title">Attribuer le modèle</div>
+        <div className="modal-subtitle">{programme.nom} · {seances.length} séance{seances.length > 1 ? 's' : ''}</div>
+
+        {/* Date de début */}
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ color: '#9494A0', fontWeight: '600', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Date de début</label>
+          <input type="date" value={dateDebut} onChange={e => setDateDebut(e.target.value)} className="input" style={{ width: 'auto' }} />
+          <div style={{ color: '#444', fontSize: '12px', marginTop: '8px' }}>
+            Les séances seront placées selon leur position (semaine × jour) dans le modèle.
+          </div>
+        </div>
+
+        <hr className="divider" />
+
+        {/* Joueurs */}
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{ color: '#9494A0', fontWeight: '600', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', display: 'block', marginBottom: '10px' }}>
+            Joueurs {selectedJoueurs.size > 0 && <span style={{ color: '#5599FF' }}>— {selectedJoueurs.size} sélectionné{selectedJoueurs.size > 1 ? 's' : ''}</span>}
+          </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '260px', overflowY: 'auto' }}>
+            {joueurs.length === 0 && <div style={{ color: '#444', fontSize: '13px' }}>Aucun joueur actif</div>}
+            {joueurs.map(j => {
+              const sel = selectedJoueurs.has(j.id)
+              return (
+                <button key={j.id} onClick={() => toggleJoueur(j.id)}
+                  className={`list-item${sel ? ' list-item-active' : ''}`}
+                  style={{ border: sel ? '1px solid #1A6FFF40' : '1px solid #1A1A22', cursor: 'pointer', textAlign: 'left' }}>
+                  <div className={`checkbox-custom${sel ? ' checked' : ''}`}>{sel ? '✓' : ''}</div>
+                  <div style={{ flex: 1 }}>
+                    <span style={{ color: sel ? '#F0F0F8' : '#9494A0', fontSize: '14px', fontWeight: sel ? '700' : '400' }}>
+                      {j.prenom} {j.nom}
+                    </span>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+          <button onClick={onClose} className="btn btn-ghost">Annuler</button>
+          <button onClick={confirmer} disabled={saving || selectedJoueurs.size === 0}
+            className={`btn${selectedJoueurs.size > 0 ? ' btn-success' : ''}`}
+            style={selectedJoueurs.size === 0 ? { background: '#1A1A22', color: '#3A3A50', cursor: 'not-allowed', padding: '10px 20px' } : {}}>
+            {saving ? 'Attribution...' : `Confirmer l'attribution`}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function Programmes() {
@@ -894,91 +1348,72 @@ function Programmes() {
   const seancesSelectionnees = templates.filter(s => selection.has(s.id))
 
   return (
-    <div>
+    <div className="page-section">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '800' }}>
-          Séances templates <span style={{ color: '#555', fontSize: '16px', fontWeight: '400' }}>({templates.length})</span>
-        </h1>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div>
+          <h1 className="page-title">Séances templates</h1>
+          <p className="page-subtitle">{templates.length} séance{templates.length > 1 ? 's' : ''} · Sélectionne et attribue à tes joueurs</p>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {selection.size > 0 && (
-            <button onClick={() => setShowAttrib(true)} style={{
-              background: '#2ECC71', color: '#FFF', padding: '12px 20px',
-              borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: '700', fontSize: '14px',
-            }}>
+            <button onClick={() => setShowAttrib(true)} className="btn btn-success">
               Attribuer ({selection.size}) →
             </button>
           )}
           {selection.size > 0 && (
-            <button onClick={() => setSelection(new Set())} style={{
-              background: 'transparent', color: '#555', padding: '12px 14px',
-              borderRadius: '10px', border: '1px solid #2A2A2A', cursor: 'pointer', fontSize: '13px',
-            }}>Tout déselectionner</button>
+            <button onClick={() => setSelection(new Set())} className="btn btn-ghost btn-sm">Tout désélectionner</button>
           )}
-          <button onClick={nouvelleSeance} style={{
-            background: '#1A6FFF', color: '#FFF', padding: '12px 20px',
-            borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '14px',
-          }}>+ Nouvelle séance</button>
+          <button onClick={nouvelleSeance} className="btn btn-primary">+ Nouvelle séance</button>
         </div>
       </div>
 
       {selection.size > 0 && (
-        <div style={{ background: '#2ECC7110', border: '1px solid #2ECC7130', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', fontSize: '13px', color: '#2ECC71' }}>
+        <div style={{ background: '#2ECC7110', border: '1px solid #2ECC7125', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', fontSize: '13px', color: '#3DD68C', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2ECC71', boxShadow: '0 0 6px #2ECC71' }} />
           {selection.size} séance{selection.size > 1 ? 's' : ''} sélectionnée{selection.size > 1 ? 's' : ''} — clique sur "Attribuer" pour les assigner à un joueur
         </div>
       )}
 
       {templates.length === 0 ? (
-        <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
-          <p style={{ color: '#555', fontSize: '14px', marginBottom: '16px' }}>Aucune séance template.</p>
+        <div className="card">
+          <div className="empty-state">
+            <div className="empty-state-icon">📋</div>
+            <div className="empty-state-text">Aucune séance template.<br />Crée ta première séance !</div>
+          </div>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {templates.map(s => {
             const selected = selection.has(s.id)
+            const tc = TYPE_COLORS[s.type] || TYPE_COLORS.complete
+            const exoCount = s.seance_exercices?.length || 0
             return (
-              <div key={s.id} style={{
-                background: selected ? '#2ECC7108' : '#111',
-                border: `1px solid ${selected ? '#2ECC7150' : '#2A2A2A'}`,
-                borderRadius: '12px', padding: '16px 20px',
-                display: 'flex', alignItems: 'center', gap: '14px',
-              }}>
-                {/* Checkbox */}
-                <button onClick={() => toggleSelect(s.id)} style={{
-                  width: '22px', height: '22px', borderRadius: '6px', flexShrink: 0,
-                  border: `2px solid ${selected ? '#2ECC71' : '#333'}`,
-                  background: selected ? '#2ECC71' : 'transparent',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '13px', color: '#FFF',
-                }}>{selected ? '✓' : ''}</button>
+              <div key={s.id} className={`card${selected ? ' card-selected' : ''}`}
+                style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <button onClick={() => toggleSelect(s.id)}
+                  className={`checkbox-custom${selected ? ' checked' : ''}`}
+                  style={{ borderColor: selected ? '#2ECC71' : undefined, background: selected ? '#2ECC71' : undefined, boxShadow: selected ? '0 0 8px #2ECC7140' : undefined }}>
+                  {selected ? '✓' : ''}
+                </button>
 
-                <span style={{
-                  padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '700',
-                  background: '#1A6FFF20', color: '#1A6FFF', flexShrink: 0,
-                }}>{LABELS_TYPE[s.type] || s.type}</span>
+                <div style={{ width: '3px', height: '36px', borderRadius: '2px', background: tc.text, opacity: 0.7, flexShrink: 0 }} />
 
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '700', fontSize: '15px' }}>{s.nom}</div>
-                  <div style={{ color: '#666', fontSize: '12px', marginTop: '2px' }}>
-                    {s.seance_exercices?.length || 0} exercice{(s.seance_exercices?.length || 0) > 1 ? 's' : ''}
-                    {s.notes && ` · ${s.notes.substring(0, 50)}`}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: '700', fontSize: '14px', marginBottom: '3px' }} className="truncate">{s.nom}</div>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <span className="badge" style={{ background: tc.bg, color: tc.text, border: `1px solid ${tc.border}`, padding: '2px 8px', fontSize: '10px' }}>{LABELS_TYPE[s.type] || s.type}</span>
+                    <span style={{ color: '#444', fontSize: '11px' }}>{exoCount} exercice{exoCount > 1 ? 's' : ''}</span>
+                    {s.notes && <span style={{ color: '#333', fontSize: '11px' }} className="truncate">· {s.notes.substring(0, 40)}</span>}
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => { toggleSelect(s.id); }} style={{
-                    padding: '7px 12px', borderRadius: '8px',
-                    border: `1px solid ${selected ? '#2ECC71' : '#2A2A2A'}`,
-                    background: selected ? '#2ECC7115' : 'transparent',
-                    color: selected ? '#2ECC71' : '#888', fontSize: '12px', cursor: 'pointer',
-                  }}>{selected ? '✓ Sélectionnée' : 'Sélectionner'}</button>
-                  <button onClick={() => editSeance(s)} style={{
-                    padding: '7px 12px', borderRadius: '8px', border: '1px solid #2A2A2A',
-                    background: 'transparent', color: '#888', fontSize: '12px', cursor: 'pointer',
-                  }}>Éditer</button>
-                  <button onClick={() => deleteSeance(s.id)} style={{
-                    padding: '7px 12px', borderRadius: '8px', border: '1px solid #FF475740',
-                    background: 'transparent', color: '#FF4757', fontSize: '12px', cursor: 'pointer',
-                  }}>✕</button>
+                <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                  <button onClick={() => toggleSelect(s.id)} className="btn btn-ghost btn-sm"
+                    style={selected ? { borderColor: '#2ECC7140', color: '#3DD68C', background: '#2ECC7110' } : {}}>
+                    {selected ? '✓' : 'Sélectionner'}
+                  </button>
+                  <button onClick={() => editSeance(s)} className="btn btn-ghost btn-sm">Éditer</button>
+                  <button onClick={() => deleteSeance(s.id)} className="btn btn-danger btn-sm">✕</button>
                 </div>
               </div>
             )
@@ -1120,57 +1555,42 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
   )
 
   return (
-    <div>
+    <div className="page-section">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-        <button onClick={onCancel} style={{
-          background: 'transparent', border: '1px solid #2A2A2A', color: '#888',
-          padding: '8px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px',
-        }}>← Retour</button>
-        <h1 style={{ fontSize: '22px', fontWeight: '800', flex: 1 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+        <button onClick={onCancel} className="btn btn-ghost">← Retour</button>
+        <h1 className="page-title" style={{ flex: 1, fontSize: '20px' }}>
           {seance.id ? 'Éditer la séance' : 'Nouvelle séance'}
         </h1>
         {seance.id && (
-          <button onClick={() => setShowDup(true)} style={{
-            background: '#C9A84C20', border: '1px solid #C9A84C40', color: '#C9A84C',
-            padding: '8px 14px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
-          }}>⚡ Dupliquer avec progression</button>
+          <button onClick={() => setShowDup(true)} className="btn btn-gold">⚡ Dupliquer avec progression</button>
         )}
-        <button onClick={handleSave} disabled={saving} style={{
-          background: saving ? '#333' : '#1A6FFF', color: '#FFF',
-          padding: '10px 20px', borderRadius: '10px', border: 'none',
-          cursor: saving ? 'not-allowed' : 'pointer', fontWeight: '700', fontSize: '14px',
-        }}>{saving ? 'Enregistrement...' : 'Enregistrer'}</button>
+        <button onClick={handleSave} disabled={saving} className="btn btn-primary"
+          style={saving ? { opacity: 0.6, cursor: 'not-allowed' } : {}}>
+          {saving ? 'Enregistrement...' : 'Enregistrer'}
+        </button>
       </div>
 
       {/* Infos séance */}
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
         <input value={nom} onChange={e => setNom(e.target.value)} placeholder="Nom de la séance *"
-          style={{ flex: 1, background: '#111', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '12px 16px', color: '#FFF', fontSize: '15px', outline: 'none', fontWeight: '600' }} />
-        <select value={type} onChange={e => setType(e.target.value)}
-          style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '12px 16px', color: '#FFF', fontSize: '14px', outline: 'none' }}>
+          className="input" style={{ flex: 1, fontSize: '15px', fontWeight: '600' }} />
+        <select value={type} onChange={e => setType(e.target.value)} className="select">
           {TYPES_SEANCE.map(t => <option key={t} value={t}>{LABELS_TYPE[t]}</option>)}
         </select>
       </div>
 
       <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Notes générales de la séance..."
-        rows={2} style={{ width: '100%', background: '#111', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '12px 16px', color: '#FFF', fontSize: '14px', outline: 'none', resize: 'vertical', marginBottom: '24px' }} />
+        rows={2} className="textarea" style={{ marginBottom: '24px' }} />
 
       {/* Exercices */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '16px', fontWeight: '700' }}>Exercices ({lignes.length})</h2>
-        <button onClick={() => setShowPicker(true)} style={{
-          background: '#1A6FFF20', color: '#1A6FFF', border: '1px solid #1A6FFF40',
-          padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
-        }}>+ Ajouter un exercice</button>
-      </div>
-
-      {/* En-têtes paramètres */}
-      {lignes.length > 0 && (
-        <div style={{ padding: '0 8px 8px', marginBottom: '4px', color: '#444', fontSize: '11px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-          Exercices — définissez le nombre de séries pour configurer chaque série individuellement
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+        <div>
+          <h2 style={{ fontSize: '14px', fontWeight: '700', letterSpacing: '-0.2px' }}>Exercices</h2>
+          {lignes.length > 0 && <p style={{ color: '#444', fontSize: '11px', marginTop: '2px' }}>Définissez le nombre de séries pour configurer chaque série individuellement</p>}
         </div>
-      )}
+        <button onClick={() => setShowPicker(true)} className="btn btn-ghost btn-sm" style={{ borderColor: '#1A6FFF30', color: '#5599FF' }}>+ Ajouter</button>
+      </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '24px' }}>
         {lignes.map((l, idx) => {
@@ -3223,81 +3643,67 @@ function AttributionModal({ seances, onClose }: {
   const dates = datesPrevues()
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300 }}>
-      <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '520px', maxHeight: '90vh', overflowY: 'auto' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '6px' }}>Attribuer des séances</h2>
-        <p style={{ color: '#888', fontSize: '13px', marginBottom: '24px' }}>{seances.length} séance{seances.length > 1 ? 's' : ''} sélectionnée{seances.length > 1 ? 's' : ''}</p>
+    <div className="modal-overlay">
+      <div className="modal-box" style={{ maxWidth: '520px' }}>
+        <div className="modal-title">Attribuer des séances</div>
+        <div className="modal-subtitle">{seances.length} séance{seances.length > 1 ? 's' : ''} sélectionnée{seances.length > 1 ? 's' : ''}</div>
 
-        {/* Séances + dates */}
-        <div style={{ marginBottom: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
-            <span style={{ color: '#FFF', fontWeight: '600', fontSize: '13px' }}>Date de début</span>
+        {/* Date + intervalle */}
+        <div style={{ marginBottom: '16px' }}>
+          <label className="section-label" style={{ display: 'block', marginBottom: '8px' }}>Planification</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             <input type="date" value={dateDebut} onChange={e => setDateDebut(e.target.value)}
-              style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '7px 12px', color: '#FFF', fontSize: '13px', outline: 'none' }} />
+              className="input" style={{ width: 'auto' }} />
             {seances.length > 1 && (
               <>
-                <span style={{ color: '#888', fontSize: '13px' }}>tous les</span>
+                <span style={{ color: '#555', fontSize: '13px' }}>tous les</span>
                 <input type="number" min={1} value={intervalJours} onChange={e => setIntervalJours(Number(e.target.value))}
-                  style={{ width: '50px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '7px 8px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }} />
-                <span style={{ color: '#888', fontSize: '13px' }}>jours</span>
+                  className="input" style={{ width: '56px', textAlign: 'center' }} />
+                <span style={{ color: '#555', fontSize: '13px' }}>jours</span>
               </>
             )}
           </div>
+        </div>
 
-          {/* Liste des séances avec leur date */}
-          <div style={{ background: '#0A0A0A', borderRadius: '10px', overflow: 'hidden' }}>
-            {seances.map((s, i) => (
-              <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: i < seances.length - 1 ? '1px solid #1A1A1A' : 'none' }}>
-                <span style={{ color: '#FFF', fontSize: '13px', fontWeight: '600' }}>{s.nom}</span>
-                <span style={{ color: '#C9A84C', fontSize: '12px', fontWeight: '600' }}>
-                  {new Date(dates[i] + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}
-                </span>
-              </div>
-            ))}
-          </div>
+        {/* Liste séances + dates */}
+        <div style={{ background: '#08080A', borderRadius: '10px', overflow: 'hidden', marginBottom: '20px', border: '1px solid #1A1A22' }}>
+          {seances.map((s, i) => (
+            <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: i < seances.length - 1 ? '1px solid #141418' : 'none' }}>
+              <span style={{ color: '#D0D0E0', fontSize: '13px', fontWeight: '600' }}>{s.nom}</span>
+              <span style={{ color: '#D4AF60', fontSize: '12px', fontWeight: '700', background: '#C9A84C10', padding: '3px 8px', borderRadius: '6px' }}>
+                {new Date(dates[i] + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })}
+              </span>
+            </div>
+          ))}
         </div>
 
         {/* Joueurs */}
         <div style={{ marginBottom: '24px' }}>
-          <div style={{ fontWeight: '600', fontSize: '13px', marginBottom: '10px', color: '#FFF' }}>
-            Attribuer à {selectedJoueurs.size > 0 ? `${selectedJoueurs.size} joueur${selectedJoueurs.size > 1 ? 's' : ''}` : '...'}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '220px', overflowY: 'auto' }}>
-            {joueurs.length === 0 && <span style={{ color: '#555', fontSize: '13px' }}>Aucun joueur actif</span>}
+          <label className="section-label" style={{ display: 'block', marginBottom: '10px' }}>
+            Joueurs {selectedJoueurs.size > 0 && <span style={{ color: '#5599FF', textTransform: 'none', letterSpacing: 0 }}>— {selectedJoueurs.size} sélectionné{selectedJoueurs.size > 1 ? 's' : ''}</span>}
+          </label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '220px', overflowY: 'auto' }}>
+            {joueurs.length === 0 && <span style={{ color: '#444', fontSize: '13px' }}>Aucun joueur actif</span>}
             {joueurs.map(j => {
               const sel = selectedJoueurs.has(j.id)
               return (
-                <button key={j.id} onClick={() => toggleJoueur(j.id)} style={{
-                  display: 'flex', alignItems: 'center', gap: '12px',
-                  background: sel ? '#1A6FFF12' : '#1A1A1A',
-                  border: `1px solid ${sel ? '#1A6FFF' : '#2A2A2A'}`,
-                  borderRadius: '10px', padding: '12px 14px', cursor: 'pointer', textAlign: 'left',
-                }}>
-                  <div style={{
-                    width: '20px', height: '20px', borderRadius: '5px', flexShrink: 0,
-                    border: `2px solid ${sel ? '#1A6FFF' : '#333'}`,
-                    background: sel ? '#1A6FFF' : 'transparent',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '12px', color: '#FFF',
-                  }}>{sel ? '✓' : ''}</div>
-                  <span style={{ color: '#FFF', fontWeight: '600', fontSize: '14px' }}>{j.prenom} {j.nom}</span>
+                <button key={j.id} onClick={() => toggleJoueur(j.id)}
+                  className={`list-item${sel ? ' list-item-active' : ''}`}
+                  style={{ border: sel ? '1px solid #1A6FFF40' : '1px solid #1A1A22', cursor: 'pointer', textAlign: 'left' }}>
+                  <div className={`checkbox-custom${sel ? ' checked' : ''}`}>{sel ? '✓' : ''}</div>
+                  <span style={{ color: sel ? '#F0F0F8' : '#888', fontSize: '14px', fontWeight: sel ? '700' : '400' }}>{j.prenom} {j.nom}</span>
                 </button>
               )
             })}
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={onClose} style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #2A2A2A', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>
-            Annuler
-          </button>
-          <button onClick={confirmer} disabled={saving || selectedJoueurs.size === 0} style={{
-            flex: 2, padding: '12px', borderRadius: '10px', border: 'none',
-            background: saving || selectedJoueurs.size === 0 ? '#333' : '#2ECC71',
-            color: '#FFF', cursor: saving || selectedJoueurs.size === 0 ? 'not-allowed' : 'pointer',
-            fontWeight: '700', fontSize: '14px',
-          }}>
-            {saving ? 'Attribution...' : `Attribuer à ${selectedJoueurs.size} joueur${selectedJoueurs.size > 1 ? 's' : ''}`}
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={onClose} className="btn btn-ghost" style={{ flex: 1 }}>Annuler</button>
+          <button onClick={confirmer} disabled={saving || selectedJoueurs.size === 0}
+            className={`btn${selectedJoueurs.size > 0 && !saving ? ' btn-success' : ''}`}
+            style={{ flex: 2, justifyContent: 'center', padding: '12px', ...(selectedJoueurs.size === 0 || saving ? { background: '#1A1A22', color: '#3A3A50', cursor: 'not-allowed' } : {}) }}>
+            {saving ? 'Attribution...' : `Attribuer à ${selectedJoueurs.size || '...'} joueur${selectedJoueurs.size > 1 ? 's' : ''}`}
           </button>
         </div>
       </div>
