@@ -1428,15 +1428,20 @@ function VideoThumb({ url, size = 72, famille }: { url?: string | null; size?: n
   if (!url) {
     const color = famille?.couleur || '#6B7280'
     const emoji = famille ? (FAMILLE_EMOJI[famille.nom] || '🏅') : '▷'
+    // Parse hex → rgba pour compat iOS Safari
+    const hex = color.replace('#', '')
+    const r = parseInt(hex.slice(0, 2), 16)
+    const g = parseInt(hex.slice(2, 4), 16)
+    const b = parseInt(hex.slice(4, 6), 16)
     return (
       <div style={{
-        width: size, height: size * 0.75, borderRadius: '8px',
-        background: `linear-gradient(135deg, ${color}33 0%, ${color}18 100%)`,
-        border: `1px solid ${color}44`,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0, gap: '2px',
+        width: size, height: size, borderRadius: '10px',
+        background: `linear-gradient(135deg, rgba(${r},${g},${b},0.35) 0%, rgba(${r},${g},${b},0.15) 100%)`,
+        border: `1.5px solid rgba(${r},${g},${b},0.5)`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0,
       }}>
-        <span style={{ fontSize: size * 0.28, lineHeight: 1 }}>{emoji}</span>
+        <span style={{ fontSize: size * 0.42, lineHeight: 1 }}>{emoji}</span>
       </div>
     )
   }
