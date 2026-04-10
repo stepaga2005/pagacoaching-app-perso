@@ -1403,6 +1403,161 @@ function Programmes() {
   )
 }
 
+// ─── Helper : extraire l'ID YouTube d'une URL ──────────────────────
+function getYoutubeId(url: string): string | null {
+  if (!url) return null
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+
+// ─── Vignette vidéo ────────────────────────────────────────────────
+function VideoThumb({ url, size = 72 }: { url?: string | null; size?: number }) {
+  const [hovered, setHovered] = useState(false)
+  const ytId = url ? getYoutubeId(url) : null
+
+  if (!url) {
+    return (
+      <div style={{
+        width: size, height: size * 0.56, borderRadius: '6px',
+        background: '#1A1A22', border: '1px solid #2A2A2A',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0, color: '#333', fontSize: '18px',
+      }}>▷</div>
+    )
+  }
+
+  if (ytId) {
+    const thumb = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`
+    return (
+      <div style={{ position: 'relative', width: size, height: size * 0.56, flexShrink: 0 }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        {/* Thumbnail statique */}
+        {!hovered && (
+          <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: '6px', overflow: 'hidden', cursor: 'pointer' }}>
+            <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            <div style={{
+              position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'rgba(0,0,0,0.35)',
+            }}>
+              <div style={{
+                width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255,255,255,0.9)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <div style={{ width: 0, height: 0, borderStyle: 'solid', borderWidth: '5px 0 5px 9px', borderColor: 'transparent transparent transparent #1A1A1A', marginLeft: '2px' }} />
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Preview iframe au survol */}
+        {hovered && (
+          <iframe
+            src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0&modestbranding=1`}
+            style={{ width: '100%', height: '100%', border: 'none', borderRadius: '6px', display: 'block' }}
+            allow="autoplay"
+          />
+        )}
+      </div>
+    )
+  }
+
+  // Vidéo directe (mp4, etc.)
+  return (
+    <video
+      src={url}
+      muted
+      loop
+      playsInline
+      onMouseEnter={e => (e.currentTarget as HTMLVideoElement).play()}
+      onMouseLeave={e => { const v = e.currentTarget as HTMLVideoElement; v.pause(); v.currentTime = 0 }}
+      style={{ width: size, height: size * 0.56, objectFit: 'cover', borderRadius: '6px', flexShrink: 0, cursor: 'pointer', display: 'block' }}
+    />
+  )
+}
+
+// ─── Picker exercice avec vignettes vidéo ─────────────────────────
+function ExercicePicker({ exercices, recherche, onRecherche, onSelect, onClose }: {
+  exercices: Exercice[]
+  recherche: string
+  onRecherche: (v: string) => void
+  onSelect: (ex: Exercice) => void
+  onClose: () => void
+}) {
+  return (
+    <div className="modal-overlay" style={{ zIndex: 200, alignItems: 'flex-end' }}>
+      <div className="modal-box" style={{
+        maxWidth: '560px', width: '100%',
+        maxHeight: '85vh', display: 'flex', flexDirection: 'column',
+        borderRadius: '20px 20px 0 0', margin: 0,
+      }}>
+        {/* Handle */}
+        <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: '#2A2A35', margin: '0 auto 16px' }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+          <div className="modal-title" style={{ flex: 1, marginBottom: 0 }}>Choisir un exercice</div>
+          <button onClick={onClose} className="btn btn-ghost btn-sm" style={{ fontSize: '16px', padding: '6px 10px' }}>✕</button>
+        </div>
+
+        <input
+          autoFocus
+          value={recherche}
+          onChange={e => onRecherche(e.target.value)}
+          placeholder="Rechercher par nom ou famille..."
+          className="input"
+          style={{ marginBottom: '12px' }}
+        />
+
+        <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {exercices.length === 0 && (
+            <div className="empty-state">
+              <div className="empty-state-icon">🔍</div>
+              <div className="empty-state-text">Aucun exercice trouvé</div>
+            </div>
+          )}
+          {exercices.map(ex => (
+            <button key={ex.id} onClick={() => onSelect(ex)}
+              className="list-item"
+              style={{ gap: '12px', alignItems: 'center', border: '1px solid #1A1A22', padding: '10px 12px' }}>
+
+              {/* Vignette vidéo */}
+              <VideoThumb url={ex.video_url} size={80} />
+
+              {/* Infos */}
+              <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                <div style={{ fontWeight: '700', fontSize: '13px', color: '#F0F0F8', marginBottom: '4px' }} className="truncate">
+                  {ex.nom}
+                </div>
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {ex.familles && (
+                    <span style={{
+                      fontSize: '10px', fontWeight: '700',
+                      color: ex.familles.couleur,
+                      background: ex.familles.couleur + '20',
+                      border: `1px solid ${ex.familles.couleur}30`,
+                      padding: '2px 7px', borderRadius: '99px',
+                    }}>{ex.familles.nom}</span>
+                  )}
+                  {ex.video_url && (
+                    <span style={{ fontSize: '10px', color: '#444', fontWeight: '600' }}>▷ vidéo</span>
+                  )}
+                </div>
+                {ex.consignes_execution && (
+                  <div style={{ fontSize: '11px', color: '#444', marginTop: '3px' }} className="truncate">
+                    {ex.consignes_execution}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ color: '#333', fontSize: '16px', flexShrink: 0 }}>+</div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttribution, sauvegarderFavori }: {
   seance: Seance
   exercices: Exercice[]
@@ -1867,32 +2022,13 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
 
       {/* Picker exercice */}
       {showPicker && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
-          <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '700' }}>Choisir un exercice</h3>
-              <button onClick={() => setShowPicker(false)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '18px', cursor: 'pointer' }}>✕</button>
-            </div>
-            <input value={recherche} onChange={e => setRecherche(e.target.value)} placeholder="Rechercher..."
-              style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '10px 14px', color: '#FFF', fontSize: '14px', outline: 'none', marginBottom: '12px' }} />
-            <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {exsFiltres.map(ex => (
-                <button key={ex.id} onClick={() => ajouterExercice(ex)} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px',
-                  padding: '10px 14px', cursor: 'pointer', textAlign: 'left',
-                }}>
-                  <span style={{ color: '#FFF', fontSize: '13px', fontWeight: '600' }}>{ex.nom}</span>
-                  {ex.familles && (
-                    <span style={{ fontSize: '11px', color: ex.familles.couleur, background: ex.familles.couleur + '20', padding: '2px 8px', borderRadius: '10px' }}>
-                      {ex.familles.nom}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <ExercicePicker
+          exercices={exsFiltres}
+          recherche={recherche}
+          onRecherche={setRecherche}
+          onSelect={ajouterExercice}
+          onClose={() => { setShowPicker(false); setRecherche('') }}
+        />
       )}
 
       {/* Modal duplication avec progression */}
