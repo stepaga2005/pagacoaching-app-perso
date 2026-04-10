@@ -1798,6 +1798,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
   const [addExoTo, setAddExoTo] = useState<string | null>(null)
   const [rechercheExo, setRechercheExo] = useState('')
   const [loading, setLoading] = useState(true)
+  const [expandedExo, setExpandedExo] = useState<{ rId: string; eId: string } | null>(null)
   const [windowWidth, setWindowWidth] = useState(() => typeof window !== 'undefined' ? window.innerWidth : 1200)
 
   useEffect(() => {
@@ -2028,6 +2029,26 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                         const hasVideo = !!exo.exercices?.video_url
                         const prevLinked = exoIdx > 0 && exos[exoIdx - 1].lien_suivant
 
+                        // Résumé compact pour mobile
+                        const seriesSummary = (() => {
+                          if (hasSets && exo.sets_config!.length > 0) {
+                            const s = exo.sets_config![0]
+                            const parts = []
+                            if (s.reps) parts.push(`${s.reps}r`)
+                            if (s.duree) parts.push(`${s.duree}s`)
+                            if (s.dist) parts.push(`${s.dist}m`)
+                            if (s.charge) parts.push(`${s.charge}kg`)
+                            return `${exo.sets_config!.length}×${parts.join(' ')}`
+                          }
+                          const parts = []
+                          if (exo.repetitions) parts.push(`${exo.repetitions}r`)
+                          if (exo.duree_secondes) parts.push(`${exo.duree_secondes}s`)
+                          if (exo.distance_metres) parts.push(`${exo.distance_metres}m`)
+                          if (exo.charge_kg) parts.push(`${exo.charge_kg}kg`)
+                          const base = parts.join(' ')
+                          return exo.series ? `${exo.series}×${base || '—'}` : base || '—'
+                        })()
+
                         return (
                           <div key={exo.id}>
                             {prevLinked && (
@@ -2037,96 +2058,112 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                               </div>
                             )}
 
-                            <div style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !prevLinked ? '1px solid #1A1A1A' : 'none', background: prevLinked ? '#1A6FFF04' : 'transparent' }}>
-                              {/* Exercise header row */}
-                              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginBottom: '5px' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0', flexShrink: 0, marginTop: '2px' }}>
-                                  <button onClick={() => moveExo(r.id, exo.id, -1)} style={{ background: 'none', border: 'none', color: '#2A2A2A', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▲</button>
-                                  <button onClick={() => moveExo(r.id, exo.id, 1)} style={{ background: 'none', border: 'none', color: '#2A2A2A', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▼</button>
+                            {isMobile ? (
+                              /* ── MOBILE : carte compacte tappable ── */
+                              <div onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
+                                style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !prevLinked ? '1px solid #1A1A1A' : 'none', background: prevLinked ? '#1A6FFF04' : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ width: '20px', height: '20px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                  <span style={{ color: couleur, fontSize: '8px', fontWeight: '900' }}>{exo.ordre}</span>
                                 </div>
-                                {hasVideo ? (
-                                  <button onClick={() => window.open(exo.exercices!.video_url!.replace('vimeo.com/', 'player.vimeo.com/video/'), '_blank')}
-                                    style={{ width: '24px', height: '24px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '9px', color: '#1A6FFF' }}>▶</button>
-                                ) : (
-                                  <div style={{ width: '24px', height: '24px', background: couleur + '18', border: `1px solid ${couleur}30`, borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                    <span style={{ color: couleur, fontSize: '8px', fontWeight: '900' }}>{exo.ordre}</span>
-                                  </div>
-                                )}
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                  {fam && <div style={{ color: couleur, fontSize: '7px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1 }}>{fam.nom}</div>}
-                                  <div style={{ color: '#DDD', fontWeight: '700', fontSize: '10px', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
+                                  <div style={{ color: '#DDD', fontWeight: '700', fontSize: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
+                                  <div style={{ color: '#555', fontSize: '9px' }}>{seriesSummary}</div>
                                 </div>
-                                <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
-                                  <button onClick={() => toggleUniPodal(r.id, exo)}
-                                    style={{ background: exo.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.uni_podal ? '#1A6FFF60' : '#252525'}`, color: exo.uni_podal ? '#1A6FFF' : '#333', fontSize: '7px', padding: '2px 4px', borderRadius: '3px', cursor: 'pointer', fontWeight: '700' }}>↔</button>
-                                  <button onClick={() => removeExo(r.id, exo.id)}
-                                    style={{ background: 'transparent', border: '1px solid #FF475718', color: '#FF475760', borderRadius: '3px', padding: '2px 4px', cursor: 'pointer', fontSize: '9px' }}>✕</button>
-                                </div>
+                                <span style={{ color: '#333', fontSize: '12px' }}>›</span>
                               </div>
-
-                              {/* Set table */}
-                              <div style={{ marginBottom: '4px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '1px 2px', marginBottom: '1px' }}>
-                                  {['', 'Reps', 'Dur', 'Dist', 'Kg', 'Réc', ''].map((h, hi) => (
-                                    <div key={hi} style={{ color: '#2A2A2A', fontSize: '7px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
-                                  ))}
+                            ) : (
+                              /* ── DESKTOP : édition inline complète ── */
+                              <div style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !prevLinked ? '1px solid #1A1A1A' : 'none', background: prevLinked ? '#1A6FFF04' : 'transparent' }}>
+                                {/* Exercise header row */}
+                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginBottom: '5px' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0', flexShrink: 0, marginTop: '2px' }}>
+                                    <button onClick={() => moveExo(r.id, exo.id, -1)} style={{ background: 'none', border: 'none', color: '#2A2A2A', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▲</button>
+                                    <button onClick={() => moveExo(r.id, exo.id, 1)} style={{ background: 'none', border: 'none', color: '#2A2A2A', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▼</button>
+                                  </div>
+                                  {hasVideo ? (
+                                    <button onClick={() => window.open(exo.exercices!.video_url!.replace('vimeo.com/', 'player.vimeo.com/video/'), '_blank')}
+                                      style={{ width: '24px', height: '24px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '9px', color: '#1A6FFF' }}>▶</button>
+                                  ) : (
+                                    <div style={{ width: '24px', height: '24px', background: couleur + '18', border: `1px solid ${couleur}30`, borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                      <span style={{ color: couleur, fontSize: '8px', fontWeight: '900' }}>{exo.ordre}</span>
+                                    </div>
+                                  )}
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    {fam && <div style={{ color: couleur, fontSize: '7px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1 }}>{fam.nom}</div>}
+                                    <div style={{ color: '#DDD', fontWeight: '700', fontSize: '10px', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
+                                  </div>
+                                  <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
+                                    <button onClick={() => toggleUniPodal(r.id, exo)}
+                                      style={{ background: exo.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.uni_podal ? '#1A6FFF60' : '#252525'}`, color: exo.uni_podal ? '#1A6FFF' : '#333', fontSize: '7px', padding: '2px 4px', borderRadius: '3px', cursor: 'pointer', fontWeight: '700' }}>↔</button>
+                                    <button onClick={() => removeExo(r.id, exo.id)}
+                                      style={{ background: 'transparent', border: '1px solid #FF475718', color: '#FF475760', borderRadius: '3px', padding: '2px 4px', cursor: 'pointer', fontSize: '9px' }}>✕</button>
+                                  </div>
                                 </div>
-                                {hasSets ? (
-                                  exo.sets_config!.map((s, si) => (
-                                    <div key={si} style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '3px', alignItems: 'center', marginBottom: '1px' }}>
-                                      <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{si + 1}</div>
-                                      {(['reps', 'duree', 'dist', 'charge', 'recup'] as (keyof SetConfig)[]).map(key => (
-                                        <input key={key} {...setInput()}
+
+                                {/* Set table */}
+                                <div style={{ marginBottom: '4px' }}>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '1px 2px', marginBottom: '1px' }}>
+                                    {['', 'Reps', 'Dur', 'Dist', 'Kg', 'Réc', ''].map((h, hi) => (
+                                      <div key={hi} style={{ color: '#2A2A2A', fontSize: '7px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
+                                    ))}
+                                  </div>
+                                  {hasSets ? (
+                                    exo.sets_config!.map((s, si) => (
+                                      <div key={si} style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '3px', alignItems: 'center', marginBottom: '1px' }}>
+                                        <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{si + 1}</div>
+                                        {(['reps', 'duree', 'dist', 'charge', 'recup'] as (keyof SetConfig)[]).map(key => (
+                                          <input key={key} {...setInput()}
+                                            placeholder="-"
+                                            value={s[key] ?? ''}
+                                            onChange={e => patchSet(r.id, exo.id, exo, si, key, e.target.value)}
+                                            onBlur={() => flushSets(exo.id, r.id)}
+                                          />
+                                        ))}
+                                        <button onClick={() => removeSet(r.id, exo.id, exo, si)}
+                                          style={{ background: 'transparent', border: 'none', color: '#FF475740', cursor: 'pointer', fontSize: '8px', padding: '0', lineHeight: 1 }}>✕</button>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', alignItems: 'center' }}>
+                                      <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{exo.series || '—'}</div>
+                                      {[
+                                        ['repetitions', exo.repetitions],
+                                        ['duree_secondes', exo.duree_secondes],
+                                        ['distance_metres', exo.distance_metres],
+                                        ['charge_kg', exo.charge_kg],
+                                        ['recuperation_secondes', exo.recuperation_secondes],
+                                      ].map(([key, val]) => (
+                                        <input key={key as string} {...setInput()}
                                           placeholder="-"
-                                          value={s[key] ?? ''}
-                                          onChange={e => patchSet(r.id, exo.id, exo, si, key, e.target.value)}
-                                          onBlur={() => flushSets(exo.id, r.id)}
+                                          value={(val as number) ?? ''}
+                                          onChange={e => patchSimple(r.id, exo.id, key as string, e.target.value)}
+                                          onBlur={() => flushSimple(exo.id, r.id, key as string)}
                                         />
                                       ))}
-                                      <button onClick={() => removeSet(r.id, exo.id, exo, si)}
-                                        style={{ background: 'transparent', border: 'none', color: '#FF475740', cursor: 'pointer', fontSize: '8px', padding: '0', lineHeight: 1 }}>✕</button>
+                                      <div />
                                     </div>
-                                  ))
-                                ) : (
-                                  <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', alignItems: 'center' }}>
-                                    <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{exo.series || '—'}</div>
-                                    {[
-                                      ['repetitions', exo.repetitions],
-                                      ['duree_secondes', exo.duree_secondes],
-                                      ['distance_metres', exo.distance_metres],
-                                      ['charge_kg', exo.charge_kg],
-                                      ['recuperation_secondes', exo.recuperation_secondes],
-                                    ].map(([key, val]) => (
-                                      <input key={key as string} {...setInput()}
-                                        placeholder="-"
-                                        value={(val as number) ?? ''}
-                                        onChange={e => patchSimple(r.id, exo.id, key as string, e.target.value)}
-                                        onBlur={() => flushSimple(exo.id, r.id, key as string)}
-                                      />
-                                    ))}
-                                    <div />
-                                  </div>
-                                )}
-                              </div>
+                                  )}
+                                </div>
 
-                              {/* Footer: + Série + count + superset */}
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <button onClick={() => addSet(r.id, exo.id, exo)}
-                                  style={{ background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 7px', color: '#666', cursor: 'pointer', fontSize: '8px', fontWeight: '600', whiteSpace: 'nowrap' }}>+ Série</button>
-                                <input type="number" placeholder="×" value={exo.series ?? ''}
-                                  onChange={async e => {
-                                    const val = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value))
-                                    patchExoLocal(r.id, exo.id, { series: val })
-                                    await saveExoField(exo.id, { series: val ?? null })
-                                  }}
-                                  style={{ width: '28px', background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 3px', color: '#888', fontSize: '9px', outline: 'none', textAlign: 'center' }}
-                                />
-                                <div style={{ flex: 1 }} />
-                                <button onClick={() => toggleLienSuivant(r.id, exo)}
-                                  title={exo.lien_suivant ? 'Délier' : 'Lier en superset'}
-                                  style={{ background: exo.lien_suivant ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#222'}`, borderRadius: '4px', padding: '2px 6px', color: exo.lien_suivant ? '#1A6FFF' : '#333', cursor: 'pointer', fontSize: '10px' }}>⇌</button>
+                                {/* Footer: + Série + count + superset */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <button onClick={() => addSet(r.id, exo.id, exo)}
+                                    style={{ background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 7px', color: '#666', cursor: 'pointer', fontSize: '8px', fontWeight: '600', whiteSpace: 'nowrap' }}>+ Série</button>
+                                  <input type="number" placeholder="×" value={exo.series ?? ''}
+                                    onChange={async e => {
+                                      const val = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value))
+                                      patchExoLocal(r.id, exo.id, { series: val })
+                                      await saveExoField(exo.id, { series: val ?? null })
+                                    }}
+                                    style={{ width: '28px', background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 3px', color: '#888', fontSize: '9px', outline: 'none', textAlign: 'center' }}
+                                  />
+                                  <div style={{ flex: 1 }} />
+                                  <button onClick={() => toggleLienSuivant(r.id, exo)}
+                                    title={exo.lien_suivant ? 'Délier' : 'Lier en superset'}
+                                    style={{ background: exo.lien_suivant ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#222'}`, borderRadius: '4px', padding: '2px 6px', color: exo.lien_suivant ? '#1A6FFF' : '#333', cursor: 'pointer', fontSize: '10px' }}>⇌</button>
+                                </div>
                               </div>
-                            </div>
+                            )}
                           </div>
                         )
                       })}
@@ -2171,6 +2208,114 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           </div>
         </div>
       )}
+
+      {/* ── MOBILE BOTTOM SHEET : édition exercice ── */}
+      {isMobile && expandedExo && (() => {
+        const r = reals.find(r => r.id === expandedExo.rId)
+        const exo = r?.seances?.seance_exercices?.find(e => e.id === expandedExo.eId)
+        if (!r || !exo) return null
+        const fam = exo.exercices?.familles
+        const couleur = fam?.couleur || '#555'
+        const hasSets = exo.sets_config && exo.sets_config.length > 0
+        const inputLg: React.CSSProperties = { background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '10px', color: '#FFF', fontSize: '16px', outline: 'none', textAlign: 'center', width: '100%', boxSizing: 'border-box' as const }
+        return (
+          <>
+            {/* Backdrop */}
+            <div onClick={() => setExpandedExo(null)} style={{ position: 'fixed', inset: 0, zIndex: 400, background: '#00000080' }} />
+            {/* Sheet */}
+            <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 401, background: '#131313', borderRadius: '16px 16px 0 0', border: '1px solid #252525', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
+              {/* Handle */}
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
+                <div style={{ width: '36px', height: '4px', background: '#333', borderRadius: '2px' }} />
+              </div>
+              {/* Header */}
+              <div style={{ padding: '8px 16px 12px', borderBottom: '1px solid #1E1E1E', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '32px', height: '32px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ color: couleur, fontSize: '12px', fontWeight: '900' }}>{exo.ordre}</span>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {fam && <div style={{ color: couleur, fontSize: '10px', fontWeight: '800', textTransform: 'uppercase' }}>{fam.nom}</div>}
+                  <div style={{ color: '#FFF', fontWeight: '800', fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={() => { moveExo(r.id, exo.id, -1) }} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>▲</button>
+                  <button onClick={() => { moveExo(r.id, exo.id, 1) }} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>▼</button>
+                  <button onClick={() => { removeExo(r.id, exo.id); setExpandedExo(null) }} style={{ background: '#FF475710', border: '1px solid #FF475730', borderRadius: '8px', padding: '8px 12px', color: '#FF4757', cursor: 'pointer', fontSize: '14px' }}>✕</button>
+                </div>
+              </div>
+              {/* Body scrollable */}
+              <div style={{ overflowY: 'auto', flex: 1, padding: '16px' }}>
+                {/* Nb séries */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <span style={{ color: '#555', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase' }}>Séries</span>
+                  <input type="number" placeholder="—" value={exo.series ?? ''}
+                    onChange={async e => {
+                      const val = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value))
+                      patchExoLocal(r.id, exo.id, { series: val })
+                      await saveExoField(exo.id, { series: val ?? null })
+                    }}
+                    style={{ ...inputLg, width: '80px' }} />
+                  <button onClick={() => addSet(r.id, exo.id, exo)}
+                    style={{ background: '#1A6FFF20', border: '1px solid #1A6FFF40', borderRadius: '10px', padding: '10px 18px', color: '#1A6FFF', cursor: 'pointer', fontSize: '13px', fontWeight: '700' }}>+ Série</button>
+                  <div style={{ flex: 1 }} />
+                  <button onClick={() => toggleLienSuivant(r.id, exo)}
+                    style={{ background: exo.lien_suivant ? '#1A6FFF20' : '#1A1A1A', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#2A2A2A'}`, borderRadius: '10px', padding: '10px 14px', color: exo.lien_suivant ? '#1A6FFF' : '#555', cursor: 'pointer', fontSize: '14px' }}>⇌</button>
+                </div>
+
+                {/* Table sets */}
+                {hasSets ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {/* Headers */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr 1fr 1fr 28px', gap: '6px', padding: '0 2px' }}>
+                      {['', 'Reps', 'Dur', 'Dist', 'Kg', 'Réc', ''].map((h, hi) => (
+                        <div key={hi} style={{ color: '#555', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
+                      ))}
+                    </div>
+                    {exo.sets_config!.map((s, si) => (
+                      <div key={si} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr 1fr 1fr 28px', gap: '6px', alignItems: 'center' }}>
+                        <div style={{ color: '#C9A84C', fontSize: '13px', fontWeight: '800', textAlign: 'center' }}>{si + 1}</div>
+                        {(['reps', 'duree', 'dist', 'charge', 'recup'] as (keyof SetConfig)[]).map(key => (
+                          <input key={key} type="number" placeholder="-" min="0"
+                            value={s[key] ?? ''}
+                            onChange={e => patchSet(r.id, exo.id, exo, si, key, e.target.value)}
+                            onBlur={() => flushSets(exo.id, r.id)}
+                            style={inputLg} />
+                        ))}
+                        <button onClick={() => removeSet(r.id, exo.id, exo, si)}
+                          style={{ background: 'transparent', border: 'none', color: '#FF475760', cursor: 'pointer', fontSize: '16px', padding: '0' }}>✕</button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '8px' }}>
+                    {[
+                      ['Reps', 'repetitions', exo.repetitions],
+                      ['Dur (s)', 'duree_secondes', exo.duree_secondes],
+                      ['Dist (m)', 'distance_metres', exo.distance_metres],
+                      ['Kg', 'charge_kg', exo.charge_kg],
+                      ['Réc (s)', 'recuperation_secondes', exo.recuperation_secondes],
+                    ].map(([label, key, val]) => (
+                      <div key={key as string} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <div style={{ color: '#555', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{label as string}</div>
+                        <input type="number" placeholder="-" min="0"
+                          value={(val as number) ?? ''}
+                          onChange={e => patchSimple(r.id, exo.id, key as string, e.target.value)}
+                          onBlur={() => flushSimple(exo.id, r.id, key as string)}
+                          style={inputLg} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* Footer */}
+              <div style={{ padding: '12px 16px', borderTop: '1px solid #1E1E1E' }}>
+                <button onClick={() => setExpandedExo(null)}
+                  style={{ width: '100%', padding: '14px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '12px', color: '#888', cursor: 'pointer', fontSize: '15px', fontWeight: '600' }}>Fermer</button>
+              </div>
+            </div>
+          </>
+        )
+      })()}
     </div>
   )
 }
