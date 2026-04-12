@@ -466,7 +466,7 @@ function Joueurs() {
 
   async function createGroupe() {
     if (!newGroupeNom.trim()) return
-    const { error } = await supabase.from('groupes').insert({ nom: newGroupeNom.trim(), couleur: newGroupeCouleur, coach_id: coachId })
+    const { error } = await supabase.from('groupes').insert({ nom: newGroupeNom.trim(), couleur: newGroupeCouleur })
     if (error) { console.error('createGroupe error:', error.message); return }
     setNewGroupeNom('')
     setNewGroupeCouleur(GROUPE_COLORS[0])
