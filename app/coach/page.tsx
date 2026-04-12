@@ -5,6 +5,12 @@ import { supabase } from '@/lib/supabase'
 import { subscribePush, sendPush } from '@/lib/push'
 import { useRouter } from 'next/navigation'
 
+function haptic(type: 'light' | 'medium' | 'success' = 'light') {
+  if (typeof navigator === 'undefined' || !navigator.vibrate) return
+  const patterns: Record<string, number[]> = { light: [8], medium: [25], success: [8, 60, 12] }
+  navigator.vibrate(patterns[type])
+}
+
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: '🏛️' },
   { id: 'joueurs', label: 'Joueurs', icon: '👥' },
@@ -116,6 +122,7 @@ export default function CoachPage() {
   )
 
   function navTo(id: string) {
+    haptic('light')
     if (id === activeTab) { setSidebarOpen(false); return }
     setActiveTab(id)
     if (id === 'messages') setUnreadMessages(0)
@@ -423,15 +430,127 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
         )}
       </div>
 
-      {/* ── Bloc 4 : Semaine en cours ── */}
+      {/* ── Bloc 4 : Charge hebdomadaire (bar chart) ── */}
+      {(() => {
+        const loadByDay = weekDays.map((d, i) => ({
+          d, letter: dayLetters[i],
+          count: realsWeek.filter(r => r.date_realisation === d && r.completee && r.seance_id).length,
+          planned: realsWeek.filter(r => r.date_realisation === d && r.seance_id).length,
+        }))
+        const maxCount = Math.max(...loadByDay.map(d => d.planned), 1)
+        const totalWeek = loadByDay.reduce((s, d) => s + d.count, 0)
+        const totalPlanned = loadByDay.reduce((s, d) => s + d.planned, 0)
+        const pct = totalPlanned > 0 ? Math.round((totalWeek / totalPlanned) * 100) : 0
+        return (
+          <div style={{ marginBottom: '28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '3px', height: '18px', background: '#1A6FFF', borderRadius: '2px' }} />
+                <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#1A6FFF', letterSpacing: '1px', textTransform: 'uppercase' }}>Charge semaine</h2>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '11px', color: '#444', fontWeight: '700' }}>{totalWeek}/{totalPlanned} séances</span>
+                <span style={{
+                  fontSize: '12px', fontWeight: '800', padding: '3px 10px', borderRadius: '20px',
+                  background: pct >= 80 ? '#2ECC7120' : pct >= 50 ? '#F39C1220' : '#FF475720',
+                  color: pct >= 80 ? '#2ECC71' : pct >= 50 ? '#F39C12' : '#FF4757',
+                }}>{pct}%</span>
+              </div>
+            </div>
+            <div style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '16px', padding: '20px 16px' }}>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', height: '72px' }}>
+                {loadByDay.map((d) => {
+                  const isToday = d.d === today
+                  const isPast = d.d < today
+                  const fillH = d.planned === 0 ? 0 : Math.max(4, (d.count / maxCount) * 56)
+                  const bgH = d.planned === 0 ? 0 : Math.max(4, (d.planned / maxCount) * 56)
+                  const col = isToday ? '#1A6FFF' : isPast ? '#2ECC71' : '#2A2A3A'
+                  return (
+                    <div key={d.d} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end' }}>
+                      <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+                        {/* Barre planifiée (fond) */}
+                        {d.planned > 0 && <div style={{ position: 'absolute', bottom: 0, left: '10%', right: '10%', height: `${bgH}px`, borderRadius: '4px 4px 0 0', background: '#1A1A1A' }} />}
+                        {/* Barre réalisée */}
+                        {d.count > 0 && <div style={{ position: 'relative', left: '10%', right: '10%', width: '80%', height: `${fillH}px`, borderRadius: '4px 4px 0 0', background: col, transition: 'height 0.4s cubic-bezier(0.22,1,0.36,1)' }} />}
+                      </div>
+                      <span style={{ fontSize: '10px', fontWeight: '800', color: isToday ? '#1A6FFF' : '#444', textTransform: 'uppercase' }}>{d.letter}</span>
+                    </div>
+                  )
+                })}
+              </div>
+              {/* Légende */}
+              <div style={{ display: 'flex', gap: '16px', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #161616' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#2ECC71' }} />
+                  <span style={{ fontSize: '10px', color: '#444', fontWeight: '600' }}>Réalisé</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#1A1A1A', border: '1px solid #333' }} />
+                  <span style={{ fontSize: '10px', color: '#444', fontWeight: '600' }}>Planifié</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#1A6FFF' }} />
+                  <span style={{ fontSize: '10px', color: '#444', fontWeight: '600' }}>Aujourd'hui</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* ── Bloc 5 : État de forme joueurs ── */}
+      {joueurs.length > 0 && (
+        <div style={{ marginBottom: '28px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+            <div style={{ width: '3px', height: '18px', background: '#9B59B6', borderRadius: '2px' }} />
+            <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#9B59B6', letterSpacing: '1px', textTransform: 'uppercase' }}>État de forme</h2>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {joueurs.map(j => {
+              const jReals = (byPlayer[j.id] || []).filter(r => r.completee && r.fatigue != null)
+              const lastFatigue = jReals.length > 0
+                ? [...jReals].sort((a, b) => b.date_realisation.localeCompare(a.date_realisation))[0].fatigue ?? null
+                : null
+              const completedWeek = (byPlayer[j.id] || []).filter(r => r.completee && r.seance_id).length
+              const plannedWeek = (byPlayer[j.id] || []).filter(r => r.seance_id).length
+              const { label, color, bg } = lastFatigue === null
+                ? { label: 'Aucune donnée', color: '#444', bg: '#1A1A1A' }
+                : lastFatigue <= 3 ? { label: '🟢 Frais', color: '#2ECC71', bg: '#2ECC7110' }
+                : lastFatigue <= 5 ? { label: '🟡 Normal', color: '#F39C12', bg: '#F39C1210' }
+                : lastFatigue <= 7 ? { label: '🟠 Fatigué', color: '#FF6B35', bg: '#FF6B3510' }
+                : { label: '🔴 Surchargé', color: '#FF4757', bg: '#FF475710' }
+              return (
+                <div key={j.id} style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ fontSize: '12px', fontWeight: '900', color }}>{j.prenom[0]}{j.nom[0]}</span>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: '700', fontSize: '14px' }}>{j.prenom} {j.nom}</div>
+                    <div style={{ fontSize: '11px', color: '#444', marginTop: '2px' }}>
+                      {plannedWeek > 0 ? `${completedWeek}/${plannedWeek} séances cette semaine` : 'Aucune séance planifiée'}
+                    </div>
+                  </div>
+                  <div style={{ padding: '4px 12px', borderRadius: '20px', background: bg, flexShrink: 0 }}>
+                    <span style={{ fontSize: '11px', fontWeight: '800', color }}>{label}</span>
+                  </div>
+                  {lastFatigue !== null && (
+                    <div style={{ fontWeight: '900', fontSize: '20px', color, flexShrink: 0, minWidth: '28px', textAlign: 'center' }}>{lastFatigue}</div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Bloc 6 : Heatmap semaine ── */}
       {joueursAvecSeances.length > 0 && (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
             <div style={{ width: '3px', height: '18px', background: '#1A6FFF', borderRadius: '2px' }} />
-            <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#1A6FFF', letterSpacing: '1px', textTransform: 'uppercase' }}>Semaine en cours</h2>
+            <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#1A6FFF', letterSpacing: '1px', textTransform: 'uppercase' }}>Planning semaine</h2>
           </div>
           <div style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '16px', overflow: 'hidden' }}>
-            {/* Header jours */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr repeat(7, 36px)', gap: '4px', padding: '10px 14px', borderBottom: '1px solid #161616', alignItems: 'center' }}>
               <div />
               {weekDays.map((ds, i) => (
@@ -441,7 +560,6 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
                 </div>
               ))}
             </div>
-            {/* Lignes joueurs */}
             {joueursAvecSeances.map((j, ji) => {
               const jReals = byPlayer[j.id] || []
               return (
@@ -453,22 +571,13 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
                     const dayReals = jReals.filter(r => r.date_realisation === ds && r.seance_id)
                     const isToday = ds === today
                     const isPast = ds < today
-                    if (dayReals.length === 0) {
-                      return <div key={ds} style={{ width: '28px', height: '28px', margin: '0 auto' }} />
-                    }
+                    if (dayReals.length === 0) return <div key={ds} style={{ width: '28px', height: '28px', margin: '0 auto' }} />
                     const allDone = dayReals.every(r => r.completee)
                     const someDone = dayReals.some(r => r.completee)
                     const color = allDone ? '#2ECC71' : someDone ? '#F39C12' : isPast ? '#FF4757' : '#1A6FFF'
                     return (
-                      <div key={ds} title={`${dayReals.length} séance${dayReals.length > 1 ? 's' : ''}`} style={{
-                        width: '28px', height: '28px', borderRadius: '50%', margin: '0 auto',
-                        background: color + (isToday ? 'FF' : '25'),
-                        border: `2px solid ${color}${isToday ? 'FF' : '80'}`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}>
-                        <span style={{ fontSize: '10px', fontWeight: '900', color: isToday ? '#FFF' : color }}>
-                          {allDone ? '✓' : dayReals.length}
-                        </span>
+                      <div key={ds} style={{ width: '28px', height: '28px', borderRadius: '50%', margin: '0 auto', background: color + (isToday ? 'FF' : '25'), border: `2px solid ${color}${isToday ? 'FF' : '80'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: '10px', fontWeight: '900', color: isToday ? '#FFF' : color }}>{allDone ? '✓' : dayReals.length}</span>
                       </div>
                     )
                   })}
