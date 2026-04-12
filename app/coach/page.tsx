@@ -14,6 +14,60 @@ const NAV_ITEMS = [
   { id: 'messages', label: 'Messages', icon: '💬' },
 ]
 
+function SplashScreen({ onDone }: { onDone: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 2600)
+    return () => clearTimeout(t)
+  }, [onDone])
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, background: '#000',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: 9999,
+      animation: 'splashFadeOut 0.5s ease 2.1s both',
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        {/* Logo */}
+        <div style={{ fontSize: '44px', fontWeight: '900', letterSpacing: '-2.5px', lineHeight: 1, display: 'flex', alignItems: 'baseline', gap: '0px', justifyContent: 'center' }}>
+          <span style={{
+            color: '#FFFFFF',
+            display: 'inline-block',
+            animation: 'splashWordIn 0.65s cubic-bezier(0.22,1,0.36,1) 0.15s both',
+          }}>PAGA</span>
+          <span style={{
+            background: 'linear-gradient(135deg, #1A6FFF 0%, #6BAAFF 100%)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            display: 'inline-block',
+            animation: 'splashWordIn 0.65s cubic-bezier(0.22,1,0.36,1) 0.32s both',
+          }}>COACHING</span>
+        </div>
+
+        {/* Ligne accent */}
+        <div style={{
+          height: '2px',
+          background: 'linear-gradient(90deg, transparent, #1A6FFF 30%, #6BAAFF 70%, transparent)',
+          marginTop: '14px',
+          transformOrigin: 'center',
+          animation: 'splashLineIn 0.55s cubic-bezier(0.22,1,0.36,1) 0.7s both',
+        }} />
+
+        {/* Sous-titre */}
+        <div style={{
+          color: '#444',
+          fontSize: '10px',
+          textTransform: 'uppercase',
+          marginTop: '14px',
+          fontWeight: '700',
+          animation: 'splashSubIn 0.6s ease 1s both',
+        }}>
+          Performance Coaching
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function CoachPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -21,6 +75,10 @@ export default function CoachPage() {
   const [coachId, setCoachId] = useState<string | null>(null)
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return !sessionStorage.getItem('splash_shown')
+  })
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -52,9 +110,7 @@ export default function CoachPage() {
   }
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#0A0A0A', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: '#1A6FFF', fontSize: '14px', letterSpacing: '2px' }}>CHARGEMENT...</div>
-    </div>
+    <div style={{ minHeight: '100vh', background: '#000' }} />
   )
 
   function navTo(id: string) {
@@ -65,6 +121,14 @@ export default function CoachPage() {
 
   return (
     <div className="app-shell">
+
+      {/* Splash screen */}
+      {showSplash && (
+        <SplashScreen onDone={() => {
+          sessionStorage.setItem('splash_shown', '1')
+          setShowSplash(false)
+        }} />
+      )}
 
       {/* Backdrop mobile */}
       {sidebarOpen && (

@@ -142,6 +142,24 @@ button, a, [role="button"] {
   to   { transform: scale(0.95); }
 }
 
+/* ─── SPLASH SCREEN ──────────────────────────────────────────── */
+@keyframes splashWordIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes splashLineIn {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+@keyframes splashSubIn {
+  from { opacity: 0; letter-spacing: 6px; }
+  to   { opacity: 1; letter-spacing: 4px; }
+}
+@keyframes splashFadeOut {
+  0%   { opacity: 1; }
+  100% { opacity: 0; pointer-events: none; }
+}
+
 /* Accessibilité : désactive animations si préféré */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
