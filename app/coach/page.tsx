@@ -1968,24 +1968,21 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                   </div>
                 )}
 
-                {/* Ligne exercice — même grid 9 colonnes que les headers */}
+                {/* Ligne exercice dans superset — layout 2 lignes (mobile-friendly) */}
                 <div style={{
-                  display: 'grid', gridTemplateColumns: '1fr 65px 65px 65px 65px 65px 65px 80px 40px',
-                  gap: '8px',
                   background: '#1A6FFF06',
                   borderTop: debutGroupe ? 'none' : '1px solid #1A6FFF25',
-                  borderBottom: 'none',
                   borderLeft: '1px solid #1A6FFF50',
                   borderRight: '1px solid #1A6FFF50',
-                  borderRadius: '0',
-                  padding: '10px 8px', alignItems: 'center',
+                  padding: '10px 10px 8px',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  {/* Ligne 1 : nom + note + supprimer */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
                       <button onClick={() => moveLigne(idx, -1)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
                       <button onClick={() => moveLigne(idx, 1)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
                     </div>
-                    <div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: '600', fontSize: '13px' }}>{l.exercices?.nom}</div>
                       <div style={{ display: 'flex', gap: '5px', marginTop: '3px', flexWrap: 'wrap' }}>
                         {fam && <span style={{ fontSize: '10px', color: fam.couleur }}>{fam.nom}</span>}
@@ -1993,22 +1990,24 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                           style={{ background: l.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${l.uni_podal ? '#1A6FFF60' : '#2A2A2A'}`, color: l.uni_podal ? '#1A6FFF' : '#444', fontSize: '9px', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer', fontWeight: '700' }}>↔ 2 côtés</button>
                       </div>
                     </div>
+                    <input value={l.notes || ''} onChange={e => updateLigne(idx, 'notes', e.target.value)}
+                      placeholder="note..."
+                      style={{ width: '80px', flexShrink: 0, background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '6px', padding: '5px 7px', color: '#FFF', fontSize: '11px', outline: 'none' }} />
+                    <button onClick={() => removeLigne(idx)} style={{
+                      flexShrink: 0, background: 'transparent', border: '1px solid #FF475730', color: '#FF4757',
+                      borderRadius: '6px', padding: '5px 7px', cursor: 'pointer', fontSize: '12px',
+                    }}>✕</button>
                   </div>
-                  {/* Colonne Séries : vide (partagée dans le header) */}
-                  <div />
-                  {paramInput(idx, 'repetitions', '-')}
-                  {paramInput(idx, 'duree_secondes', '-')}
-                  {paramInput(idx, 'distance_metres', '-')}
-                  {paramInput(idx, 'charge_kg', '-')}
-                  {/* Colonne Récup : vide (gérée en transition ou footer) */}
-                  <div />
-                  <input value={l.notes || ''} onChange={e => updateLigne(idx, 'notes', e.target.value)}
-                    placeholder="note..."
-                    style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '6px', padding: '6px 8px', color: '#FFF', fontSize: '12px', outline: 'none' }} />
-                  <button onClick={() => removeLigne(idx)} style={{
-                    background: 'transparent', border: '1px solid #FF475730', color: '#FF4757',
-                    borderRadius: '6px', padding: '6px', cursor: 'pointer', fontSize: '12px',
-                  }}>✕</button>
+                  {/* Ligne 2 : Reps, Durée, Dist, Charge */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
+                    {['Reps', 'Durée(s)', 'Dist(m)', 'Charge(kg)'].map(h => (
+                      <div key={h} style={{ color: '#444', fontSize: '10px', textTransform: 'uppercase' as const, textAlign: 'center' as const }}>{h}</div>
+                    ))}
+                    {paramInput(idx, 'repetitions', '-', '100%')}
+                    {paramInput(idx, 'duree_secondes', '-', '100%')}
+                    {paramInput(idx, 'distance_metres', '-', '100%')}
+                    {paramInput(idx, 'charge_kg', '-', '100%')}
+                  </div>
                 </div>
 
                 {/* Récup de transition entre exercices */}
