@@ -75,6 +75,8 @@ export default function CoachPage() {
   const [coachId, setCoachId] = useState<string | null>(null)
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [displayTab, setDisplayTab] = useState('dashboard')
+  const [tabVisible, setTabVisible] = useState(true)
   const [showSplash, setShowSplash] = useState(() => {
     if (typeof window === 'undefined') return false
     return !sessionStorage.getItem('splash_shown')
@@ -114,9 +116,15 @@ export default function CoachPage() {
   )
 
   function navTo(id: string) {
+    if (id === activeTab) { setSidebarOpen(false); return }
     setActiveTab(id)
     if (id === 'messages') setUnreadMessages(0)
     setSidebarOpen(false)
+    setTabVisible(false)
+    setTimeout(() => {
+      setDisplayTab(id)
+      setTabVisible(true)
+    }, 140)
   }
 
   return (
@@ -196,12 +204,18 @@ export default function CoachPage() {
           </div>
         </div>
 
-        {activeTab === 'dashboard' && <Dashboard coachId={coachId} onNavTo={navTo} />}
-        {activeTab === 'joueurs' && <Joueurs />}
-        {activeTab === 'exercices' && <Exercices />}
-        {activeTab === 'modeles' && <Modeles />}
-        {activeTab === 'programmes' && <Programmes />}
-        {activeTab === 'messages' && <Messages coachId={coachId} onUnreadChange={setUnreadMessages} />}
+        <div style={{
+          opacity: tabVisible ? 1 : 0,
+          transform: tabVisible ? 'translateY(0)' : 'translateY(10px)',
+          transition: tabVisible ? 'opacity 0.25s ease, transform 0.25s cubic-bezier(0.22,1,0.36,1)' : 'opacity 0.12s ease, transform 0.12s ease',
+        }}>
+        {displayTab === 'dashboard' && <Dashboard coachId={coachId} onNavTo={navTo} />}
+        {displayTab === 'joueurs' && <Joueurs />}
+        {displayTab === 'exercices' && <Exercices />}
+        {displayTab === 'modeles' && <Modeles />}
+        {displayTab === 'programmes' && <Programmes />}
+        {displayTab === 'messages' && <Messages coachId={coachId} onUnreadChange={setUnreadMessages} />}
+        </div>
       </div>
     </div>
   )
