@@ -1372,119 +1372,192 @@ function Programmes() {
   const [exercices, setExercices] = useState<Exercice[]>([])
   const [selection, setSelection] = useState<Set<string>>(new Set())
   const [showAttrib, setShowAttrib] = useState(false)
+  const [search, setSearch] = useState('')
+  const [filtreType, setFiltreType] = useState('')
+  const [loadingEdit, setLoadingEdit] = useState(false)
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => { loadList() }, [])
 
-  async function loadData() {
-    const [{ data: seances }, { data: exs }] = await Promise.all([
-      supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('est_template', true).order('nom').limit(2000),
-      supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom').limit(5000),
-    ])
-    if (seances) setTemplates(seances)
-    if (exs) setExercices(exs)
+  // Chargement léger : juste noms + type + count d'exos
+  async function loadList() {
+    const { data } = await supabase
+      .from('seances')
+      .select('id, nom, type, notes, est_template, seance_exercices(id)')
+      .eq('est_template', true)
+      .order('nom')
+      .limit(2000)
+    if (data) setTemplates(data as unknown as Seance[])
+  }
+
+  // Exercices mis en cache après le 1er chargement
+  async function getExercices(): Promise<Exercice[]> {
+    if (exercices.length > 0) return exercices
+    const { data } = await supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom').limit(5000)
+    const exs = (data || []) as Exercice[]
+    setExercices(exs)
+    return exs
   }
 
   function toggleSelect(id: string) {
-    setSelection(prev => {
-      const n = new Set(prev)
-      n.has(id) ? n.delete(id) : n.add(id)
-      return n
-    })
+    setSelection(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
   }
 
-  function nouvelleSeance() {
+  async function nouvelleSeance() {
+    setLoadingEdit(true)
+    const exs = await getExercices()
+    setExercices(exs)
     setSeanceEdit({ id: '', nom: '', type: 'complete', notes: '', est_template: true, seance_exercices: [] })
+    setLoadingEdit(false)
     setVue('editeur')
   }
 
-  function editSeance(s: Seance) {
-    setSeanceEdit({ ...s, seance_exercices: s.seance_exercices || [] })
+  async function editSeance(s: Seance) {
+    setLoadingEdit(true)
+    const [{ data: full }, exs] = await Promise.all([
+      supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('id', s.id).single(),
+      getExercices(),
+    ])
+    setExercices(exs)
+    setSeanceEdit(full ? { ...full, seance_exercices: (full as Seance).seance_exercices || [] } : { ...s, seance_exercices: [] })
+    setLoadingEdit(false)
     setVue('editeur')
   }
 
   async function deleteSeance(id: string) {
     if (!confirm('Supprimer cette séance ?')) return
     await supabase.from('seances').delete().eq('id', id)
-    await loadData()
+    loadList()
+  }
+
+  if (loadingEdit) {
+    return (
+      <div className="page-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '200px' }}>
+        <span style={{ color: '#1A6FFF', fontSize: '13px', letterSpacing: '2px' }}>CHARGEMENT...</span>
+      </div>
+    )
   }
 
   if (vue === 'editeur' && seanceEdit) {
     return <EditeurSeance
       seance={seanceEdit}
       exercices={exercices}
-      onSave={async () => { await loadData(); setVue('templates') }}
+      onSave={async () => { await loadList(); setVue('templates') }}
       onCancel={() => setVue('templates')}
-
     />
   }
 
+  // Filtrage instantané (tout en mémoire)
+  const typesDisponibles = [...new Set(templates.map(s => s.type))].filter(Boolean).sort()
+  const filtrés = templates
+    .filter(s => !filtreType || s.type === filtreType)
+    .filter(s => !search || s.nom.toLowerCase().includes(search.toLowerCase()))
   const seancesSelectionnees = templates.filter(s => selection.has(s.id))
 
   return (
     <div className="page-section">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', gap: '12px' }}>
         <div>
-          <h1 className="page-title">Séances templates</h1>
-          <p className="page-subtitle">{templates.length} séance{templates.length > 1 ? 's' : ''} · Sélectionne et attribue à tes joueurs</p>
+          <h1 className="page-title">Séances</h1>
+          <p className="page-subtitle">
+            {search || filtreType ? `${filtrés.length} / ${templates.length}` : templates.length} séance{templates.length > 1 ? 's' : ''}
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
           {selection.size > 0 && (
-            <button onClick={() => setShowAttrib(true)} className="btn btn-success">
-              Attribuer ({selection.size}) →
-            </button>
+            <button onClick={() => setShowAttrib(true)} className="btn btn-success btn-sm">Attribuer ({selection.size}) →</button>
           )}
-          {selection.size > 0 && (
-            <button onClick={() => setSelection(new Set())} className="btn btn-ghost btn-sm">Tout désélectionner</button>
-          )}
-          <button onClick={nouvelleSeance} className="btn btn-primary">+ Nouvelle séance</button>
+          <button onClick={nouvelleSeance} className="btn btn-primary btn-sm">+ Nouvelle</button>
         </div>
       </div>
 
+      {/* Barre recherche */}
+      <div style={{ marginBottom: '12px' }}>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder={`Rechercher parmi ${templates.length} séances...`}
+          className="input"
+          style={{ fontSize: '15px', width: '100%' }}
+        />
+      </div>
+
+      {/* Filtres par type */}
+      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
+        <button onClick={() => setFiltreType('')} style={{
+          padding: '5px 12px', borderRadius: '99px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+          border: `1px solid ${!filtreType ? '#007AFF' : '#252530'}`,
+          background: !filtreType ? 'rgba(0,122,255,0.15)' : 'transparent',
+          color: !filtreType ? '#007AFF' : '#555',
+        }}>Tous</button>
+        {typesDisponibles.map(t => {
+          const tc = TYPE_COLORS[t] || TYPE_COLORS.complete
+          const actif = filtreType === t
+          return (
+            <button key={t} onClick={() => setFiltreType(actif ? '' : t)} style={{
+              padding: '5px 12px', borderRadius: '99px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+              border: `1px solid ${actif ? tc.text : '#252530'}`,
+              background: actif ? tc.bg : 'transparent',
+              color: actif ? tc.text : '#555',
+            }}>{LABELS_TYPE[t] || t}</button>
+          )
+        })}
+      </div>
+
+      {/* Sélection active */}
       {selection.size > 0 && (
-        <div style={{ background: '#2ECC7110', border: '1px solid #2ECC7125', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', fontSize: '13px', color: '#3DD68C', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ background: '#2ECC7110', border: '1px solid #2ECC7125', borderRadius: '10px', padding: '10px 16px', marginBottom: '12px', fontSize: '13px', color: '#3DD68C', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2ECC71', boxShadow: '0 0 6px #2ECC71' }} />
-          {selection.size} séance{selection.size > 1 ? 's' : ''} sélectionnée{selection.size > 1 ? 's' : ''} — clique sur "Attribuer" pour les assigner à un joueur
+          <span style={{ flex: 1 }}>{selection.size} séance{selection.size > 1 ? 's' : ''} sélectionnée{selection.size > 1 ? 's' : ''}</span>
+          <button onClick={() => setSelection(new Set())} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '11px' }}>Tout désélectionner</button>
         </div>
       )}
 
+      {/* Liste */}
       {templates.length === 0 ? (
         <div className="card">
           <div className="empty-state">
             <div className="empty-state-icon">📋</div>
-            <div className="empty-state-text">Aucune séance template.<br />Crée ta première séance !</div>
+            <div className="empty-state-text">Aucune séance.<br />Crée ta première séance !</div>
+          </div>
+        </div>
+      ) : filtrés.length === 0 ? (
+        <div className="card">
+          <div className="empty-state">
+            <div className="empty-state-icon">🔍</div>
+            <div className="empty-state-text">Aucun résultat pour "{search}"</div>
           </div>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {templates.map(s => {
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {filtrés.map(s => {
             const selected = selection.has(s.id)
             const tc = TYPE_COLORS[s.type] || TYPE_COLORS.complete
             const exoCount = s.seance_exercices?.length || 0
             return (
-              <div key={s.id} className={`card${selected ? ' card-selected' : ''}`}
-                style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div key={s.id}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  padding: '12px 16px', borderRadius: '12px', cursor: 'default',
+                  background: selected ? 'rgba(46,204,113,0.06)' : 'rgba(255,255,255,0.02)',
+                  border: `1px solid ${selected ? '#2ECC7130' : '#1A1A28'}`,
+                  transition: 'background 0.1s',
+                }}>
                 <button onClick={() => toggleSelect(s.id)}
                   className={`checkbox-custom${selected ? ' checked' : ''}`}
-                  style={{ borderColor: selected ? '#2ECC71' : undefined, background: selected ? '#2ECC71' : undefined, boxShadow: selected ? '0 0 8px #2ECC7140' : undefined }}>
+                  style={{ borderColor: selected ? '#2ECC71' : undefined, background: selected ? '#2ECC71' : undefined, flexShrink: 0 }}>
                   {selected ? '✓' : ''}
                 </button>
-
-                <div style={{ width: '3px', height: '36px', borderRadius: '2px', background: tc.text, opacity: 0.7, flexShrink: 0 }} />
-
+                <div style={{ width: '3px', alignSelf: 'stretch', borderRadius: '2px', background: tc.text, opacity: 0.6, flexShrink: 0 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: '700', fontSize: '14px', marginBottom: '3px' }} className="truncate">{s.nom}</div>
+                  <div style={{ fontWeight: '700', fontSize: '14px', marginBottom: '2px' }} className="truncate">{s.nom}</div>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <span className="badge" style={{ background: tc.bg, color: tc.text, border: `1px solid ${tc.border}`, padding: '2px 8px', fontSize: '10px' }}>{LABELS_TYPE[s.type] || s.type}</span>
-                    <span style={{ color: '#444', fontSize: '11px' }}>{exoCount} exercice{exoCount > 1 ? 's' : ''}</span>
-                    {s.notes && <span style={{ color: '#333', fontSize: '11px' }} className="truncate">· {s.notes.substring(0, 40)}</span>}
+                    <span style={{ fontSize: '10px', fontWeight: '700', color: tc.text }}>{LABELS_TYPE[s.type] || s.type}</span>
+                    <span style={{ color: '#444', fontSize: '11px' }}>{exoCount} exo{exoCount > 1 ? 's' : ''}</span>
+                    {s.notes && <span style={{ color: '#333', fontSize: '11px' }} className="truncate">· {s.notes.substring(0, 50)}</span>}
                   </div>
                 </div>
-
                 <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                  <button onClick={() => toggleSelect(s.id)} className="btn btn-ghost btn-sm"
-                    style={selected ? { borderColor: '#2ECC7140', color: '#3DD68C', background: '#2ECC7110' } : {}}>
-                    {selected ? '✓' : 'Sélectionner'}
-                  </button>
                   <button onClick={() => editSeance(s)} className="btn btn-ghost btn-sm">Éditer</button>
                   <button onClick={() => deleteSeance(s.id)} className="btn btn-danger btn-sm">✕</button>
                 </div>
