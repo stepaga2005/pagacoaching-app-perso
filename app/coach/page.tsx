@@ -222,7 +222,7 @@ function Joueurs() {
 
   async function loadJoueurs() {
     const { data } = await supabase.from('joueurs').select('*').order('nom')
-    if (data) setJoueurs(data)
+    if (data) setJoueurs([...data].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
   }
 
   function openAdd() {
@@ -456,8 +456,8 @@ function Exercices() {
       supabase.from('exercices').select('*, familles(nom, couleur)').order('nom').limit(5000),
       supabase.from('familles').select('*').order('nom'),
     ])
-    if (exs) setExercices(exs)
-    if (fams) setFamilles(fams)
+    if (exs) setExercices([...exs].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
+    if (fams) setFamilles([...fams].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
   }
 
   function openAdd() {
@@ -502,7 +502,9 @@ function Exercices() {
   const filtres = filtresFamille.length > 0
     ? exercices.filter(e => filtresFamille.includes(e.famille_id))
     : exercices
-  const affichés = filtres.filter(e => e.nom.toLowerCase().includes(search.toLowerCase()))
+  const affichés = filtres
+    .filter(e => e.nom.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
 
   const inp = (placeholder: string, key: keyof typeof form, type = 'text') => (
     <input type={type} placeholder={placeholder} value={form[key]}
@@ -855,7 +857,7 @@ function SearchableSelect({ value, items, onChange, placeholder, triggerStyle, z
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const selected = items.find(i => i.id === value)
-  const filtered = items.filter(i => i.nom.toLowerCase().includes(search.toLowerCase()))
+  const filtered = items.filter(i => i.nom.toLowerCase().includes(search.toLowerCase())).sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
 
   return (
     <>
@@ -963,15 +965,16 @@ function Modeles() {
   async function loadProgrammes() {
     const { data } = await supabase.from('programmes').select('*').order('nom')
     if (data) {
-      setProgrammes(data)
-      if (data.length > 0 && !selectedProg) setSelectedProg(data[0])
+      const sorted = [...data].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
+      setProgrammes(sorted)
+      if (sorted.length > 0 && !selectedProg) setSelectedProg(sorted[0])
     }
     const [{ data: tpls }, { data: exs }] = await Promise.all([
       supabase.from('seances').select('*, seance_exercices(id)').eq('est_template', true).order('nom').limit(2000),
       supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom').limit(5000),
     ])
-    if (tpls) setTemplates(tpls)
-    if (exs) setExercices(exs)
+    if (tpls) setTemplates([...tpls].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
+    if (exs) setExercices([...exs].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
   }
 
   async function loadSeancesProg(progId: string) {
@@ -1388,14 +1391,14 @@ function Programmes() {
       .eq('est_template', true)
       .order('nom')
       .limit(2000)
-    if (data) setTemplates(data as unknown as Seance[])
+    if (data) setTemplates([...(data as unknown as Seance[])].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
   }
 
   // Exercices mis en cache après le 1er chargement
   async function getExercices(): Promise<Exercice[]> {
     if (exercices.length > 0) return exercices
     const { data } = await supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom').limit(5000)
-    const exs = (data || []) as Exercice[]
+    const exs = [...((data || []) as Exercice[])].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
     setExercices(exs)
     return exs
   }
@@ -1869,6 +1872,7 @@ function ExercicePicker({ exercices, onConfirm, onClose }: {
       e.nom.toLowerCase().includes(recherche.toLowerCase()) ||
       (e.familles?.nom || '').toLowerCase().includes(recherche.toLowerCase())
     )
+    .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
 
   function toggleEx(id: string) {
     setSelection(prev => {
@@ -2951,12 +2955,12 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
 
   useEffect(() => {
     supabase.from('seances').select('id, nom').eq('est_template', true).order('nom').limit(2000)
-      .then(({ data }) => { if (data) setMpTemplates(data) })
+      .then(({ data }) => { if (data) setMpTemplates([...data].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))) })
   }, [])
 
   useEffect(() => {
     supabase.from('joueurs').select('id, nom, prenom').eq('actif', true).order('nom')
-      .then(({ data }) => { if (data) setAllJoueurs(data) })
+      .then(({ data }) => { if (data) setAllJoueurs([...data].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))) })
   }, [])
 
   async function mpAttribuerSession(ds: string) {
@@ -3761,9 +3765,9 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
       supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('est_template', true).order('nom').limit(2000),
     ])
     if (reals) setRealisations(reals as unknown as Realisation[])
-    if (tmpl) setTemplates(tmpl)
-    if (exs) setExercices(exs)
-    if (favs) setFavoris(favs)
+    if (tmpl) setTemplates([...tmpl].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
+    if (exs) setExercices([...exs].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
+    if (favs) setFavoris([...favs].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
   }
 
   async function attribuerTemplate() {
