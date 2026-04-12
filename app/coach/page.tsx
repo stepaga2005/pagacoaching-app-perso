@@ -6,7 +6,7 @@ import { subscribePush, sendPush } from '@/lib/push'
 import { useRouter } from 'next/navigation'
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+  { id: 'dashboard', label: 'Dashboard', icon: '🏛️' },
   { id: 'joueurs', label: 'Joueurs', icon: '👥' },
   { id: 'exercices', label: 'Exercices', icon: '⚡' },
   { id: 'modeles', label: 'Modèles', icon: '🗓️' },
