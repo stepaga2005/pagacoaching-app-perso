@@ -415,6 +415,7 @@ type Joueur = {
   actif: boolean
   acces_debut: string
   acces_fin: string
+  groupe?: string | null
 }
 
 function Joueurs() {
@@ -424,10 +425,12 @@ function Joueurs() {
   const [profilJoueur, setProfilJoueur] = useState<Joueur | null>(null)
   const [saving, setSaving] = useState(false)
   const [coachId, setCoachId] = useState<string | null>(null)
+  const [filtreGroupe, setFiltreGroupe] = useState<string | null>(null)
   const [form, setForm] = useState({
     nom: '', prenom: '', email: '', password: '',
     poste: '', niveau: '', club: '',
     acces_debut: '', acces_fin: '',
+    groupe: '',
   })
 
   useEffect(() => {
@@ -445,7 +448,7 @@ function Joueurs() {
 
   function openAdd() {
     setEditJoueur(null)
-    setForm({ nom: '', prenom: '', email: '', password: '', poste: '', niveau: '', club: '', acces_debut: '', acces_fin: '' })
+    setForm({ nom: '', prenom: '', email: '', password: '', poste: '', niveau: '', club: '', acces_debut: '', acces_fin: '', groupe: '' })
     setShowForm(true)
   }
 
@@ -455,6 +458,7 @@ function Joueurs() {
       nom: j.nom, prenom: j.prenom, email: j.email, password: '',
       poste: j.poste || '', niveau: j.niveau || '', club: j.club || '',
       acces_debut: j.acces_debut || '', acces_fin: j.acces_fin || '',
+      groupe: j.groupe || '',
     })
     setShowForm(true)
   }
@@ -467,6 +471,7 @@ function Joueurs() {
         poste: form.poste, niveau: form.niveau, club: form.club,
         acces_debut: form.acces_debut || null,
         acces_fin: form.acces_fin || null,
+        groupe: form.groupe || null,
       }).eq('id', editJoueur.id)
     } else {
       // Crée le compte auth Supabase
@@ -550,6 +555,27 @@ function Joueurs() {
               {input('Niveau (ex: N2, CFA)', 'niveau')}
               {input('Club', 'club')}
 
+              <div>
+                <label style={{ color: '#888', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                  Groupe
+                </label>
+                <input
+                  list="groupes-datalist"
+                  placeholder="ex: Équipe pro, Coaching en ligne..."
+                  value={form.groupe}
+                  onChange={e => setForm(f => ({ ...f, groupe: e.target.value }))}
+                  style={{
+                    width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A',
+                    borderRadius: '8px', padding: '12px 14px', color: '#FFF', fontSize: '14px', outline: 'none',
+                  }}
+                />
+                <datalist id="groupes-datalist">
+                  {[...new Set(joueurs.map(j => j.groupe).filter(Boolean))].map(g => (
+                    <option key={g as string} value={g as string} />
+                  ))}
+                </datalist>
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: '8px' }}>
                 <div>
                   <label style={{ color: '#888', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
@@ -585,14 +611,38 @@ function Joueurs() {
         </div>
       )}
 
+      {/* Filtres groupes */}
+      {(() => {
+        const groupes = [...new Set(joueurs.map(j => j.groupe).filter(Boolean))] as string[]
+        if (groupes.length === 0) return null
+        return (
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+            <button onClick={() => setFiltreGroupe(null)} style={{
+              padding: '7px 16px', borderRadius: '20px', border: 'none', cursor: 'pointer',
+              background: filtreGroupe === null ? '#1A6FFF' : '#1A1A1A',
+              color: filtreGroupe === null ? '#FFF' : '#888', fontSize: '13px', fontWeight: '600',
+            }}>Tous ({joueurs.length})</button>
+            {groupes.map(g => (
+              <button key={g} onClick={() => setFiltreGroupe(g)} style={{
+                padding: '7px 16px', borderRadius: '20px', border: 'none', cursor: 'pointer',
+                background: filtreGroupe === g ? '#1A6FFF' : '#1A1A1A',
+                color: filtreGroupe === g ? '#FFF' : '#888', fontSize: '13px', fontWeight: '600',
+              }}>{g} ({joueurs.filter(j => j.groupe === g).length})</button>
+            ))}
+          </div>
+        )
+      })()}
+
       {/* Liste joueurs */}
-      {joueurs.length === 0 ? (
+      {(() => {
+        const joueursFiltres = filtreGroupe ? joueurs.filter(j => j.groupe === filtreGroupe) : joueurs
+        return joueursFiltres.length === 0 ? (
         <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '24px', color: '#555', fontSize: '14px' }}>
           Aucun joueur pour l'instant.
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {joueurs.map(j => (
+          {joueursFiltres.map(j => (
             <div key={j.id} onClick={() => setProfilJoueur(j)} style={{
               background: '#111', border: '1px solid #2A2A2A', borderRadius: '12px',
               padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -611,7 +661,15 @@ function Joueurs() {
                   {j.prenom[0]}{j.nom[0]}
                 </div>
                 <div>
-                  <div style={{ fontWeight: '700', fontSize: '15px' }}>{j.prenom} {j.nom}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontWeight: '700', fontSize: '15px' }}>{j.prenom} {j.nom}</span>
+                    {j.groupe && (
+                      <span style={{
+                        padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: '600',
+                        background: '#1A6FFF20', color: '#1A6FFF', border: '1px solid #1A6FFF40',
+                      }}>{j.groupe}</span>
+                    )}
+                  </div>
                   <div style={{ color: '#888', fontSize: '12px', marginTop: '2px' }}>
                     {j.poste && `${j.poste} · `}{j.club && `${j.club} · `}{j.email}
                   </div>
@@ -638,7 +696,8 @@ function Joueurs() {
             </div>
           ))}
         </div>
-      )}
+      )
+      })()}
     </div>
   )
 }

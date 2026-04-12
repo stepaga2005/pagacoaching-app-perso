@@ -7,7 +7,7 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(req: Request) {
-  const { nom, prenom, email, password, poste, niveau, club, acces_debut, acces_fin, coach_id } = await req.json()
+  const { nom, prenom, email, password, poste, niveau, club, acces_debut, acces_fin, groupe, coach_id } = await req.json()
 
   const profil = {
     nom,
@@ -17,6 +17,7 @@ export async function POST(req: Request) {
     club: club || null,
     acces_debut: acces_debut || null,
     acces_fin: acces_fin || null,
+    groupe: groupe || null,
     coach_id: coach_id || null,
     actif: true,
   }
