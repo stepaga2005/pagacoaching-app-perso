@@ -1599,8 +1599,8 @@ function ExercicePicker({ exercices, onConfirm, onClose }: {
   return (
     <div className="modal-overlay" style={{ zIndex: 200, alignItems: 'flex-end' }}>
       <div className="modal-box" style={{
-        maxWidth: '560px', width: '100%',
-        maxHeight: '90vh', display: 'flex', flexDirection: 'column',
+        maxWidth: '600px', width: '100%',
+        height: '92vh', display: 'flex', flexDirection: 'column',
         borderRadius: '20px 20px 0 0', margin: 0, padding: '0',
       }}>
         {/* Handle */}
@@ -1609,100 +1609,101 @@ function ExercicePicker({ exercices, onConfirm, onClose }: {
         </div>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px 12px' }}>
-          <div className="modal-title" style={{ flex: 1, marginBottom: 0 }}>Ajouter des exercices</div>
-          <button onClick={onClose} className="btn btn-ghost btn-sm" style={{ fontSize: '16px', padding: '6px 10px' }}>✕</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px 10px' }}>
+          <div className="modal-title" style={{ flex: 1, marginBottom: 0, fontSize: '17px' }}>Ajouter des exercices</div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '20px', lineHeight: 1, padding: '4px' }}>✕</button>
         </div>
 
         {/* Recherche */}
-        <div style={{ padding: '0 16px 10px' }}>
+        <div style={{ padding: '0 12px 10px' }}>
           <input
             autoFocus
             value={recherche}
             onChange={e => setRecherche(e.target.value)}
             placeholder="Rechercher par nom..."
             className="input"
-            style={{ fontSize: '15px' }}
+            style={{ fontSize: '14px' }}
           />
         </div>
 
-        {/* Filtres familles */}
-        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', padding: '0 16px 12px', scrollbarWidth: 'none' }}>
-          <button
-            onClick={() => setFiltresFamille([])}
-            style={{
-              padding: '6px 14px', borderRadius: '99px', border: `1px solid ${filtresFamille.length === 0 ? '#007AFF' : '#252530'}`,
-              background: filtresFamille.length === 0 ? 'rgba(0,122,255,0.15)' : 'transparent',
-              color: filtresFamille.length === 0 ? '#007AFF' : '#666',
-              fontSize: '12px', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-            }}>Tous</button>
-          {familles.map(f => {
-            const actif = filtresFamille.includes(f.id)
-            return (
-              <button key={f.id} onClick={() => setFiltresFamille(prev => actif ? prev.filter(id => id !== f.id) : [...prev, f.id])}
-                style={{
-                  padding: '6px 14px', borderRadius: '99px',
-                  border: `1px solid ${actif ? f.couleur : '#252530'}`,
-                  background: actif ? f.couleur + '22' : 'transparent',
-                  color: actif ? f.couleur : '#666',
-                  fontSize: '12px', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                }}>{f.nom}</button>
-            )
-          })}
-        </div>
+        {/* Corps : sidebar familles + liste exercices */}
+        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
-        {/* Liste exercices */}
-        <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px', padding: '0 12px' }}>
-          {filtres.length === 0 && (
-            <div className="empty-state">
-              <div className="empty-state-icon">🔍</div>
-              <div className="empty-state-text">Aucun exercice trouvé</div>
-            </div>
-          )}
-          {filtres.map(ex => {
-            const selected = selection.has(ex.id)
-            return (
-              <button key={ex.id} onClick={() => toggleEx(ex.id)}
-                style={{
-                  display: 'flex', gap: '12px', alignItems: 'center',
-                  padding: '10px 12px', borderRadius: '12px', cursor: 'pointer', textAlign: 'left', width: '100%',
-                  background: selected ? 'rgba(0,122,255,0.1)' : 'rgba(255,255,255,0.02)',
-                  border: `1px solid ${selected ? 'rgba(0,122,255,0.4)' : '#1A1A28'}`,
-                  transition: 'all 0.15s ease',
-                }}>
+          {/* Sidebar familles (gauche) */}
+          <div style={{
+            width: '90px', flexShrink: 0,
+            overflowY: 'auto', borderRight: '1px solid #1A1A28',
+            display: 'flex', flexDirection: 'column', gap: '2px', padding: '4px 6px',
+          }}>
+            <button
+              onClick={() => setFiltresFamille([])}
+              style={{
+                padding: '8px 6px', borderRadius: '8px', border: 'none',
+                background: filtresFamille.length === 0 ? 'rgba(0,122,255,0.18)' : 'transparent',
+                color: filtresFamille.length === 0 ? '#007AFF' : '#555',
+                fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+                textAlign: 'center', lineHeight: '1.2',
+              }}>Tous</button>
+            {familles.map(f => {
+              const actif = filtresFamille.includes(f.id)
+              return (
+                <button key={f.id}
+                  onClick={() => setFiltresFamille(prev => actif ? prev.filter(id => id !== f.id) : [...prev, f.id])}
+                  style={{
+                    padding: '8px 6px', borderRadius: '8px', border: 'none',
+                    background: actif ? f.couleur + '28' : 'transparent',
+                    color: actif ? f.couleur : '#555',
+                    fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+                    textAlign: 'center', lineHeight: '1.2',
+                  }}>{f.nom}</button>
+              )
+            })}
+          </div>
 
-                {/* Vignette vidéo */}
-                <VideoThumb url={ex.video_url} size={56} famille={ex.familles} />
-
-                {/* Infos */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: '700', fontSize: '13px', color: selected ? '#60B8FF' : '#F0F0F8', marginBottom: '3px' }} className="truncate">
-                    {ex.nom}
+          {/* Liste exercices (droite) */}
+          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '4px', padding: '4px 8px' }}>
+            {filtres.length === 0 && (
+              <div className="empty-state">
+                <div className="empty-state-icon">🔍</div>
+                <div className="empty-state-text">Aucun exercice trouvé</div>
+              </div>
+            )}
+            {filtres.map(ex => {
+              const selected = selection.has(ex.id)
+              return (
+                <button key={ex.id} onClick={() => toggleEx(ex.id)}
+                  style={{
+                    display: 'flex', gap: '10px', alignItems: 'center',
+                    padding: '9px 10px', borderRadius: '12px', cursor: 'pointer', textAlign: 'left', width: '100%',
+                    background: selected ? 'rgba(0,122,255,0.1)' : 'rgba(255,255,255,0.02)',
+                    border: `1px solid ${selected ? 'rgba(0,122,255,0.4)' : '#1A1A28'}`,
+                    transition: 'all 0.15s ease',
+                  }}>
+                  <VideoThumb url={ex.video_url} size={44} famille={ex.familles} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: '700', fontSize: '13px', color: selected ? '#60B8FF' : '#F0F0F8', marginBottom: '2px' }} className="truncate">
+                      {ex.nom}
+                    </div>
+                    {ex.familles && (
+                      <span style={{
+                        fontSize: '10px', fontWeight: '700',
+                        color: ex.familles.couleur,
+                      }}>{ex.familles.nom}</span>
+                    )}
                   </div>
-                  {ex.familles && (
-                    <span style={{
-                      fontSize: '10px', fontWeight: '700',
-                      color: ex.familles.couleur,
-                      background: ex.familles.couleur + '18',
-                      border: `1px solid ${ex.familles.couleur}28`,
-                      padding: '2px 7px', borderRadius: '99px',
-                    }}>{ex.familles.nom}</span>
-                  )}
-                </div>
-
-                {/* Checkbox visuel */}
-                <div style={{
-                  width: '24px', height: '24px', borderRadius: '6px', flexShrink: 0,
-                  background: selected ? '#007AFF' : 'transparent',
-                  border: `2px solid ${selected ? '#007AFF' : '#333'}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transition: 'all 0.15s ease',
-                }}>
-                  {selected && <span style={{ color: '#FFF', fontSize: '14px', lineHeight: 1 }}>✓</span>}
-                </div>
-              </button>
-            )
-          })}
+                  <div style={{
+                    width: '22px', height: '22px', borderRadius: '6px', flexShrink: 0,
+                    background: selected ? '#007AFF' : 'transparent',
+                    border: `2px solid ${selected ? '#007AFF' : '#333'}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.15s ease',
+                  }}>
+                    {selected && <span style={{ color: '#FFF', fontSize: '13px', lineHeight: 1 }}>✓</span>}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         {/* Footer — bouton Ajouter */}
