@@ -843,6 +843,101 @@ const TYPE_COLORS: Record<string, { bg: string; border: string; text: string }> 
   retour_au_calme:  { bg: '#9B59B618', border: '#9B59B650', text: '#C39BD3' },
 }
 
+// ─── SEARCHABLE SELECT ────────────────────────────────────────────
+function SearchableSelect({ value, items, onChange, placeholder, triggerStyle, zIndex = 500 }: {
+  value: string
+  items: { id: string; nom: string }[]
+  onChange: (item: { id: string; nom: string }) => void
+  placeholder?: string
+  triggerStyle?: React.CSSProperties
+  zIndex?: number
+}) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const selected = items.find(i => i.id === value)
+  const filtered = items.filter(i => i.nom.toLowerCase().includes(search.toLowerCase()))
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '8px',
+          background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px',
+          padding: '10px 14px', color: selected ? '#F0F0F8' : '#555',
+          cursor: 'pointer', fontSize: '14px', outline: 'none', textAlign: 'left',
+          ...triggerStyle,
+        }}>
+        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {selected?.nom || placeholder || 'Sélectionner...'}
+        </span>
+        <span style={{ color: '#444', fontSize: '10px', flexShrink: 0 }}>▼</span>
+      </button>
+
+      {open && (
+        <div
+          onClick={() => { setOpen(false); setSearch('') }}
+          style={{ position: 'fixed', inset: 0, zIndex, background: 'rgba(0,0,0,0.75)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: '#111', borderRadius: '20px 20px 0 0', maxHeight: '70vh', display: 'flex', flexDirection: 'column', border: '1px solid #1E1E28' }}>
+            {/* Handle */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0' }}>
+              <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: '#2A2A35' }} />
+            </div>
+            {/* Search */}
+            <div style={{ padding: '12px 16px 6px' }}>
+              <input
+                autoFocus
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Rechercher..."
+                className="input"
+                style={{ fontSize: '14px' }}
+              />
+            </div>
+            {/* Compteur */}
+            <div style={{ padding: '4px 20px 6px', color: '#444', fontSize: '11px', fontWeight: '600' }}>
+              {filtered.length} résultat{filtered.length !== 1 ? 's' : ''}
+            </div>
+            {/* Liste */}
+            <div style={{ overflowY: 'auto', flex: 1 }}>
+              {filtered.map(item => {
+                const isSelected = item.id === value
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => { onChange(item); setOpen(false); setSearch('') }}
+                    style={{
+                      display: 'flex', alignItems: 'center', width: '100%',
+                      padding: '14px 20px', textAlign: 'left', border: 'none',
+                      borderBottom: '1px solid #161620',
+                      background: isSelected ? 'rgba(0,122,255,0.08)' : 'transparent',
+                      color: isSelected ? '#007AFF' : '#D0D0E8',
+                      cursor: 'pointer', fontSize: '14px', fontWeight: isSelected ? '700' : '400',
+                    }}>
+                    <span style={{ flex: 1 }}>{item.nom}</span>
+                    {isSelected && <span style={{ color: '#007AFF', fontSize: '16px' }}>✓</span>}
+                  </button>
+                )
+              })}
+              {filtered.length === 0 && (
+                <div style={{ padding: '32px', textAlign: 'center', color: '#444', fontSize: '13px' }}>Aucun résultat</div>
+              )}
+            </div>
+            {/* Fermer */}
+            <div style={{ padding: '12px 16px', borderTop: '1px solid #1A1A28' }}>
+              <button
+                onClick={() => { setOpen(false); setSearch('') }}
+                className="btn btn-ghost btn-block">Fermer</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
 // ─── MODELES COMPONENT ────────────────────────────────────────────
 function Modeles() {
   const [programmes, setProgrammes] = useState<Programme[]>([])
@@ -998,19 +1093,13 @@ function Modeles() {
           {programmes.length === 0 ? (
             <div style={{ color: '#444', fontSize: '13px' }}>Aucun modèle — crée-en un !</div>
           ) : (
-            <select
+            <SearchableSelect
               value={selectedProg?.id || ''}
-              onChange={e => {
-                const p = programmes.find(x => x.id === e.target.value)
-                if (p) setSelectedProg(p)
-              }}
-              className="select"
-              style={{ width: '100%', fontWeight: '700' }}
-            >
-              {programmes.map(p => (
-                <option key={p.id} value={p.id}>{p.nom}</option>
-              ))}
-            </select>
+              items={programmes}
+              onChange={p => { const found = programmes.find(x => x.id === p.id); if (found) setSelectedProg(found) }}
+              placeholder="Choisir un modèle..."
+              triggerStyle={{ width: '100%', fontWeight: '700' }}
+            />
           )}
         </div>
         <button onClick={() => setShowNewProg(true)} className="btn btn-primary btn-sm">+ Nouveau</button>
@@ -2579,12 +2668,14 @@ function CopierJoursModal({ joursSelectionnes, byDate, joueurCourant, allJoueurs
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
               <label style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>Joueur cible</label>
-              <select value={cibleJoueurId} onChange={e => setCibleJoueurId(e.target.value)} className="select" style={{ width: '100%' }}>
-                <option value="">— Choisir un joueur —</option>
-                {allJoueurs.filter(j => j.id !== joueurCourant.id).map(j => (
-                  <option key={j.id} value={j.id}>{j.prenom} {j.nom}</option>
-                ))}
-              </select>
+              <SearchableSelect
+                value={cibleJoueurId}
+                items={allJoueurs.filter(j => j.id !== joueurCourant.id).map(j => ({ id: j.id, nom: `${j.prenom} ${j.nom}` }))}
+                onChange={j => setCibleJoueurId(j.id)}
+                placeholder="— Choisir un joueur —"
+                triggerStyle={{ width: '100%' }}
+                zIndex={650}
+              />
             </div>
             <div>
               <label style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
@@ -3171,11 +3262,14 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '14px', borderRadius: '14px', border: '1px solid #1A6FFF40', background: '#1A6FFF10' }}>
                 <div style={{ color: '#1A6FFF', fontWeight: '700', fontSize: '14px' }}>📋 Session d'entraînement</div>
-                <select value={mpSeanceChoisie} onChange={e => setMpSeanceChoisie(e.target.value)}
-                  style={{ background: '#0D0D0D', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 10px', color: mpSeanceChoisie ? '#FFF' : '#555', fontSize: '13px', outline: 'none' }}>
-                  <option value="">Choisir un modèle...</option>
-                  {mpTemplates.map(t => <option key={t.id} value={t.id}>{t.nom}</option>)}
-                </select>
+                <SearchableSelect
+                  value={mpSeanceChoisie}
+                  items={mpTemplates}
+                  onChange={t => setMpSeanceChoisie(t.id)}
+                  placeholder="Choisir un modèle..."
+                  triggerStyle={{ width: '100%', fontSize: '13px' }}
+                  zIndex={450}
+                />
                 <button onClick={() => mpAttribuerSession(mpActionDate)} disabled={!mpSeanceChoisie}
                   style={{ padding: '10px', borderRadius: '10px', border: 'none', background: mpSeanceChoisie ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpSeanceChoisie ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>
                   Ajouter au planning
@@ -4070,11 +4164,13 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
 
             {createMode === 'choisir' ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <select value={seanceChoisie} onChange={e => setSeanceChoisie(e.target.value)}
-                  style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '10px 14px', color: seanceChoisie ? '#FFF' : '#555', fontSize: '14px', outline: 'none' }}>
-                  <option value="">Choisir un modèle...</option>
-                  {templates.map(t => <option key={t.id} value={t.id}>{t.nom}</option>)}
-                </select>
+                <SearchableSelect
+                  value={seanceChoisie}
+                  items={templates}
+                  onChange={t => setSeanceChoisie(t.id)}
+                  placeholder="Choisir un modèle..."
+                  triggerStyle={{ width: '100%' }}
+                />
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button onClick={() => setCreateDate(null)} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: '1px solid #2A2A2A', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
                   <button onClick={attribuerTemplate} disabled={!seanceChoisie} style={{
