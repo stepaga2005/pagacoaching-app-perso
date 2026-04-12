@@ -459,13 +459,15 @@ function Joueurs() {
   }
 
   async function loadGroupes() {
-    const { data } = await supabase.from('groupes').select('*').order('nom')
+    const { data, error } = await supabase.from('groupes').select('*').order('nom')
+    if (error) console.error('loadGroupes error:', error.message)
     if (data) setGroupes(data)
   }
 
   async function createGroupe() {
     if (!newGroupeNom.trim()) return
-    await supabase.from('groupes').insert({ nom: newGroupeNom.trim(), couleur: newGroupeCouleur, coach_id: coachId })
+    const { error } = await supabase.from('groupes').insert({ nom: newGroupeNom.trim(), couleur: newGroupeCouleur, coach_id: coachId })
+    if (error) { console.error('createGroupe error:', error.message); return }
     setNewGroupeNom('')
     setNewGroupeCouleur(GROUPE_COLORS[0])
     await loadGroupes()
