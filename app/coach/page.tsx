@@ -452,8 +452,8 @@ function Exercices() {
   }, [])
 
   async function loadData() {
-    const [{ data: exs }, { data: fams }] = await Promise.all([
-      supabase.from('exercices').select('*, familles(nom, couleur)').order('nom'),
+    const [{ data: exs, error: exsError }, { data: fams }] = await Promise.all([
+      supabase.from('exercices').select('*, familles(nom, couleur)').order('nom').limit(5000),
       supabase.from('familles').select('*').order('nom'),
     ])
     if (exs) setExercices(exs)
@@ -482,9 +482,11 @@ function Exercices() {
     setSaving(true)
     const payload = { ...form, famille_id: form.famille_id }
     if (editEx) {
-      await supabase.from('exercices').update(payload).eq('id', editEx.id)
+      const { error } = await supabase.from('exercices').update(payload).eq('id', editEx.id)
+      if (error) { alert('Erreur modification : ' + error.message); setSaving(false); return }
     } else {
-      await supabase.from('exercices').insert(payload)
+      const { error } = await supabase.from('exercices').insert(payload).select()
+      if (error) { alert('Erreur création : ' + error.message); setSaving(false); return }
     }
     await loadData()
     setShowForm(false)
@@ -638,15 +640,25 @@ function Exercices() {
               </div>
             </div>
 
-            {apercu.video_url && (
-              <div style={{ marginBottom: '20px', borderRadius: '10px', overflow: 'hidden', background: '#000', aspectRatio: '16/9' }}>
-                <iframe
-                  src={apercu.video_url.replace('vimeo.com/', 'player.vimeo.com/video/')}
-                  style={{ width: '100%', height: '100%', border: 'none' }}
-                  allow="fullscreen"
-                />
-              </div>
-            )}
+            {apercu.video_url && (() => {
+              const ytId = getYoutubeId(apercu.video_url)
+              const vimeoId = getVimeoId(apercu.video_url)
+              const src = ytId
+                ? `https://www.youtube.com/embed/${ytId}`
+                : vimeoId
+                ? `https://player.vimeo.com/video/${vimeoId}`
+                : null
+              return src ? (
+                <div style={{ marginBottom: '20px', borderRadius: '12px', overflow: 'hidden', background: '#000', aspectRatio: '16/9' }}>
+                  <iframe
+                    src={src}
+                    style={{ width: '100%', height: '100%', border: 'none' }}
+                    allow="autoplay; fullscreen"
+                    allowFullScreen
+                  />
+                </div>
+              ) : null
+            })()}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {apercu.description && (
@@ -861,7 +873,7 @@ function Modeles() {
     }
     const [{ data: tpls }, { data: exs }] = await Promise.all([
       supabase.from('seances').select('*, seance_exercices(id)').eq('est_template', true).order('nom'),
-      supabase.from('exercices').select('*, familles(nom, couleur)').order('nom'),
+      supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom'),
     ])
     if (tpls) setTemplates(tpls)
     if (exs) setExercices(exs)
@@ -1276,8 +1288,8 @@ function Programmes() {
 
   async function loadData() {
     const [{ data: seances }, { data: exs }] = await Promise.all([
-      supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(nom, couleur)))').eq('est_template', true).order('nom'),
-      supabase.from('exercices').select('*, familles(nom, couleur)').order('nom'),
+      supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('est_template', true).order('nom'),
+      supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom'),
     ])
     if (seances) setTemplates(seances)
     if (exs) setExercices(exs)
@@ -1410,6 +1422,13 @@ function getYoutubeId(url: string): string | null {
   return m ? m[1] : null
 }
 
+// ─── Helper : extraire l'ID Vimeo d'une URL ────────────────────────
+function getVimeoId(url: string): string | null {
+  if (!url) return null
+  const m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/)
+  return m ? m[1] : null
+}
+
 // ─── Emojis par famille ─────────────────────────────────────────────
 const FAMILLE_EMOJI: Record<string, string> = {
   'Vitesse': '⚡', 'Accélération': '🏃', 'Décélération': '🛑',
@@ -1424,11 +1443,29 @@ const FAMILLE_EMOJI: Record<string, string> = {
 function VideoThumb({ url, size = 72, famille }: { url?: string | null; size?: number; famille?: Famille }) {
   const [hovered, setHovered] = useState(false)
   const ytId = url ? getYoutubeId(url) : null
+  const vimeoId = url ? getVimeoId(url) : null
 
+  // Bouton play réutilisable
+  const PlayBtn = ({ small = false }: { small?: boolean }) => (
+    <div style={{
+      width: small ? 22 : 28, height: small ? 22 : 28, borderRadius: '50%',
+      background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+    }}>
+      <div style={{
+        width: 0, height: 0, borderStyle: 'solid',
+        borderWidth: small ? '4px 0 4px 7px' : '5px 0 5px 9px',
+        borderColor: `transparent transparent transparent #111`,
+        marginLeft: small ? '2px' : '2px',
+      }} />
+    </div>
+  )
+
+  // Pas de vidéo → placeholder famille
   if (!url) {
     const color = famille?.couleur || '#6B7280'
     const emoji = famille ? (FAMILLE_EMOJI[famille.nom] || '🏅') : '▷'
-    // Parse hex → rgba pour compat iOS Safari
     const hex = color.replace('#', '')
     const r = parseInt(hex.slice(0, 2), 16)
     const g = parseInt(hex.slice(2, 4), 16)
@@ -1446,6 +1483,7 @@ function VideoThumb({ url, size = 72, famille }: { url?: string | null; size?: n
     )
   }
 
+  // YouTube
   if (ytId) {
     const thumb = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`
     return (
@@ -1453,28 +1491,18 @@ function VideoThumb({ url, size = 72, famille }: { url?: string | null; size?: n
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {/* Thumbnail statique */}
         {!hovered && (
-          <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: '6px', overflow: 'hidden', cursor: 'pointer' }}>
+          <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer' }}>
             <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-            <div style={{
-              position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(0,0,0,0.35)',
-            }}>
-              <div style={{
-                width: '24px', height: '24px', borderRadius: '50%', background: 'rgba(255,255,255,0.9)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <div style={{ width: 0, height: 0, borderStyle: 'solid', borderWidth: '5px 0 5px 9px', borderColor: 'transparent transparent transparent #1A1A1A', marginLeft: '2px' }} />
-              </div>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }}>
+              <PlayBtn />
             </div>
           </div>
         )}
-        {/* Preview iframe au survol */}
         {hovered && (
           <iframe
             src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0&modestbranding=1`}
-            style={{ width: '100%', height: '100%', border: 'none', borderRadius: '6px', display: 'block' }}
+            style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px', display: 'block' }}
             allow="autoplay"
           />
         )}
@@ -1482,96 +1510,210 @@ function VideoThumb({ url, size = 72, famille }: { url?: string | null; size?: n
     )
   }
 
-  // Vidéo directe (mp4, etc.)
+  // Vimeo — embed iframe uniquement (pas de <video> direct, Vimeo l'interdit)
+  if (vimeoId) {
+    return (
+      <div style={{ position: 'relative', width: size, height: size * 0.56, flexShrink: 0, borderRadius: '8px', overflow: 'hidden' }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        {!hovered ? (
+          // Placeholder Vimeo avec couleur de la famille
+          <div style={{
+            width: '100%', height: '100%', cursor: 'pointer',
+            background: 'linear-gradient(135deg, #1AB7EA22, #1AB7EA0A)',
+            border: '1.5px solid #1AB7EA40',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
+          }}>
+            <PlayBtn small={size < 60} />
+            <span style={{ fontSize: '8px', fontWeight: '800', color: '#1AB7EA', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Vimeo</span>
+          </div>
+        ) : (
+          <iframe
+            src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&loop=1&background=1`}
+            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+            allow="autoplay; fullscreen"
+          />
+        )}
+      </div>
+    )
+  }
+
+  // URL directe (mp4) — uniquement si ce n'est pas Vimeo/YouTube
   return (
-    <video
-      src={url}
-      muted
-      loop
-      playsInline
-      onMouseEnter={e => (e.currentTarget as HTMLVideoElement).play()}
-      onMouseLeave={e => { const v = e.currentTarget as HTMLVideoElement; v.pause(); v.currentTime = 0 }}
-      style={{ width: size, height: size * 0.56, objectFit: 'cover', borderRadius: '6px', flexShrink: 0, cursor: 'pointer', display: 'block' }}
-    />
+    <div style={{ width: size, height: size * 0.56, borderRadius: '8px', overflow: 'hidden', flexShrink: 0, background: '#111' }}>
+      <video
+        src={url}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        onMouseEnter={e => (e.currentTarget as HTMLVideoElement).play().catch(() => {})}
+        onMouseLeave={e => { const v = e.currentTarget as HTMLVideoElement; v.pause(); v.currentTime = 0 }}
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', cursor: 'pointer' }}
+      />
+    </div>
   )
 }
 
-// ─── Picker exercice avec vignettes vidéo ─────────────────────────
-function ExercicePicker({ exercices, recherche, onRecherche, onSelect, onClose }: {
+// ─── Picker exercice multi-sélection + filtres familles ───────────
+function ExercicePicker({ exercices, onConfirm, onClose }: {
   exercices: Exercice[]
-  recherche: string
-  onRecherche: (v: string) => void
-  onSelect: (ex: Exercice) => void
+  onConfirm: (exs: Exercice[]) => void
   onClose: () => void
 }) {
+  const [recherche, setRecherche] = useState('')
+  const [filtresFamille, setFiltresFamille] = useState<string[]>([])
+  const [selection, setSelection] = useState<Set<string>>(new Set())
+
+  // Familles uniques triées (id inclus dans la requête familles(id, nom, couleur))
+  const familles = Array.from(
+    new Map(
+      exercices
+        .filter(e => e.familles?.id)
+        .map(e => [e.familles!.id, e.familles!])
+    ).values()
+  ).sort((a, b) => a.nom.localeCompare(b.nom))
+
+  const filtres = exercices
+    .filter(e => filtresFamille.length === 0 || (e.familles?.id && filtresFamille.includes(e.familles.id)))
+    .filter(e =>
+      e.nom.toLowerCase().includes(recherche.toLowerCase()) ||
+      (e.familles?.nom || '').toLowerCase().includes(recherche.toLowerCase())
+    )
+
+  function toggleEx(id: string) {
+    setSelection(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  function handleConfirm() {
+    const choisis = exercices.filter(e => selection.has(e.id))
+    if (choisis.length > 0) onConfirm(choisis)
+    else onClose()
+  }
+
   return (
     <div className="modal-overlay" style={{ zIndex: 200, alignItems: 'flex-end' }}>
       <div className="modal-box" style={{
         maxWidth: '560px', width: '100%',
-        maxHeight: '85vh', display: 'flex', flexDirection: 'column',
-        borderRadius: '20px 20px 0 0', margin: 0,
+        maxHeight: '90vh', display: 'flex', flexDirection: 'column',
+        borderRadius: '20px 20px 0 0', margin: 0, padding: '0',
       }}>
         {/* Handle */}
-        <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: '#2A2A35', margin: '0 auto 16px' }} />
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0' }}>
+          <div style={{ width: '40px', height: '4px', borderRadius: '2px', background: '#2A2A35' }} />
+        </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
-          <div className="modal-title" style={{ flex: 1, marginBottom: 0 }}>Choisir un exercice</div>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 20px 12px' }}>
+          <div className="modal-title" style={{ flex: 1, marginBottom: 0 }}>Ajouter des exercices</div>
           <button onClick={onClose} className="btn btn-ghost btn-sm" style={{ fontSize: '16px', padding: '6px 10px' }}>✕</button>
         </div>
 
-        <input
-          autoFocus
-          value={recherche}
-          onChange={e => onRecherche(e.target.value)}
-          placeholder="Rechercher par nom ou famille..."
-          className="input"
-          style={{ marginBottom: '12px' }}
-        />
+        {/* Recherche */}
+        <div style={{ padding: '0 16px 10px' }}>
+          <input
+            autoFocus
+            value={recherche}
+            onChange={e => setRecherche(e.target.value)}
+            placeholder="Rechercher par nom..."
+            className="input"
+            style={{ fontSize: '15px' }}
+          />
+        </div>
 
-        <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {exercices.length === 0 && (
+        {/* Filtres familles */}
+        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', padding: '0 16px 12px', scrollbarWidth: 'none' }}>
+          <button
+            onClick={() => setFiltresFamille([])}
+            style={{
+              padding: '6px 14px', borderRadius: '99px', border: `1px solid ${filtresFamille.length === 0 ? '#007AFF' : '#252530'}`,
+              background: filtresFamille.length === 0 ? 'rgba(0,122,255,0.15)' : 'transparent',
+              color: filtresFamille.length === 0 ? '#007AFF' : '#666',
+              fontSize: '12px', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+            }}>Tous</button>
+          {familles.map(f => {
+            const actif = filtresFamille.includes(f.id)
+            return (
+              <button key={f.id} onClick={() => setFiltresFamille(prev => actif ? prev.filter(id => id !== f.id) : [...prev, f.id])}
+                style={{
+                  padding: '6px 14px', borderRadius: '99px',
+                  border: `1px solid ${actif ? f.couleur : '#252530'}`,
+                  background: actif ? f.couleur + '22' : 'transparent',
+                  color: actif ? f.couleur : '#666',
+                  fontSize: '12px', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+                }}>{f.nom}</button>
+            )
+          })}
+        </div>
+
+        {/* Liste exercices */}
+        <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px', padding: '0 12px' }}>
+          {filtres.length === 0 && (
             <div className="empty-state">
               <div className="empty-state-icon">🔍</div>
               <div className="empty-state-text">Aucun exercice trouvé</div>
             </div>
           )}
-          {exercices.map(ex => (
-            <button key={ex.id} onClick={() => onSelect(ex)}
-              className="list-item"
-              style={{ gap: '12px', alignItems: 'center', border: '1px solid #1A1A22', padding: '10px 12px' }}>
+          {filtres.map(ex => {
+            const selected = selection.has(ex.id)
+            return (
+              <button key={ex.id} onClick={() => toggleEx(ex.id)}
+                style={{
+                  display: 'flex', gap: '12px', alignItems: 'center',
+                  padding: '10px 12px', borderRadius: '12px', cursor: 'pointer', textAlign: 'left', width: '100%',
+                  background: selected ? 'rgba(0,122,255,0.1)' : 'rgba(255,255,255,0.02)',
+                  border: `1px solid ${selected ? 'rgba(0,122,255,0.4)' : '#1A1A28'}`,
+                  transition: 'all 0.15s ease',
+                }}>
 
-              {/* Vignette vidéo */}
-              <VideoThumb url={ex.video_url} size={80} famille={ex.familles} />
+                {/* Vignette vidéo */}
+                <VideoThumb url={ex.video_url} size={56} famille={ex.familles} />
 
-              {/* Infos */}
-              <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-                <div style={{ fontWeight: '700', fontSize: '13px', color: '#F0F0F8', marginBottom: '4px' }} className="truncate">
-                  {ex.nom}
-                </div>
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                {/* Infos */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: '700', fontSize: '13px', color: selected ? '#60B8FF' : '#F0F0F8', marginBottom: '3px' }} className="truncate">
+                    {ex.nom}
+                  </div>
                   {ex.familles && (
                     <span style={{
                       fontSize: '10px', fontWeight: '700',
                       color: ex.familles.couleur,
-                      background: ex.familles.couleur + '20',
-                      border: `1px solid ${ex.familles.couleur}30`,
+                      background: ex.familles.couleur + '18',
+                      border: `1px solid ${ex.familles.couleur}28`,
                       padding: '2px 7px', borderRadius: '99px',
                     }}>{ex.familles.nom}</span>
                   )}
-                  {ex.video_url && (
-                    <span style={{ fontSize: '10px', color: '#444', fontWeight: '600' }}>▷ vidéo</span>
-                  )}
                 </div>
-                {ex.consignes_execution && (
-                  <div style={{ fontSize: '11px', color: '#444', marginTop: '3px' }} className="truncate">
-                    {ex.consignes_execution}
-                  </div>
-                )}
-              </div>
 
-              <div style={{ color: '#333', fontSize: '16px', flexShrink: 0 }}>+</div>
-            </button>
-          ))}
+                {/* Checkbox visuel */}
+                <div style={{
+                  width: '24px', height: '24px', borderRadius: '6px', flexShrink: 0,
+                  background: selected ? '#007AFF' : 'transparent',
+                  border: `2px solid ${selected ? '#007AFF' : '#333'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all 0.15s ease',
+                }}>
+                  {selected && <span style={{ color: '#FFF', fontSize: '14px', lineHeight: 1 }}>✓</span>}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Footer — bouton Ajouter */}
+        <div style={{ padding: '12px 16px', borderTop: '1px solid #1A1A28' }}>
+          <button onClick={handleConfirm}
+            className="btn btn-primary btn-block btn-lg"
+            style={{ borderRadius: '14px' }}>
+            {selection.size === 0
+              ? 'Fermer'
+              : `Ajouter ${selection.size} exercice${selection.size > 1 ? 's' : ''}`}
+          </button>
         </div>
       </div>
     </div>
@@ -1596,18 +1738,17 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
   const [saving, setSaving] = useState(false)
   const [showDup, setShowDup] = useState(false)
 
-  const exsFiltres = exercices.filter(e =>
-    e.nom.toLowerCase().includes(recherche.toLowerCase()) ||
-    (e.familles?.nom || '').toLowerCase().includes(recherche.toLowerCase())
-  )
 
-  function ajouterExercice(ex: Exercice) {
-    setLignes(prev => [...prev, {
-      exercice_id: ex.id, ordre: prev.length + 1,
-      series: undefined, repetitions: undefined, duree_secondes: undefined,
-      distance_metres: undefined, charge_kg: undefined, recuperation_secondes: undefined,
-      notes: '', sets_config: undefined, exercices: { nom: ex.nom, familles: ex.familles },
-    }])
+  function ajouterExercices(exs: Exercice[]) {
+    setLignes(prev => {
+      const base = prev.length
+      return [...prev, ...exs.map((ex, i) => ({
+        exercice_id: ex.id, ordre: base + i + 1,
+        series: undefined, repetitions: undefined, duree_secondes: undefined,
+        distance_metres: undefined, charge_kg: undefined, recuperation_secondes: undefined,
+        notes: '', sets_config: undefined, exercices: { nom: ex.nom, familles: ex.familles },
+      }))]
+    })
     setShowPicker(false)
     setRecherche('')
   }
@@ -1652,20 +1793,27 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
 
   async function handleSave() {
     if (!nom) { alert('Nom obligatoire'); return }
+    console.log('handleSave — lignes:', lignes.length, lignes.map(l => l.exercice_id))
     setSaving(true)
     let seanceId = seance.id
 
     if (!seanceId) {
       const estTemplate = joueurId ? (sauvegarderFavori ?? false) : true
-      const { data } = await supabase.from('seances').insert({ nom, type, notes: notes || null, est_template: estTemplate, programme_id: null }).select().single()
-      seanceId = data?.id
+      const { data, error } = await supabase.from('seances').insert({ nom, type, notes: notes || null, est_template: estTemplate, programme_id: null }).select().single()
+      if (error || !data?.id) {
+        alert('Erreur création séance : ' + (error?.message || 'données manquantes'))
+        setSaving(false)
+        return
+      }
+      seanceId = data.id
     } else {
-      await supabase.from('seances').update({ nom, type, notes: notes || null }).eq('id', seanceId)
+      const { error } = await supabase.from('seances').update({ nom, type, notes: notes || null }).eq('id', seanceId)
+      if (error) { alert('Erreur modification séance : ' + error.message); setSaving(false); return }
       await supabase.from('seance_exercices').delete().eq('seance_id', seanceId)
     }
 
     if (lignes.length > 0) {
-      await supabase.from('seance_exercices').insert(
+      const { error: exoError } = await supabase.from('seance_exercices').insert(
         lignes.map((l, i) => ({
           seance_id: seanceId,
           exercice_id: l.exercice_id,
@@ -1684,6 +1832,12 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
           sets_config: l.sets_config || null,
         }))
       )
+      if (exoError) {
+        alert('Séance créée mais erreur exercices : ' + exoError.message)
+        setSaving(false)
+        if (seanceId) onSave(seanceId)
+        return
+      }
     }
     setSaving(false)
     if (seanceId) onSave(seanceId)
@@ -2043,10 +2197,8 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
       {/* Picker exercice */}
       {showPicker && (
         <ExercicePicker
-          exercices={exsFiltres}
-          recherche={recherche}
-          onRecherche={setRecherche}
-          onSelect={ajouterExercice}
+          exercices={exercices}
+          onConfirm={ajouterExercices}
           onClose={() => { setShowPicker(false); setRecherche('') }}
         />
       )}
@@ -2564,12 +2716,12 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           {!isMobile && <span style={{ color: '#444', fontSize: '11px' }}>{joueur.prenom} {joueur.nom}</span>}
         </div>
         {/* Ligne 2 : nav semaine + date picker */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px 8px' }}>
-          <button onClick={prevWeek} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '6px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>‹</button>
-          <button onClick={nextWeek} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '6px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>›</button>
-          <span style={{ color: '#555', fontSize: '11px', whiteSpace: 'nowrap', flex: 1 }}>{weekLabel}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px 10px' }}>
+          <button onClick={prevWeek} style={{ background: '#181820', border: '1px solid #252530', borderRadius: '8px', padding: '8px 14px', color: '#888', cursor: 'pointer', fontSize: '16px', minHeight: '36px', minWidth: '36px' }}>‹</button>
+          <button onClick={nextWeek} style={{ background: '#181820', border: '1px solid #252530', borderRadius: '8px', padding: '8px 14px', color: '#888', cursor: 'pointer', fontSize: '16px', minHeight: '36px', minWidth: '36px' }}>›</button>
+          <span style={{ color: '#666', fontSize: '12px', whiteSpace: 'nowrap', flex: 1, fontWeight: '600' }}>{weekLabel}</span>
           <input type="date" onChange={e => e.target.value && jumpToDate(e.target.value)}
-            style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', padding: '4px 8px', color: '#1A6FFF', fontSize: '11px', outline: 'none', cursor: 'pointer' }} />
+            style={{ background: '#181820', border: '1px solid #252530', borderRadius: '8px', padding: '6px 10px', color: '#007AFF', fontSize: '12px', outline: 'none', cursor: 'pointer', minHeight: '36px' }} />
         </div>
       </div>
 
@@ -2590,16 +2742,14 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           return (
             <div key={ds} style={{ background: isToday ? '#0C0C14' : '#0D0D0D', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               {/* Day header */}
-              <div style={{ padding: '6px 8px 4px', borderBottom: '1px solid #1A1A1A', background: isToday ? '#111520' : '#111', flexShrink: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <div style={{ color: '#444', fontSize: '9px', fontWeight: '800', letterSpacing: '1px', textTransform: 'uppercase' }}>{JOUR_NOMS[di]}</div>
-                    <div style={{ color: isToday ? '#1A6FFF' : '#777', fontSize: '20px', fontWeight: '900', lineHeight: 1 }}>{dateNum}</div>
-                    <div style={{ color: '#333', fontSize: '9px' }}>{mois}</div>
-                  </div>
-                  <button onClick={() => { setMpActionDate(ds); setMpSeanceChoisie('') }}
-                    style={{ width: '18px', height: '18px', borderRadius: '4px', border: '1px solid #2A2A2A', background: 'transparent', color: '#444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: 0 }}>+</button>
+              <div style={{ padding: '8px 6px 6px', borderBottom: '1px solid #1A1A1A', background: isToday ? '#0C1020' : '#0D0D0D', flexShrink: 0 }}>
+                <div style={{ textAlign: 'center', marginBottom: '4px' }}>
+                  <div style={{ color: isToday ? '#5AABFF' : '#555', fontSize: '10px', fontWeight: '800', letterSpacing: '0.8px', textTransform: 'uppercase' }}>{JOUR_NOMS[di]}</div>
+                  <div style={{ color: isToday ? '#007AFF' : '#888', fontSize: '22px', fontWeight: '900', lineHeight: 1, marginTop: '1px' }}>{dateNum}</div>
+                  <div style={{ color: '#444', fontSize: '10px', marginTop: '1px' }}>{mois}</div>
                 </div>
+                <button onClick={() => { setMpActionDate(ds); setMpSeanceChoisie('') }}
+                  style={{ width: '100%', minHeight: '28px', borderRadius: '6px', border: '1px solid #252530', background: 'transparent', color: '#444', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 0' }}>+</button>
               </div>
 
               {/* Sessions scroll area */}
@@ -2610,9 +2760,9 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                   return (
                     <div key={r.id} style={{ background: '#111', border: '1px solid #252525', borderRadius: '8px', overflow: 'hidden' }}>
                       {/* Session header */}
-                      <div style={{ padding: '6px 10px', borderBottom: '1px solid #1E1E1E', display: 'flex', alignItems: 'center', gap: '6px', background: '#131313' }}>
-                        <div style={{ flex: 1, fontWeight: '700', fontSize: '11px', color: '#CCC', lineHeight: 1.3, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
-                        <span style={{ fontSize: '8px', fontWeight: '800', color: '#555', background: '#1A1A1A', border: '1px solid #222', borderRadius: '3px', padding: '2px 5px', whiteSpace: 'nowrap', flexShrink: 0 }}>{typeLabel}</span>
+                      <div style={{ padding: '7px 8px', borderBottom: '1px solid #1E1E1E', display: 'flex', alignItems: 'center', gap: '5px', background: '#111' }}>
+                        <div style={{ flex: 1, fontWeight: '700', fontSize: '12px', color: '#DDD', lineHeight: 1.3, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
+                        <span style={{ fontSize: '9px', fontWeight: '800', color: '#555', background: '#181818', border: '1px solid #242424', borderRadius: '4px', padding: '2px 5px', whiteSpace: 'nowrap', flexShrink: 0 }}>{typeLabel}</span>
                       </div>
 
                       {/* Exercises — groupés en blocs (superset / circuit) */}
@@ -2669,15 +2819,15 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                                 {isMobile ? (
                                   /* ── MOBILE : carte compacte tappable ── */
                                   <div onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
-                                    style={{ padding: '7px 8px', borderTop: !insideGroup && exoIdx > 0 ? '1px solid #1A1A1A' : 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <div style={{ width: '20px', height: '20px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                      <span style={{ color: couleur, fontSize: '8px', fontWeight: '900' }}>{exo.ordre}</span>
+                                    style={{ padding: '9px 8px', borderTop: !insideGroup && exoIdx > 0 ? '1px solid #1A1A1A' : 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '7px', minHeight: '44px' }}>
+                                    <div style={{ width: '24px', height: '24px', background: couleur + '22', border: `1px solid ${couleur}50`, borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                      <span style={{ color: couleur, fontSize: '10px', fontWeight: '900' }}>{exo.ordre}</span>
                                     </div>
                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                      <div style={{ color: '#DDD', fontWeight: '700', fontSize: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
-                                      <div style={{ color: '#555', fontSize: '9px' }}>{seriesSummary}</div>
+                                      <div style={{ color: '#E0E0E0', fontWeight: '700', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
+                                      <div style={{ color: '#666', fontSize: '10px', marginTop: '1px' }}>{seriesSummary}</div>
                                     </div>
-                                    <span style={{ color: '#333', fontSize: '12px' }}>›</span>
+                                    <span style={{ color: '#444', fontSize: '14px' }}>›</span>
                                   </div>
                                 ) : (
                               /* ── DESKTOP : édition inline complète ── */
@@ -2796,7 +2946,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
 
                       <div style={{ padding: '5px' }}>
                         <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }}
-                          style={{ width: '100%', background: '#0D0D0D', border: '1px dashed #222', borderRadius: '5px', padding: '4px', color: '#333', cursor: 'pointer', fontSize: '10px' }}>
+                          style={{ width: '100%', background: '#0A0A0A', border: '1px dashed #252525', borderRadius: '6px', padding: '8px 4px', color: '#444', cursor: 'pointer', fontSize: '11px', fontWeight: '600', minHeight: '36px' }}>
                           + exercice
                         </button>
                       </div>
@@ -3080,8 +3230,8 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
     const [{ data: reals }, { data: tmpl }, { data: exs }, { data: favs }] = await Promise.all([
       supabase.from('realisations').select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, est_template, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, notes, exercices(nom, consignes_execution, familles(nom, couleur))))').eq('joueur_id', joueur.id).order('date_realisation'),
       supabase.from('seances').select('id, nom, type').eq('est_template', true).order('nom'),
-      supabase.from('exercices').select('*, familles(nom, couleur)').order('nom'),
-      supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(nom, couleur)))').eq('est_template', true).order('nom'),
+      supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom'),
+      supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('est_template', true).order('nom'),
     ])
     if (reals) setRealisations(reals as unknown as Realisation[])
     if (tmpl) setTemplates(tmpl)
@@ -3282,10 +3432,10 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                       overflow: 'hidden',
                     }}>
                       {/* Header jour */}
-                      <div style={{ padding: '6px 8px 4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1E1E1E' }}>
-                        <div style={{ fontSize: '16px', fontWeight: isToday ? '900' : '600', color: isToday ? '#1A6FFF' : isPast ? '#444' : '#DDD', lineHeight: 1 }}>{dateNum}</div>
+                      <div style={{ padding: '7px 7px 5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1A1A1A' }}>
+                        <div style={{ fontSize: '18px', fontWeight: isToday ? '900' : '600', color: isToday ? '#007AFF' : isPast ? '#444' : '#CCC', lineHeight: 1 }}>{dateNum}</div>
                         <button onClick={() => setActionMenuDate(ds)}
-                          style={{ width: '20px', height: '20px', borderRadius: '5px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, padding: 0 }}>+</button>
+                          style={{ width: '26px', height: '26px', borderRadius: '6px', border: '1px solid #252525', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, padding: 0 }}>+</button>
                       </div>
 
                       {/* Cartes séances */}
@@ -3303,16 +3453,16 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                             }
                             return (
                               <div key={r.id} onClick={() => setSeanceDetail(r)} style={{
-                                background: '#2ECC7110', borderLeft: '3px solid #2ECC71',
-                                borderTop: '1px solid #2ECC7130', borderBottom: '1px solid #2ECC7130', borderRight: '1px solid #2ECC7130',
-                                borderRadius: '4px', padding: '4px 6px', cursor: 'pointer',
+                                background: '#2ECC7112',
+                                border: '1px solid #2ECC7128', borderLeft: '3px solid #2ECC71',
+                                borderRadius: '6px', padding: '6px 7px', cursor: 'pointer',
                               }}>
-                                <div style={{ fontSize: '10px', fontWeight: '700', color: '#2ECC71' }}>💚 Wellness</div>
-                                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '2px' }}>
-                                  {r.fatigue != null && <span style={{ fontSize: '9px', fontWeight: '700', color: wColor(r.fatigue) }}>F:{r.fatigue}</span>}
-                                  {r.rpe != null && <span style={{ fontSize: '9px', fontWeight: '700', color: wColor(r.rpe) }}>R:{r.rpe}</span>}
-                                  {r.qualite_sommeil != null && <span style={{ fontSize: '9px', fontWeight: '700', color: wColor(r.qualite_sommeil, true) }}>S:{r.qualite_sommeil}</span>}
-                                  {r.courbatures != null && <span style={{ fontSize: '9px', fontWeight: '700', color: wColor(r.courbatures) }}>C:{r.courbatures}</span>}
+                                <div style={{ fontSize: '10px', fontWeight: '800', color: '#2ECC71', marginBottom: '4px', letterSpacing: '0.3px' }}>💚 Wellness</div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 6px' }}>
+                                  {r.fatigue != null && <span style={{ fontSize: '11px', fontWeight: '800', color: wColor(r.fatigue) }}>F <span style={{ fontSize: '13px' }}>{r.fatigue}</span></span>}
+                                  {r.rpe != null && <span style={{ fontSize: '11px', fontWeight: '800', color: wColor(r.rpe) }}>R <span style={{ fontSize: '13px' }}>{r.rpe}</span></span>}
+                                  {r.qualite_sommeil != null && <span style={{ fontSize: '11px', fontWeight: '800', color: wColor(r.qualite_sommeil, true) }}>S <span style={{ fontSize: '13px' }}>{r.qualite_sommeil}</span></span>}
+                                  {r.courbatures != null && <span style={{ fontSize: '11px', fontWeight: '800', color: wColor(r.courbatures) }}>C <span style={{ fontSize: '13px' }}>{r.courbatures}</span></span>}
                                 </div>
                               </div>
                             )
@@ -3320,19 +3470,18 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                           const couleur = r.completee ? '#2ECC71' : isPast ? '#FF4757' : '#1A6FFF'
                           return (
                             <div key={r.id} onClick={() => setSeanceDetail(r)} style={{
-                              background: r.completee ? '#2ECC7112' : isPast ? '#FF475710' : '#1A6FFF10',
-                              borderTop: `1px solid ${couleur}30`,
-                              borderBottom: `1px solid ${couleur}30`,
-                              borderRight: `1px solid ${couleur}30`,
+                              background: r.completee ? '#2ECC7112' : isPast ? '#FF475710' : '#1A6FFF0E',
+                              border: `1px solid ${couleur}28`,
                               borderLeft: `3px solid ${couleur}`,
-                              borderRadius: '4px', padding: '4px 6px',
+                              borderRadius: '6px', padding: '6px 7px',
                               cursor: 'pointer',
-                              display: 'flex', alignItems: 'flex-start', gap: '5px',
+                              display: 'flex', alignItems: 'center', gap: '6px',
+                              minHeight: '36px',
                             }}>
                               <input type="checkbox" checked={r.completee} onChange={e => { e.stopPropagation(); toggleCompletee(r) }}
-                                style={{ marginTop: '1px', accentColor: couleur, flexShrink: 0, cursor: 'pointer' }} />
+                                style={{ accentColor: couleur, flexShrink: 0, cursor: 'pointer', width: '14px', height: '14px' }} />
                               <div style={{ flex: 1, overflow: 'hidden' }}>
-                                <div style={{ fontSize: '11px', fontWeight: '600', color: '#DDD', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.seances?.nom || 'Séance'}</div>
+                                <div style={{ fontSize: '12px', fontWeight: '700', color: '#E0E0E0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.seances?.nom || 'Séance'}</div>
                               </div>
                             </div>
                           )
