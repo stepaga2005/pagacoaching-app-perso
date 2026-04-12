@@ -5234,16 +5234,13 @@ function ChatView({ myId, otherId, height = 'calc(100vh - 220px)' }: { myId: str
     const path = `${myId}/${Date.now()}.${ext}`
     const { data, error } = await supabase.storage.from('messages').upload(path, file)
     if (error) {
-      console.error('uploadMedia storage error:', error.message)
-      alert('Erreur upload : ' + error.message)
       setUploading(false)
       return
     }
     if (data) {
       const { data: { publicUrl } } = supabase.storage.from('messages').getPublicUrl(path)
       const type: 'image' | 'video' = file.type.startsWith('image/') ? 'image' : 'video'
-      const { error: msgError } = await supabase.from('messages').insert({ expediteur_id: myId, destinataire_id: otherId, media_url: publicUrl, media_type: type })
-      if (msgError) { alert('Erreur message : ' + msgError.message); console.error('uploadMedia insert error:', msgError.message) }
+      await supabase.from('messages').insert({ expediteur_id: myId, destinataire_id: otherId, media_url: publicUrl, media_type: type })
       await load()
     }
     setUploading(false)
