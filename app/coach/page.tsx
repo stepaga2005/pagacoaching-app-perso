@@ -3007,7 +3007,11 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  const nbDays = isMobile ? 3 : 7
+  const nbDays = 7
+  const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set())
+  function toggleExpandSession(id: string) {
+    setExpandedSessions(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
 
   const JOUR_NOMS = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM']
 
@@ -3199,20 +3203,170 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
         </div>
       </div>
 
-      {/* Grid of day columns */}
+      {/* Chargement */}
       {loading && (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span style={{ color: '#1A6FFF', fontSize: '13px', letterSpacing: '2px' }}>CHARGEMENT...</span>
         </div>
       )}
-      <div style={{ flex: loading ? 0 : 1, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, 1fr)`, gap: '1px', background: '#1E1E1E', overflow: loading ? 'hidden' : 'hidden' }}>
+
+      {/* ══ MOBILE : vue liste verticale style TotalCoaching ══ */}
+      {!loading && isMobile && (
+        <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+
+          {/* Strip 7 jours */}
+          <div style={{ display: 'flex', gap: '4px', padding: '12px 14px 0', flexShrink: 0 }}>
+            {days.map((ds, i) => {
+              const dayReals = byDate[ds] || []
+              const isToday = ds === today
+              const isPast = ds < today
+              const hasSessions = dayReals.length > 0
+              const allDone = hasSessions && dayReals.every(r => r.completee)
+              const someMissed = hasSessions && !allDone && isPast
+              const estSel = joursSelectionnes.has(ds)
+              const letters = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+              return (
+                <div key={ds} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ fontSize: '9px', fontWeight: '700', color: isToday ? '#1A6FFF' : '#333' }}>{letters[i]}</span>
+                  <div style={{
+                    width: '100%', aspectRatio: '1', borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: estSel ? '#2ECC71' : isToday ? '#1A6FFF' : allDone ? '#2ECC7122' : hasSessions ? '#1A6FFF18' : 'transparent',
+                    border: `2px solid ${estSel ? '#2ECC71' : isToday ? '#1A6FFF' : allDone ? '#2ECC7160' : someMissed ? '#FF475760' : hasSessions ? '#1A6FFF50' : '#1A1A1A'}`,
+                    cursor: hasSessions ? 'pointer' : 'default',
+                  }}>
+                    <span style={{ fontSize: '12px', fontWeight: '800', color: estSel || isToday || allDone ? '#FFF' : hasSessions ? (isPast ? '#FF4757' : '#1A6FFF') : '#2A2A2A' }}>
+                      {allDone && !estSel ? '✓' : new Date(ds + 'T12:00:00').getDate()}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Liste des jours */}
+          <div style={{ padding: '16px 14px 80px' }}>
+            {days.map(ds => {
+              const dayReals = byDate[ds] || []
+              const isToday = ds === today
+              const isPast = ds < today
+              const estSel = joursSelectionnes.has(ds)
+              const dateLabel = new Date(ds + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()
+
+              return (
+                <div key={ds} style={{ marginBottom: '20px' }}>
+                  {/* En-tête de jour */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '1px', color: isToday ? '#1A6FFF' : estSel ? '#2ECC71' : '#333' }}>{dateLabel}</span>
+                    {!modeSelection ? (
+                      <button onClick={() => { setMpActionDate(ds); setMpSeanceChoisie('') }}
+                        style={{ background: '#161620', border: '1px solid #252530', borderRadius: '8px', width: '32px', height: '32px', color: '#555', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                    ) : (
+                      <button onClick={() => toggleJour(ds)} style={{
+                        background: estSel ? 'rgba(46,204,113,0.2)' : '#161620',
+                        border: `1px solid ${estSel ? '#2ECC71' : '#252530'}`,
+                        borderRadius: '8px', width: '32px', height: '32px',
+                        color: estSel ? '#2ECC71' : '#555', cursor: 'pointer',
+                        fontSize: estSel ? '16px' : '18px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>{estSel ? '✓' : '○'}</button>
+                    )}
+                  </div>
+
+                  {/* Séances du jour */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {dayReals.map(r => {
+                      const exos = [...(r.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
+                      const isExpanded = expandedSessions.has(r.id)
+                      const statusColor = r.completee ? '#2ECC71' : isPast ? '#FF4757' : '#1A6FFF'
+                      const typeLabel = LABELS_TYPE[r.seances?.type || ''] || r.seances?.type || ''
+
+                      return (
+                        <div key={r.id} style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '14px', overflow: 'hidden', display: 'flex' }}>
+                          {/* Barre colorée */}
+                          <div style={{ width: '4px', background: statusColor, flexShrink: 0 }} />
+
+                          <div style={{ flex: 1 }}>
+                            {/* Header séance — tappable pour déplier */}
+                            <button onClick={() => toggleExpandSession(r.id)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '14px 14px 12px', display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left' }}>
+                              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `${statusColor}18`, border: `1px solid ${statusColor}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <span style={{ color: statusColor, fontSize: '18px' }}>{r.completee ? '✓' : isPast ? '✗' : '▶'}</span>
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontWeight: '800', fontSize: '15px', color: '#F0F0F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
+                                <div style={{ fontSize: '12px', color: '#444', marginTop: '2px' }}>
+                                  {exos.length} exercice{exos.length > 1 ? 's' : ''}{typeLabel ? ` · ${typeLabel}` : ''}
+                                </div>
+                              </div>
+                              <span style={{ color: '#333', fontSize: '14px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }}>▼</span>
+                            </button>
+
+                            {/* Liste exercices dépliée */}
+                            {isExpanded && (
+                              <div style={{ borderTop: '1px solid #161616', padding: '8px 0 4px' }}>
+                                {exos.map((exo, ei) => {
+                                  const fam = exo.exercices?.familles
+                                  const couleur = fam?.couleur || '#555'
+                                  const hasSets = exo.sets_config && exo.sets_config.length > 0
+                                  const seriesSummary = (() => {
+                                    if (hasSets) {
+                                      const s = exo.sets_config![0]
+                                      const p = [s.reps && `${s.reps}r`, s.duree && `${s.duree}s`, s.dist && `${s.dist}m`, s.charge && `${s.charge}kg`].filter(Boolean)
+                                      return `${exo.sets_config!.length}×${p.join(' ') || '—'}`
+                                    }
+                                    const p = [exo.repetitions && `${exo.repetitions}r`, exo.duree_secondes && `${exo.duree_secondes}s`, exo.distance_metres && `${exo.distance_metres}m`, exo.charge_kg && `${exo.charge_kg}kg`].filter(Boolean)
+                                    return exo.series ? `${exo.series}×${p.join(' ') || '—'}` : p.join(' ') || '—'
+                                  })()
+                                  return (
+                                    <div key={exo.id}>
+                                      {exo.lien_suivant === false && ei > 0 && (
+                                        <div style={{ height: '1px', background: '#161616', margin: '0 14px' }} />
+                                      )}
+                                      <button onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
+                                        style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', minHeight: '44px' }}>
+                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: couleur, flexShrink: 0 }} />
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                          <span style={{ color: '#CCC', fontSize: '13px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{exo.exercices?.nom}</span>
+                                          {exo.lien_suivant && <span style={{ fontSize: '10px', color: '#1A6FFF60' }}>⇌ superset</span>}
+                                        </div>
+                                        <span style={{ color: '#555', fontSize: '11px', fontWeight: '600', flexShrink: 0 }}>{seriesSummary}</span>
+                                        <span style={{ color: '#2A2A2A', fontSize: '14px', flexShrink: 0 }}>›</span>
+                                      </button>
+                                    </div>
+                                  )
+                                })}
+                                <div style={{ padding: '6px 14px 10px' }}>
+                                  <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }}
+                                    style={{ width: '100%', background: 'transparent', border: '1px dashed #252530', borderRadius: '10px', padding: '10px', color: '#444', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}>
+                                    + Ajouter un exercice
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+
+                    {dayReals.length === 0 && (
+                      <div style={{ color: '#1E1E28', fontSize: '11px', fontWeight: '600', paddingLeft: '2px' }}>Aucune séance</div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ══ DESKTOP : grille de colonnes ══ */}
+      {!loading && !isMobile && (
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, 1fr)`, gap: '1px', background: '#1E1E1E', overflow: 'hidden' }}>
         {days.map((ds, di) => {
           const isToday = ds === today
           const dateObj = new Date(ds + 'T12:00:00')
           const dateNum = dateObj.getDate()
           const mois = dateObj.toLocaleDateString('fr-FR', { month: 'short' })
           const dayReals = byDate[ds] || []
-
           const estSelectionne = joursSelectionnes.has(ds)
           return (
             <div key={ds} style={{
@@ -3242,7 +3396,6 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                   }}>{estSelectionne ? '✓' : '+'}</button>
                 )}
               </div>
-
               {/* Sessions scroll area */}
               <div style={{ flex: 1, overflowY: 'auto', padding: '6px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {dayReals.map(r => {
@@ -3250,15 +3403,11 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                   const typeLabel = (LABELS_TYPE[r.seances?.type || ''] || 'SÉANCE').toUpperCase()
                   return (
                     <div key={r.id} style={{ background: '#111', border: '1px solid #252525', borderRadius: '8px', overflow: 'hidden' }}>
-                      {/* Session header */}
                       <div style={{ padding: '7px 8px', borderBottom: '1px solid #1E1E1E', display: 'flex', alignItems: 'center', gap: '5px', background: '#111' }}>
                         <div style={{ flex: 1, fontWeight: '700', fontSize: '12px', color: '#DDD', lineHeight: 1.3, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
                         <span style={{ fontSize: '9px', fontWeight: '800', color: '#555', background: '#181818', border: '1px solid #242424', borderRadius: '4px', padding: '2px 5px', whiteSpace: 'nowrap', flexShrink: 0 }}>{typeLabel}</span>
                       </div>
-
-                      {/* Exercises — groupés en blocs (superset / circuit) */}
                       {(() => {
-                        // Construire les blocs de supersets
                         const blocs: MPSeanceExercice[][] = []
                         let current: MPSeanceExercice[] = []
                         for (const exo of exos) {
@@ -3266,17 +3415,14 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                           if (!exo.lien_suivant) { blocs.push(current); current = [] }
                         }
                         if (current.length > 0) blocs.push(current)
-
                         return blocs.map((bloc, blocIdx) => {
                           const isGroup = bloc.length > 1
                           const groupLabel = bloc.length > 2 ? 'CIRCUIT' : 'SUPERSET'
-
                           const renderExo = (exo: MPSeanceExercice, exoIdx: number, insideGroup: boolean) => {
                             const fam = exo.exercices?.familles
                             const couleur = fam?.couleur || '#555'
                             const hasSets = exo.sets_config && exo.sets_config.length > 0
                             const hasVideo = !!exo.exercices?.video_url
-
                             const seriesSummary = (() => {
                               if (hasSets && exo.sets_config!.length > 0) {
                                 const s = exo.sets_config![0]
@@ -3295,135 +3441,75 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                               const base = parts.join(' ')
                               return exo.series ? `${exo.series}×${base || '—'}` : base || '—'
                             })()
-
                             return (
                               <div key={exo.id}>
                                 {insideGroup && exoIdx > 0 && (
                                   <div style={{ display: 'flex', alignItems: 'center', padding: '2px 8px', gap: '6px', background: '#1A6FFF08' }}>
                                     <div style={{ width: '2px', height: '12px', background: '#1A6FFF', marginLeft: '9px', borderRadius: '1px' }} />
-                                    {exo.recuperation_secondes
-                                      ? <span style={{ color: '#2ECC71', fontSize: '9px', fontWeight: '700' }}>⏱ {exo.recuperation_secondes}s</span>
-                                      : <span style={{ color: '#1A6FFF80', fontSize: '8px' }}>enchaîner</span>}
+                                    {exo.recuperation_secondes ? <span style={{ color: '#2ECC71', fontSize: '9px', fontWeight: '700' }}>⏱ {exo.recuperation_secondes}s</span> : <span style={{ color: '#1A6FFF80', fontSize: '8px' }}>enchaîner</span>}
                                   </div>
                                 )}
-
-                                {isMobile ? (
-                                  /* ── MOBILE : carte compacte tappable ── */
-                                  <div onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
-                                    style={{ padding: '9px 8px', borderTop: !insideGroup && exoIdx > 0 ? '1px solid #1A1A1A' : 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '7px', minHeight: '44px' }}>
-                                    <div style={{ width: '24px', height: '24px', background: couleur + '22', border: `1px solid ${couleur}50`, borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                      <span style={{ color: couleur, fontSize: '10px', fontWeight: '900' }}>{exo.ordre}</span>
+                                <div style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !insideGroup ? '1px solid #1A1A1A' : 'none', background: 'transparent' }}>
+                                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginBottom: '5px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0', flexShrink: 0, marginTop: '2px' }}>
+                                      <button onClick={() => moveExo(r.id, exo.id, -1)} style={{ background: 'none', border: 'none', color: '#2A2A2A', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▲</button>
+                                      <button onClick={() => moveExo(r.id, exo.id, 1)} style={{ background: 'none', border: 'none', color: '#2A2A2A', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▼</button>
                                     </div>
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                      <div style={{ color: '#E0E0E0', fontWeight: '700', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
-                                      <div style={{ color: '#666', fontSize: '10px', marginTop: '1px' }}>{seriesSummary}</div>
-                                    </div>
-                                    <span style={{ color: '#444', fontSize: '14px' }}>›</span>
-                                  </div>
-                                ) : (
-                              /* ── DESKTOP : édition inline complète ── */
-                              <div style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !insideGroup ? '1px solid #1A1A1A' : 'none', background: 'transparent' }}>
-                                {/* Exercise header row */}
-                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginBottom: '5px' }}>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0', flexShrink: 0, marginTop: '2px' }}>
-                                    <button onClick={() => moveExo(r.id, exo.id, -1)} style={{ background: 'none', border: 'none', color: '#2A2A2A', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▲</button>
-                                    <button onClick={() => moveExo(r.id, exo.id, 1)} style={{ background: 'none', border: 'none', color: '#2A2A2A', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▼</button>
-                                  </div>
-                                  {hasVideo ? (
-                                    <button onClick={() => window.open(exo.exercices!.video_url!.replace('vimeo.com/', 'player.vimeo.com/video/'), '_blank')}
-                                      style={{ width: '24px', height: '24px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '9px', color: '#1A6FFF' }}>▶</button>
-                                  ) : (
-                                    <div style={{ width: '24px', height: '24px', background: couleur + '18', border: `1px solid ${couleur}30`, borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                      <span style={{ color: couleur, fontSize: '8px', fontWeight: '900' }}>{exo.ordre}</span>
-                                    </div>
-                                  )}
-                                  <div style={{ flex: 1, minWidth: 0 }}>
-                                    {fam && <div style={{ color: couleur, fontSize: '7px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1 }}>{fam.nom}</div>}
-                                    <div style={{ color: '#DDD', fontWeight: '700', fontSize: '10px', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
-                                  </div>
-                                  <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
-                                    <button onClick={() => toggleUniPodal(r.id, exo)}
-                                      style={{ background: exo.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.uni_podal ? '#1A6FFF60' : '#252525'}`, color: exo.uni_podal ? '#1A6FFF' : '#333', fontSize: '7px', padding: '2px 4px', borderRadius: '3px', cursor: 'pointer', fontWeight: '700' }}>↔</button>
-                                    <button onClick={() => removeExo(r.id, exo.id)}
-                                      style={{ background: 'transparent', border: '1px solid #FF475718', color: '#FF475760', borderRadius: '3px', padding: '2px 4px', cursor: 'pointer', fontSize: '9px' }}>✕</button>
-                                  </div>
-                                </div>
-
-                                {/* Set table */}
-                                <div style={{ marginBottom: '4px' }}>
-                                  <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '1px 2px', marginBottom: '1px' }}>
-                                    {['', 'Reps', 'Dur', 'Dist', 'Kg', 'Réc', ''].map((h, hi) => (
-                                      <div key={hi} style={{ color: '#2A2A2A', fontSize: '7px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
-                                    ))}
-                                  </div>
-                                  {hasSets ? (
-                                    exo.sets_config!.map((s, si) => (
-                                      <div key={si} style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '3px', alignItems: 'center', marginBottom: '1px' }}>
-                                        <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{si + 1}</div>
-                                        {(['reps', 'duree', 'dist', 'charge', 'recup'] as (keyof SetConfig)[]).map(key => (
-                                          <input key={key} {...setInput()}
-                                            placeholder="-"
-                                            value={s[key] ?? ''}
-                                            onChange={e => patchSet(r.id, exo.id, exo, si, key, e.target.value)}
-                                            onBlur={() => flushSets(exo.id, r.id)}
-                                          />
-                                        ))}
-                                        <button onClick={() => removeSet(r.id, exo.id, exo, si)}
-                                          style={{ background: 'transparent', border: 'none', color: '#FF475740', cursor: 'pointer', fontSize: '8px', padding: '0', lineHeight: 1 }}>✕</button>
+                                    {hasVideo ? (
+                                      <button onClick={() => window.open(exo.exercices!.video_url!.replace('vimeo.com/', 'player.vimeo.com/video/'), '_blank')}
+                                        style={{ width: '24px', height: '24px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '9px', color: '#1A6FFF' }}>▶</button>
+                                    ) : (
+                                      <div style={{ width: '24px', height: '24px', background: couleur + '18', border: `1px solid ${couleur}30`, borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <span style={{ color: couleur, fontSize: '8px', fontWeight: '900' }}>{exo.ordre}</span>
                                       </div>
-                                    ))
-                                  ) : (
-                                    <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', alignItems: 'center' }}>
-                                      <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{exo.series || '—'}</div>
-                                      {[
-                                        ['repetitions', exo.repetitions],
-                                        ['duree_secondes', exo.duree_secondes],
-                                        ['distance_metres', exo.distance_metres],
-                                        ['charge_kg', exo.charge_kg],
-                                        ['recuperation_secondes', exo.recuperation_secondes],
-                                      ].map(([key, val]) => (
-                                        <input key={key as string} {...setInput()}
-                                          placeholder="-"
-                                          value={(val as number) ?? ''}
-                                          onChange={e => patchSimple(r.id, exo.id, key as string, e.target.value)}
-                                          onBlur={() => flushSimple(exo.id, r.id, key as string)}
-                                        />
-                                      ))}
-                                      <div />
+                                    )}
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      {fam && <div style={{ color: couleur, fontSize: '7px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1 }}>{fam.nom}</div>}
+                                      <div style={{ color: '#DDD', fontWeight: '700', fontSize: '10px', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
                                     </div>
-                                  )}
-                                </div>
-
-                                {/* Footer: + Série + count + superset */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                  <button onClick={() => addSet(r.id, exo.id, exo)}
-                                    style={{ background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 7px', color: '#666', cursor: 'pointer', fontSize: '8px', fontWeight: '600', whiteSpace: 'nowrap' }}>+ Série</button>
-                                  <input type="number" placeholder="×" value={exo.series ?? ''}
-                                    onChange={async e => {
-                                      const val = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value))
-                                      patchExoLocal(r.id, exo.id, { series: val })
-                                      await saveExoField(exo.id, { series: val ?? null })
-                                    }}
-                                    style={{ width: '28px', background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 3px', color: '#888', fontSize: '9px', outline: 'none', textAlign: 'center' }}
-                                  />
-                                  <div style={{ flex: 1 }} />
-                                  <button onClick={() => toggleLienSuivant(r.id, exo)}
-                                    title={exo.lien_suivant ? 'Délier' : 'Lier en superset'}
-                                    style={{ background: exo.lien_suivant ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#222'}`, borderRadius: '4px', padding: '2px 6px', color: exo.lien_suivant ? '#1A6FFF' : '#333', cursor: 'pointer', fontSize: '10px' }}>⇌</button>
+                                    <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
+                                      <button onClick={() => toggleUniPodal(r.id, exo)} style={{ background: exo.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.uni_podal ? '#1A6FFF60' : '#252525'}`, color: exo.uni_podal ? '#1A6FFF' : '#333', fontSize: '7px', padding: '2px 4px', borderRadius: '3px', cursor: 'pointer', fontWeight: '700' }}>↔</button>
+                                      <button onClick={() => removeExo(r.id, exo.id)} style={{ background: 'transparent', border: '1px solid #FF475718', color: '#FF475760', borderRadius: '3px', padding: '2px 4px', cursor: 'pointer', fontSize: '9px' }}>✕</button>
+                                    </div>
+                                  </div>
+                                  <div style={{ marginBottom: '4px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '1px 2px', marginBottom: '1px' }}>
+                                      {['', 'Reps', 'Dur', 'Dist', 'Kg', 'Réc', ''].map((h, hi) => (
+                                        <div key={hi} style={{ color: '#2A2A2A', fontSize: '7px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
+                                      ))}
+                                    </div>
+                                    {hasSets ? (
+                                      exo.sets_config!.map((s, si) => (
+                                        <div key={si} style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '3px', alignItems: 'center', marginBottom: '1px' }}>
+                                          <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{si + 1}</div>
+                                          {(['reps', 'duree', 'dist', 'charge', 'recup'] as (keyof SetConfig)[]).map(key => (
+                                            <input key={key} {...setInput()} placeholder="-" value={s[key] ?? ''} onChange={e => patchSet(r.id, exo.id, exo, si, key, e.target.value)} onBlur={() => flushSets(exo.id, r.id)} />
+                                          ))}
+                                          <button onClick={() => removeSet(r.id, exo.id, exo, si)} style={{ background: 'transparent', border: 'none', color: '#FF475740', cursor: 'pointer', fontSize: '8px', padding: '0', lineHeight: 1 }}>✕</button>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', alignItems: 'center' }}>
+                                        <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{exo.series || '—'}</div>
+                                        {[['repetitions', exo.repetitions], ['duree_secondes', exo.duree_secondes], ['distance_metres', exo.distance_metres], ['charge_kg', exo.charge_kg], ['recuperation_secondes', exo.recuperation_secondes]].map(([key, val]) => (
+                                          <input key={key as string} {...setInput()} placeholder="-" value={(val as number) ?? ''} onChange={e => patchSimple(r.id, exo.id, key as string, e.target.value)} onBlur={() => flushSimple(exo.id, r.id, key as string)} />
+                                        ))}
+                                        <div />
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <button onClick={() => addSet(r.id, exo.id, exo)} style={{ background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 7px', color: '#666', cursor: 'pointer', fontSize: '8px', fontWeight: '600', whiteSpace: 'nowrap' }}>+ Série</button>
+                                    <input type="number" placeholder="×" value={exo.series ?? ''} onChange={async e => { const val = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value)); patchExoLocal(r.id, exo.id, { series: val }); await saveExoField(exo.id, { series: val ?? null }) }} style={{ width: '28px', background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 3px', color: '#888', fontSize: '9px', outline: 'none', textAlign: 'center' }} />
+                                    <div style={{ flex: 1 }} />
+                                    <button onClick={() => toggleLienSuivant(r.id, exo)} title={exo.lien_suivant ? 'Délier' : 'Lier en superset'} style={{ background: exo.lien_suivant ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#222'}`, borderRadius: '4px', padding: '2px 6px', color: exo.lien_suivant ? '#1A6FFF' : '#333', cursor: 'pointer', fontSize: '10px' }}>⇌</button>
+                                  </div>
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        )
-                          } // fin renderExo
-
+                            )
+                          }
                           return (
-                            <div key={`bloc-${blocIdx}`} style={isGroup ? {
-                              borderLeft: '4px solid #1A6FFF',
-                              background: '#1A6FFF12',
-                              margin: '4px 0',
-                              borderRadius: '0 6px 6px 0',
-                            } : { marginTop: blocIdx > 0 ? '1px' : '0' }}>
+                            <div key={`bloc-${blocIdx}`} style={isGroup ? { borderLeft: '4px solid #1A6FFF', background: '#1A6FFF12', margin: '4px 0', borderRadius: '0 6px 6px 0' } : { marginTop: blocIdx > 0 ? '1px' : '0' }}>
                               {isGroup && (
                                 <div style={{ padding: '4px 8px', background: '#1A6FFF30', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                   <span style={{ color: '#6AAEFF', fontSize: '9px', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>⇌ {groupLabel}</span>
@@ -3432,26 +3518,21 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                               {bloc.map((exo, ei) => renderExo(exo, ei, isGroup))}
                             </div>
                           )
-                        }) // fin blocs.map
+                        })
                       })()}
-
                       <div style={{ padding: '5px' }}>
-                        <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }}
-                          style={{ width: '100%', background: '#0A0A0A', border: '1px dashed #252525', borderRadius: '6px', padding: '8px 4px', color: '#444', cursor: 'pointer', fontSize: '11px', fontWeight: '600', minHeight: '36px' }}>
-                          + exercice
-                        </button>
+                        <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }} style={{ width: '100%', background: '#0A0A0A', border: '1px dashed #252525', borderRadius: '6px', padding: '8px 4px', color: '#444', cursor: 'pointer', fontSize: '11px', fontWeight: '600', minHeight: '36px' }}>+ exercice</button>
                       </div>
                     </div>
                   )
                 })}
-                {dayReals.length === 0 && (
-                  <div style={{ color: '#1A1A1A', fontSize: '12px', textAlign: 'center', paddingTop: '24px' }}>—</div>
-                )}
+                {dayReals.length === 0 && <div style={{ color: '#1A1A1A', fontSize: '12px', textAlign: 'center', paddingTop: '24px' }}>—</div>}
               </div>
             </div>
           )
         })}
       </div>
+      )}
 
       {/* MP — Menu action + / Wellness */}
       {mpActionDate && (
