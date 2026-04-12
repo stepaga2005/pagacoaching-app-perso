@@ -119,60 +119,64 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onClose, is
   return (
     <div style={{ position: 'fixed', inset: 0, background: '#080808', color: '#FFF', fontFamily: 'system-ui, -apple-system, sans-serif', zIndex: 500, display: 'flex', flexDirection: 'column' }}>
 
-      {/* Barre du haut — sticky */}
-      <div style={{ background: '#0C0C0C', borderBottom: '1px solid #161616', padding: isMobile ? '0 14px' : '0 20px', flexShrink: 0 }}>
-        <div style={{ maxWidth: '860px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '10px', height: isMobile ? '60px' : '68px' }}>
+      {/* Header gradient — style Everfit */}
+      <div style={{ background: 'linear-gradient(160deg, #1A40C8 0%, #0D1F6B 60%, #080C2A 100%)', flexShrink: 0, padding: isMobile ? `0 16px calc(24px + env(safe-area-inset-top, 0px))` : '0 24px 28px', paddingTop: `max(16px, env(safe-area-inset-top, 16px))` }}>
 
-          <button onClick={onClose} style={{ background: '#111', border: '1px solid #1E1E1E', borderRadius: '12px', width: '44px', height: '44px', color: '#888', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>←</button>
-
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: '900', fontSize: isMobile ? '15px' : '17px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{realisation.seances?.nom}</div>
-            <div style={{ fontSize: '11px', color: '#444', marginTop: '1px', textTransform: 'capitalize' }}>{dateLabel}</div>
-          </div>
-
-          {/* Chronomètre — compact sur mobile */}
-          {isMobile ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-              {(chronoRunning || chronoSec > 0) && (
-                <span style={{ fontFamily: 'monospace', fontSize: '16px', fontWeight: '900', letterSpacing: '1px', color: chronoRunning ? '#1A6FFF' : '#444', minWidth: '44px', textAlign: 'right' }}>
-                  {fmtChrono(chronoSec)}
-                </span>
-              )}
-              <button onClick={() => setChronoRunning(r => !r)} style={{ background: chronoRunning ? '#FF4757' : '#1A6FFF', border: 'none', borderRadius: '12px', width: '44px', height: '44px', color: '#FFF', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {chronoRunning ? '⏸' : '▶'}
-              </button>
-              {chronoSec > 0 && !chronoRunning && (
-                <button onClick={() => setChronoSec(0)} style={{ background: '#161616', border: '1px solid #1E1E1E', borderRadius: '10px', width: '36px', height: '36px', color: '#555', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>↺</button>
-              )}
-            </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#111', border: `1px solid ${chronoRunning ? '#1A6FFF40' : '#1E1E1E'}`, borderRadius: '14px', padding: '8px 12px', flexShrink: 0 }}>
-              <span style={{ fontFamily: 'monospace', fontSize: '20px', fontWeight: '900', letterSpacing: '2px', color: chronoRunning ? '#1A6FFF' : '#555', minWidth: '58px' }}>
+        {/* Barre retour + chrono */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', height: isMobile ? '52px' : '60px' }}>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.12)', border: 'none', borderRadius: '12px', width: '40px', height: '40px', color: '#FFF', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, backdropFilter: 'blur(8px)' }}>←</button>
+          <div style={{ flex: 1 }} />
+          {/* Chrono compact */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {(chronoRunning || chronoSec > 0) && (
+              <span style={{ fontFamily: 'monospace', fontSize: '15px', fontWeight: '900', letterSpacing: '1px', color: chronoRunning ? '#FFF' : 'rgba(255,255,255,0.4)', minWidth: '44px', textAlign: 'right' }}>
                 {fmtChrono(chronoSec)}
               </span>
-              <button onClick={() => setChronoRunning(r => !r)} style={{ background: chronoRunning ? '#FF4757' : '#1A6FFF', border: 'none', borderRadius: '8px', width: '32px', height: '32px', color: '#FFF', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {chronoRunning ? '⏸' : '▶'}
-              </button>
-              {chronoSec > 0 && !chronoRunning && (
-                <button onClick={() => setChronoSec(0)} style={{ background: '#161616', border: 'none', borderRadius: '7px', width: '28px', height: '28px', color: '#444', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>↺</button>
-              )}
-            </div>
-          )}
+            )}
+            {chronoSec > 0 && !chronoRunning && (
+              <button onClick={() => setChronoSec(0)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '8px', width: '32px', height: '32px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>↺</button>
+            )}
+          </div>
         </div>
+
+        {/* Date */}
+        <div style={{ fontSize: '11px', fontWeight: '700', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>
+          {dateLabel}
+        </div>
+
+        {/* Nom de la séance */}
+        <div style={{ fontWeight: '900', fontSize: isMobile ? '22px' : '26px', color: '#FFF', letterSpacing: '-0.4px', lineHeight: 1.2, marginBottom: '6px' }}>
+          {realisation.seances?.nom}
+        </div>
+
+        {/* Badges */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+          {typeLbl && <span style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px', backdropFilter: 'blur(8px)' }}>{typeLbl}</span>}
+          <span style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '20px', backdropFilter: 'blur(8px)' }}>{exercices.length} exercice{exercices.length > 1 ? 's' : ''}</span>
+          {realisation.completee && <span style={{ background: 'rgba(46,204,113,0.2)', color: '#2ECC71', fontSize: '11px', fontWeight: '800', padding: '4px 10px', borderRadius: '20px', border: '1px solid rgba(46,204,113,0.3)' }}>✓ Réalisée</span>}
+        </div>
+
+        {/* CTA Commencer */}
+        <button
+          onClick={() => setChronoRunning(r => !r)}
+          style={{
+            width: '100%', padding: '15px', borderRadius: '14px', border: 'none', cursor: 'pointer',
+            background: chronoRunning ? '#FF4757' : realisation.completee ? 'rgba(255,255,255,0.08)' : '#FFF',
+            color: chronoRunning ? '#FFF' : realisation.completee ? 'rgba(255,255,255,0.4)' : '#0D1F6B',
+            fontWeight: '900', fontSize: '16px', letterSpacing: '-0.2px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+            backdropFilter: 'blur(8px)',
+          }}
+        >
+          {chronoRunning ? '⏸  Pause' : chronoSec > 0 ? `▶  Reprendre · ${fmtChrono(chronoSec)}` : realisation.completee ? '✓  Séance terminée' : '▶  Commencer l\'entraînement'}
+        </button>
       </div>
 
       {/* Contenu scrollable */}
       <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
-        <div style={{ maxWidth: '860px', margin: '0 auto', padding: isMobile ? `16px 14px calc(100px + env(safe-area-inset-bottom))` : '28px 20px 80px' }}>
+        <div style={{ maxWidth: '860px', margin: '0 auto', padding: isMobile ? `20px 14px calc(100px + env(safe-area-inset-bottom))` : '28px 20px 80px' }}>
 
-          {/* Badges */}
-          <div style={{ display: 'flex', gap: '8px', marginBottom: isMobile ? '20px' : '32px', flexWrap: 'wrap' }}>
-            {typeLbl && <span style={{ background: '#1A1A1A', color: '#666', fontSize: '12px', fontWeight: '700', padding: '5px 12px', borderRadius: '20px', border: '1px solid #222' }}>{typeLbl}</span>}
-            <span style={{ background: '#1A1A1A', color: '#666', fontSize: '12px', fontWeight: '700', padding: '5px 12px', borderRadius: '20px', border: '1px solid #222' }}>{exercices.length} exercice{exercices.length > 1 ? 's' : ''}</span>
-            {realisation.completee && <span style={{ background: '#2ECC7115', color: '#2ECC71', fontSize: '12px', fontWeight: '800', padding: '5px 12px', borderRadius: '20px', border: '1px solid #2ECC7130' }}>✓ Réalisée</span>}
-          </div>
-
-          {/* Liste des exercices — style TotalCoaching */}
+          {/* Liste des exercices */}
           {blocs.length > 0 && (
             <div style={{ marginBottom: '48px' }}>
               <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#2A2A2A', marginBottom: '16px' }}>Programme</div>
@@ -949,41 +953,39 @@ export default function JoueurPage() {
           <button onClick={() => aller(1)} style={{ background: '#111', border: '1px solid #1E1E1E', borderRadius: '10px', width: '40px', height: '40px', color: '#555', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
         </div>
 
-        {/* Strip jours */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: isMobile ? '6px' : '10px', marginBottom: '28px' }}>
+        {/* Strip jours — style Everfit */}
+        <div style={{ display: 'flex', gap: isMobile ? '5px' : '8px', marginBottom: '28px' }}>
           {jours.map((ds, i) => {
             const reals = realsParDate[ds] || []
             const isToday = ds === today
             const isPast = ds < today
             const hasSessions = reals.length > 0
             const allDone = hasSessions && reals.every(r => r.completee)
-            const dayFull = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+            const someMissed = hasSessions && !allDone && isPast
+            const dayLetters = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
+            const circleColor = isToday ? '#1A6FFF' : allDone ? '#2ECC71' : someMissed ? '#FF4757' : hasSessions ? '#1A6FFF' : 'transparent'
+            const circleOpacity = isToday || allDone || someMissed ? 1 : hasSessions ? 0.25 : 0
             return (
-              <div key={ds} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: isMobile ? '9px' : '11px', color: '#2A2A2A', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>{dayFull[i]}</div>
+              <div key={ds} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '10px', fontWeight: '700', color: isToday ? '#1A6FFF' : '#333', letterSpacing: '0.3px' }}>
+                  {dayLetters[i]}
+                </span>
                 <div style={{
-                  width: '100%', aspectRatio: '1', borderRadius: isMobile ? '12px' : '14px',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
-                  background: isToday ? '#1A6FFF' : hasSessions ? (allDone ? '#2ECC7118' : '#111') : 'transparent',
-                  border: `1px solid ${isToday ? '#1A6FFF' : hasSessions ? (allDone ? '#2ECC7145' : '#1E1E1E') : '#111'}`,
+                  width: '100%', aspectRatio: '1', borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: isToday ? '#1A6FFF' : allDone ? '#2ECC71' : `${circleColor}${hasSessions && !isToday ? '22' : '00'}`,
+                  border: `2px solid ${isToday ? '#1A6FFF' : allDone ? '#2ECC71' : someMissed ? '#FF4757' : hasSessions ? '#1A6FFF55' : '#1A1A1A'}`,
                 }}>
-                  <span style={{ fontSize: isMobile ? '15px' : '18px', fontWeight: isToday ? '900' : '700', color: isToday ? '#FFF' : isPast ? '#2A2A2A' : '#CCC' }}>
-                    {new Date(ds + 'T12:00:00').getDate()}
+                  <span style={{ fontSize: isMobile ? '13px' : '15px', fontWeight: '800', color: isToday ? '#FFF' : allDone ? '#FFF' : hasSessions ? (isPast ? '#FF4757' : '#1A6FFF') : '#2A2A2A' }}>
+                    {allDone ? '✓' : new Date(ds + 'T12:00:00').getDate()}
                   </span>
-                  {hasSessions && (
-                    <div style={{ display: 'flex', gap: '3px' }}>
-                      {reals.slice(0, 3).map((r, ri) => (
-                        <div key={ri} style={{ width: isMobile ? '4px' : '5px', height: isMobile ? '4px' : '5px', borderRadius: '50%', background: r.completee ? '#2ECC71' : isToday ? '#FFFFFF90' : isPast ? '#FF475770' : '#1A6FFF' }} />
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             )
           })}
         </div>
 
-        {/* Séances par jour */}
+        {/* Séances par jour — style TotalCoaching */}
         {jours.map(ds => {
           const reals = realsParDate[ds] || []
           if (reals.length === 0) return null
@@ -991,25 +993,21 @@ export default function JoueurPage() {
           const isPast = ds < today
           const dateLabel = new Date(ds + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
           return (
-            <div key={ds} style={{ marginBottom: '24px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-                <span style={{ fontSize: isMobile ? '13px' : '14px', fontWeight: '700', color: isToday ? '#1A6FFF' : '#444', textTransform: 'capitalize' }}>{dateLabel}</span>
-                {isToday && <span style={{ background: '#1A6FFF', color: '#FFF', fontSize: '9px', padding: '3px 9px', borderRadius: '20px', fontWeight: '900', letterSpacing: '0.5px' }}>AUJOURD'HUI</span>}
+            <div key={ds} style={{ marginBottom: '28px' }}>
+              {/* En-tête de jour */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', paddingLeft: '2px' }}>
+                <span style={{ fontSize: '11px', fontWeight: '800', color: isToday ? '#1A6FFF' : '#333', textTransform: 'uppercase', letterSpacing: '1.2px' }}>{dateLabel}</span>
+                {isToday && <span style={{ background: '#1A6FFF', color: '#FFF', fontSize: '9px', padding: '2px 8px', borderRadius: '20px', fontWeight: '900', letterSpacing: '0.5px' }}>AUJOURD'HUI</span>}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {reals.map(r => {
                   const hasWellness = r.fatigue != null || r.rpe != null || r.courbatures != null || r.qualite_sommeil != null
-                  // Couleur principale : fatigue si renseignée, sinon statut
-                  const couleur = (() => {
-                    if (!r.completee) return isPast ? '#FF4757' : '#1A6FFF'
-                    if (r.fatigue == null) return '#2ECC71'
-                    if (r.fatigue <= 3) return '#2ECC71'
-                    if (r.fatigue <= 5) return '#F39C12'
-                    if (r.fatigue <= 7) return '#FF6B35'
-                    return '#FF4757'
-                  })()
+                  const exCount = r.seances?.seance_exercices?.length || 0
+                  const statusColor = r.completee ? '#2ECC71' : isPast ? '#FF4757' : '#1A6FFF'
+                  const statusLabel = r.completee ? 'Terminé' : isPast ? 'Manqué' : isToday ? 'Prévu aujourd\'hui' : 'À venir'
                   const wellnessItems = [
-                    r.fatigue != null ? { label: 'Fatigue', val: r.fatigue, color: couleur } : null,
+                    r.fatigue != null ? { label: 'Fatigue', val: r.fatigue, color: r.fatigue <= 3 ? '#2ECC71' : r.fatigue <= 5 ? '#F39C12' : r.fatigue <= 7 ? '#FF6B35' : '#FF4757' } : null,
                     r.rpe != null ? { label: 'Effort', val: r.rpe, color: '#1A6FFF' } : null,
                     r.courbatures != null ? { label: 'Courbatures', val: r.courbatures, color: '#FF6B35' } : null,
                     r.qualite_sommeil != null ? { label: 'Sommeil', val: r.qualite_sommeil, color: '#2ECC71' } : null,
@@ -1017,62 +1015,78 @@ export default function JoueurPage() {
 
                   return (
                     <div key={r.id} onClick={() => ouvrir(r)} style={{
-                      background: r.completee && hasWellness ? `${couleur}0A` : '#0F0F0F',
-                      border: `1px solid ${couleur}25`,
-                      borderLeft: `4px solid ${couleur}`,
-                      borderRadius: '14px',
+                      background: '#0F0F0F',
+                      border: '1px solid #1A1A1A',
+                      borderRadius: '16px',
                       cursor: 'pointer',
                       overflow: 'hidden',
+                      display: 'flex',
                     }}>
-                      {/* Ligne principale */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', padding: isMobile ? '14px 14px' : '16px 20px', paddingBottom: hasWellness ? '10px' : undefined }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontWeight: '800', fontSize: isMobile ? '15px' : '17px', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.seances?.nom}</div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ color: '#444', fontSize: '12px' }}>{r.seances?.seance_exercices?.length || 0} exercice{(r.seances?.seance_exercices?.length || 0) > 1 ? 's' : ''}</span>
-                            {r.completee && <span style={{ color: '#2ECC71', fontSize: '12px', fontWeight: '700' }}>✓ Réalisée</span>}
-                            {!r.completee && isPast && <span style={{ color: '#FF4757', fontSize: '12px', fontWeight: '700' }}>Non réalisée</span>}
+                      {/* Barre colorée gauche */}
+                      <div style={{ width: '4px', background: statusColor, flexShrink: 0 }} />
+
+                      {/* Contenu */}
+                      <div style={{ flex: 1, padding: isMobile ? '14px 14px 14px 16px' : '16px 20px' }}>
+
+                        {/* Ligne principale */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: hasWellness && r.completee ? '12px' : '0' }}>
+
+                          {/* Icône statut */}
+                          <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: `${statusColor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${statusColor}30` }}>
+                            <span style={{ fontSize: '20px', color: statusColor, lineHeight: 1 }}>
+                              {r.completee ? '✓' : isPast ? '✗' : '▶'}
+                            </span>
                           </div>
+
+                          {/* Texte */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: '800', fontSize: isMobile ? '15px' : '16px', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#F0F0F0' }}>
+                              {r.seances?.nom}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '12px', fontWeight: '700', color: statusColor }}>{statusLabel}</span>
+                              <span style={{ color: '#2A2A2A', fontSize: '12px' }}>·</span>
+                              <span style={{ color: '#444', fontSize: '12px' }}>{exCount} exercice{exCount > 1 ? 's' : ''}</span>
+                            </div>
+                          </div>
+
+                          {/* Badge fatigue si renseigné */}
+                          {r.completee && r.fatigue != null ? (
+                            <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', background: `${wellnessItems[0]?.color || '#2ECC71'}18`, border: `1px solid ${wellnessItems[0]?.color || '#2ECC71'}35`, borderRadius: '12px', padding: '5px 10px', minWidth: '46px' }}>
+                              <span style={{ fontSize: '8px', fontWeight: '900', color: `${wellnessItems[0]?.color || '#2ECC71'}90`, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fatigue</span>
+                              <span style={{ fontSize: '20px', fontWeight: '900', color: wellnessItems[0]?.color || '#2ECC71', lineHeight: 1 }}>{r.fatigue}</span>
+                              <span style={{ fontSize: '8px', color: '#333' }}>/10</span>
+                            </div>
+                          ) : (
+                            <div style={{ flexShrink: 0, color: '#2A2A2A', fontSize: '18px' }}>›</div>
+                          )}
                         </div>
-                        {/* Indicateur droit */}
-                        {r.completee && r.fatigue != null ? (
-                          <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', background: `${couleur}15`, border: `1px solid ${couleur}30`, borderRadius: '12px', padding: '6px 12px', minWidth: '52px' }}>
-                            <span style={{ fontSize: '9px', fontWeight: '900', color: `${couleur}80`, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fatigue</span>
-                            <span style={{ fontSize: '22px', fontWeight: '900', color: couleur, lineHeight: 1 }}>{r.fatigue}</span>
-                            <span style={{ fontSize: '9px', color: '#333' }}>/10</span>
+
+                        {/* Bande wellness */}
+                        {hasWellness && r.completee && (
+                          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${wellnessItems.length}, 1fr)`, gap: '10px', paddingTop: '12px', borderTop: '1px solid #161616' }}>
+                            {wellnessItems.map(item => (
+                              <div key={item.label} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                <span style={{ fontSize: '9px', fontWeight: '800', color: '#333', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
+                                <div style={{ display: 'flex', gap: '2px' }}>
+                                  {Array.from({ length: 10 }, (_, i) => (
+                                    <div key={i} style={{ flex: 1, height: '3px', borderRadius: '2px', background: i < item.val ? item.color : '#1A1A1A' }} />
+                                  ))}
+                                </div>
+                                <span style={{ fontSize: '11px', fontWeight: '900', color: item.color }}>{item.val}<span style={{ color: '#2A2A2A', fontWeight: '400' }}>/10</span></span>
+                              </div>
+                            ))}
                           </div>
-                        ) : (
-                          <div style={{ flexShrink: 0, width: isMobile ? '38px' : '42px', height: isMobile ? '38px' : '42px', borderRadius: '12px', background: `${couleur}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isMobile ? '16px' : '18px', color: couleur, fontWeight: '900' }}>
-                            {r.completee ? '✓' : isPast ? '!' : '›'}
+                        )}
+
+                        {/* Invite bilan */}
+                        {r.completee && !hasWellness && (
+                          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #161616', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '13px' }}>⚡</span>
+                            <span style={{ fontSize: '12px', color: '#F39C12', fontWeight: '700' }}>Renseigne ton bilan de séance →</span>
                           </div>
                         )}
                       </div>
-
-                      {/* Bande wellness */}
-                      {hasWellness && r.completee && (
-                        <div style={{ borderTop: `1px solid ${couleur}15`, padding: isMobile ? '10px 14px 12px' : '10px 20px 14px', display: 'grid', gridTemplateColumns: `repeat(${wellnessItems.length}, 1fr)`, gap: '8px' }}>
-                          {wellnessItems.map(item => (
-                            <div key={item.label} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                              <span style={{ fontSize: '9px', fontWeight: '800', color: '#333', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
-                              {/* 10 points */}
-                              <div style={{ display: 'flex', gap: '2px' }}>
-                                {Array.from({ length: 10 }, (_, i) => (
-                                  <div key={i} style={{ flex: 1, height: '4px', borderRadius: '2px', background: i < item.val ? item.color : '#1A1A1A' }} />
-                                ))}
-                              </div>
-                              <span style={{ fontSize: '11px', fontWeight: '900', color: item.color }}>{item.val}<span style={{ color: '#2A2A2A', fontWeight: '400' }}>/10</span></span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Invite à renseigner */}
-                      {r.completee && !hasWellness && (
-                        <div style={{ borderTop: '1px solid #F39C1220', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px', background: '#F39C1208' }}>
-                          <span style={{ fontSize: '14px' }}>⚡</span>
-                          <span style={{ fontSize: '12px', color: '#F39C12', fontWeight: '800' }}>Comment tu t'es senti ? Renseigne ton bilan →</span>
-                        </div>
-                      )}
                     </div>
                   )
                 })}
