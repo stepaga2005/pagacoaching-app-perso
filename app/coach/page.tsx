@@ -2479,6 +2479,156 @@ function WellnessGraphiques({ realisations }: { realisations: Realisation[] }) {
   )
 }
 
+function CopierJoursModal({ joursSelectionnes, byDate, joueurCourant, allJoueurs, onDone, onClose }: {
+  joursSelectionnes: Set<string>
+  byDate: Record<string, MPRealisation[]>
+  joueurCourant: Joueur
+  allJoueurs: { id: string; nom: string; prenom: string }[]
+  onDone: () => void
+  onClose: () => void
+}) {
+  const [mode, setMode] = useState<'joueur' | 'modele'>('joueur')
+  const [cibleJoueurId, setCibleJoueurId] = useState('')
+  const [dateDebut, setDateDebut] = useState('')
+  const [nomModele, setNomModele] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const datesTriees = [...joursSelectionnes].sort()
+
+  function addDays(ds: string, n: number) {
+    const d = new Date(ds + 'T12:00:00'); d.setDate(d.getDate() + n)
+    return d.toISOString().split('T')[0]
+  }
+  function daysBetween(d1: string, d2: string) {
+    return Math.round((new Date(d2 + 'T12:00:00').getTime() - new Date(d1 + 'T12:00:00').getTime()) / 86400000)
+  }
+
+  const totalSessions = datesTriees.reduce((n, d) => n + (byDate[d]?.filter(r => r.seance_id)?.length || 0), 0)
+
+  async function handleCopier() {
+    if (mode === 'joueur' && (!cibleJoueurId || !dateDebut)) { alert('Sélectionne un joueur et une date de début'); return }
+    if (mode === 'modele' && !nomModele.trim()) { alert('Entre un nom pour le modèle'); return }
+    setLoading(true)
+    const anchor = datesTriees[0]
+    try {
+      if (mode === 'joueur') {
+        const inserts = datesTriees.flatMap(date => {
+          const offset = daysBetween(anchor, date)
+          const newDate = addDays(dateDebut, offset)
+          return (byDate[date] || []).filter(r => r.seance_id).map(r => ({
+            joueur_id: cibleJoueurId, seance_id: r.seance_id,
+            date_realisation: newDate, completee: false,
+          }))
+        })
+        if (inserts.length > 0) await supabase.from('realisations').insert(inserts)
+        alert(`✓ ${inserts.length} séance(s) copiée(s) !`)
+      } else {
+        const { data: prog, error: pe } = await supabase.from('programmes').insert({ nom: nomModele.trim() }).select().single()
+        if (pe || !prog) { alert(`Erreur : ${pe?.message}`); setLoading(false); return }
+        for (const date of datesTriees) {
+          const offset = daysBetween(anchor, date)
+          const weekNum = Math.floor(offset / 7) + 1
+          const dow = new Date(date + 'T12:00:00').getDay()
+          const jourSemaine = dow === 0 ? 7 : dow
+          for (const real of (byDate[date] || []).filter(r => r.seance_id)) {
+            const { data: ns } = await supabase.from('seances').insert({
+              nom: real.seances?.nom || 'Séance', type: real.seances?.type || 'complete',
+              programme_id: prog.id, jour_semaine: jourSemaine, semaine: weekNum, est_template: false,
+            }).select().single()
+            if (ns && real.seance_id) {
+              const { data: exos } = await supabase.from('seance_exercices').select('*').eq('seance_id', real.seance_id).order('ordre')
+              if (exos && exos.length > 0) {
+                await supabase.from('seance_exercices').insert(exos.map(e => ({
+                  seance_id: ns.id, exercice_id: e.exercice_id, ordre: e.ordre,
+                  series: e.series, repetitions: e.repetitions, duree_secondes: e.duree_secondes,
+                  distance_metres: e.distance_metres, charge_kg: e.charge_kg,
+                  recuperation_secondes: e.recuperation_secondes, lien_suivant: e.lien_suivant,
+                  uni_podal: e.uni_podal, notes: e.notes, sets_config: e.sets_config,
+                })))
+              }
+            }
+          }
+        }
+        alert(`✓ Modèle "${nomModele}" créé !`)
+      }
+      onDone()
+    } catch (e: unknown) {
+      alert(`Erreur : ${e instanceof Error ? e.message : String(e)}`)
+    } finally { setLoading(false) }
+  }
+
+  return (
+    <div className="modal-overlay" style={{ zIndex: 600 }}>
+      <div className="modal-box" style={{ maxWidth: '440px', width: '100%' }}>
+        <div className="modal-title">Copier {datesTriees.length} jour{datesTriees.length > 1 ? 's' : ''}</div>
+        <div style={{ color: '#555', fontSize: '12px', marginBottom: '20px' }}>{totalSessions} séance{totalSessions > 1 ? 's' : ''} sélectionnée{totalSessions > 1 ? 's' : ''}</div>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+          {(['joueur', 'modele'] as const).map(m => (
+            <button key={m} onClick={() => setMode(m)} style={{
+              flex: 1, padding: '10px', borderRadius: '10px', cursor: 'pointer', fontWeight: '700', fontSize: '13px',
+              border: `1px solid ${mode === m ? (m === 'joueur' ? '#007AFF' : '#C9A84C') : '#252530'}`,
+              background: mode === m ? (m === 'joueur' ? 'rgba(0,122,255,0.12)' : 'rgba(201,168,76,0.12)') : 'transparent',
+              color: mode === m ? (m === 'joueur' ? '#007AFF' : '#C9A84C') : '#666',
+            }}>{m === 'joueur' ? '👤 Vers un joueur' : '📋 Créer un modèle'}</button>
+          ))}
+        </div>
+
+        {mode === 'joueur' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div>
+              <label style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>Joueur cible</label>
+              <select value={cibleJoueurId} onChange={e => setCibleJoueurId(e.target.value)} className="select" style={{ width: '100%' }}>
+                <option value="">— Choisir un joueur —</option>
+                {allJoueurs.filter(j => j.id !== joueurCourant.id).map(j => (
+                  <option key={j.id} value={j.id}>{j.prenom} {j.nom}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
+                Date de début (= {new Date(datesTriees[0] + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'short' })})
+              </label>
+              <input type="date" value={dateDebut} onChange={e => setDateDebut(e.target.value)} className="input" style={{ width: '100%' }} />
+            </div>
+          </div>
+        )}
+
+        {mode === 'modele' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div>
+              <label style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>Nom du modèle</label>
+              <input value={nomModele} onChange={e => setNomModele(e.target.value)} placeholder="Ex : Semaine type pré-saison" className="input" style={{ width: '100%' }} />
+            </div>
+            <div style={{ background: '#0D0D0D', border: '1px solid #1E1E1E', borderRadius: '10px', padding: '12px' }}>
+              <div style={{ color: '#444', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '8px' }}>Aperçu</div>
+              {datesTriees.filter(d => (byDate[d] || []).some(r => r.seance_id)).map(d => {
+                const offset = daysBetween(datesTriees[0], d)
+                const wk = Math.floor(offset / 7) + 1
+                const jourNom = new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short' })
+                return (
+                  <div key={d} style={{ display: 'flex', gap: '10px', alignItems: 'baseline', marginBottom: '4px' }}>
+                    <span style={{ color: '#C9A84C', fontSize: '10px', fontWeight: '800', width: '48px', flexShrink: 0 }}>S{wk} {jourNom}</span>
+                    <span style={{ color: '#666', fontSize: '11px' }}>{(byDate[d] || []).filter(r => r.seance_id).map(r => r.seances?.nom || 'Séance').join(', ')}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: '10px', marginTop: '24px' }}>
+          <button onClick={onClose} className="btn btn-ghost" style={{ flex: 1 }}>Annuler</button>
+          <button onClick={handleCopier} disabled={loading} className="btn btn-primary" style={{ flex: 2 }}>
+            {loading ? 'En cours...' : mode === 'joueur' ? 'Copier vers ce joueur' : 'Créer le modèle'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function MasterPlannerView({ joueur, realisations: initialReals, exercices, weekStart: initialWeekStart, onClose, onReload }: {
   joueur: Joueur
   realisations: MPRealisation[]
@@ -2504,10 +2654,19 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
   const [mpWellnessData, setMpWellnessData] = useState({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' })
   const [mpTemplates, setMpTemplates] = useState<{ id: string; nom: string }[]>([])
   const [mpSeanceChoisie, setMpSeanceChoisie] = useState('')
+  const [modeSelection, setModeSelection] = useState(false)
+  const [joursSelectionnes, setJoursSelectionnes] = useState<Set<string>>(new Set())
+  const [showCopierModal, setShowCopierModal] = useState(false)
+  const [allJoueurs, setAllJoueurs] = useState<{ id: string; nom: string; prenom: string }[]>([])
 
   useEffect(() => {
     supabase.from('seances').select('id, nom').eq('est_template', true).order('nom')
       .then(({ data }) => { if (data) setMpTemplates(data) })
+  }, [])
+
+  useEffect(() => {
+    supabase.from('joueurs').select('id, nom, prenom').eq('actif', true).order('nom')
+      .then(({ data }) => { if (data) setAllJoueurs(data) })
   }, [])
 
   async function mpAttribuerSession(ds: string) {
@@ -2536,6 +2695,15 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
     setMpWellnessDate(null)
     setMpWellnessData({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' })
   }
+
+  function toggleJour(ds: string) {
+    setJoursSelectionnes(prev => {
+      const next = new Set(prev)
+      next.has(ds) ? next.delete(ds) : next.add(ds)
+      return next
+    })
+  }
+
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
@@ -2714,6 +2882,18 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
             <span style={{ color: '#1A6FFF' }}>▦</span> <span style={{ color: '#FFF' }}>MASTER PLANNER</span>
           </div>
           {!isMobile && <span style={{ color: '#444', fontSize: '11px' }}>{joueur.prenom} {joueur.nom}</span>}
+          <button
+            onClick={() => { setModeSelection(v => !v); setJoursSelectionnes(new Set()) }}
+            style={{
+              background: modeSelection ? 'rgba(46,204,113,0.15)' : '#181820',
+              border: `1px solid ${modeSelection ? '#2ECC7150' : '#252530'}`,
+              borderRadius: '8px', padding: '6px 12px',
+              color: modeSelection ? '#2ECC71' : '#666',
+              cursor: 'pointer', fontSize: '12px', fontWeight: '700',
+              flexShrink: 0, whiteSpace: 'nowrap',
+            }}>
+            {modeSelection ? '✕ Annuler' : '📋 Copier'}
+          </button>
         </div>
         {/* Ligne 2 : nav semaine + date picker */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px 10px' }}>
@@ -2739,17 +2919,34 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           const mois = dateObj.toLocaleDateString('fr-FR', { month: 'short' })
           const dayReals = byDate[ds] || []
 
+          const estSelectionne = joursSelectionnes.has(ds)
           return (
-            <div key={ds} style={{ background: isToday ? '#0C0C14' : '#0D0D0D', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div key={ds} style={{
+              background: estSelectionne ? '#0A1F10' : (isToday ? '#0C0C14' : '#0D0D0D'),
+              display: 'flex', flexDirection: 'column', overflow: 'hidden',
+              outline: estSelectionne ? '2px solid #2ECC7150' : 'none', outlineOffset: '-1px',
+            }}>
               {/* Day header */}
-              <div style={{ padding: '8px 6px 6px', borderBottom: '1px solid #1A1A1A', background: isToday ? '#0C1020' : '#0D0D0D', flexShrink: 0 }}>
+              <div style={{ padding: '8px 6px 6px', borderBottom: '1px solid #1A1A1A', background: estSelectionne ? '#0D2015' : (isToday ? '#0C1020' : '#0D0D0D'), flexShrink: 0 }}>
                 <div style={{ textAlign: 'center', marginBottom: '4px' }}>
-                  <div style={{ color: isToday ? '#5AABFF' : '#555', fontSize: '10px', fontWeight: '800', letterSpacing: '0.8px', textTransform: 'uppercase' }}>{JOUR_NOMS[di]}</div>
-                  <div style={{ color: isToday ? '#007AFF' : '#888', fontSize: '22px', fontWeight: '900', lineHeight: 1, marginTop: '1px' }}>{dateNum}</div>
+                  <div style={{ color: estSelectionne ? '#2ECC71' : (isToday ? '#5AABFF' : '#555'), fontSize: '10px', fontWeight: '800', letterSpacing: '0.8px', textTransform: 'uppercase' }}>{JOUR_NOMS[di]}</div>
+                  <div style={{ color: estSelectionne ? '#2ECC71' : (isToday ? '#007AFF' : '#888'), fontSize: '22px', fontWeight: '900', lineHeight: 1, marginTop: '1px' }}>{dateNum}</div>
                   <div style={{ color: '#444', fontSize: '10px', marginTop: '1px' }}>{mois}</div>
                 </div>
-                <button onClick={() => { setMpActionDate(ds); setMpSeanceChoisie('') }}
-                  style={{ width: '100%', minHeight: '28px', borderRadius: '6px', border: '1px solid #252530', background: 'transparent', color: '#444', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 0' }}>+</button>
+                {!modeSelection && (
+                  <button onClick={() => { setMpActionDate(ds); setMpSeanceChoisie('') }}
+                    style={{ width: '100%', minHeight: '28px', borderRadius: '6px', border: '1px solid #252530', background: 'transparent', color: '#444', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 0' }}>+</button>
+                )}
+                {modeSelection && (
+                  <button onClick={() => toggleJour(ds)} style={{
+                    width: '100%', minHeight: '28px', borderRadius: '6px', cursor: 'pointer',
+                    border: `1px solid ${estSelectionne ? '#2ECC71' : '#252530'}`,
+                    background: estSelectionne ? 'rgba(46,204,113,0.2)' : 'transparent',
+                    color: estSelectionne ? '#2ECC71' : '#444',
+                    fontSize: estSelectionne ? '16px' : '13px', fontWeight: '700',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 0',
+                  }}>{estSelectionne ? '✓' : '+'}</button>
+                )}
               </div>
 
               {/* Sessions scroll area */}
@@ -3170,6 +3367,43 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           </>
         )
       })()}
+
+      {/* Barre flottante mode sélection */}
+      {modeSelection && joursSelectionnes.size > 0 && (
+        <div style={{
+          position: 'absolute', bottom: '16px', left: '12px', right: '12px', zIndex: 20,
+          background: '#0A1A0F', border: '1px solid #2ECC7140', borderRadius: '16px',
+          padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px',
+          boxShadow: '0 8px 32px rgba(46,204,113,0.15)',
+        }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ color: '#2ECC71', fontWeight: '800', fontSize: '14px' }}>
+              {joursSelectionnes.size} jour{joursSelectionnes.size > 1 ? 's' : ''} sélectionné{joursSelectionnes.size > 1 ? 's' : ''}
+            </div>
+            <div style={{ color: '#555', fontSize: '11px' }}>
+              {[...joursSelectionnes].reduce((n, d) => n + ((byDate[d] || []).filter(r => r.seance_id).length), 0)} séance(s)
+            </div>
+          </div>
+          <button onClick={() => setJoursSelectionnes(new Set())} style={{ background: 'none', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '6px 10px', color: '#555', cursor: 'pointer', fontSize: '11px' }}>Effacer</button>
+          <button onClick={() => setShowCopierModal(true)} style={{
+            background: '#2ECC71', border: 'none', borderRadius: '10px',
+            padding: '10px 20px', color: '#000', cursor: 'pointer',
+            fontSize: '13px', fontWeight: '800', whiteSpace: 'nowrap',
+          }}>Copier →</button>
+        </div>
+      )}
+
+      {/* Modal copie */}
+      {showCopierModal && (
+        <CopierJoursModal
+          joursSelectionnes={joursSelectionnes}
+          byDate={byDate}
+          joueurCourant={joueur}
+          allJoueurs={allJoueurs}
+          onDone={() => { setShowCopierModal(false); setModeSelection(false); setJoursSelectionnes(new Set()) }}
+          onClose={() => setShowCopierModal(false)}
+        />
+      )}
     </div>
   )
 }
