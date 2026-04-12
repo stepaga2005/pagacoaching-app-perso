@@ -1375,6 +1375,8 @@ function Programmes() {
   const [search, setSearch] = useState('')
   const [filtreType, setFiltreType] = useState('')
   const [loadingEdit, setLoadingEdit] = useState(false)
+  const [apercu, setApercu] = useState<Seance | null>(null)
+  const [loadingApercu, setLoadingApercu] = useState(false)
 
   useEffect(() => { loadList() }, [])
 
@@ -1427,6 +1429,18 @@ function Programmes() {
     if (!confirm('Supprimer cette séance ?')) return
     await supabase.from('seances').delete().eq('id', id)
     loadList()
+  }
+
+  async function ouvrirApercu(s: Seance) {
+    setApercu({ ...s, seance_exercices: [] })
+    setLoadingApercu(true)
+    const { data } = await supabase
+      .from('seances')
+      .select('id, nom, type, notes, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, notes, lien_suivant, exercices(nom, familles(id, nom, couleur)))')
+      .eq('id', s.id)
+      .single()
+    if (data) setApercu(data as unknown as Seance)
+    setLoadingApercu(false)
   }
 
   if (loadingEdit) {
@@ -1536,14 +1550,15 @@ function Programmes() {
             const exoCount = s.seance_exercices?.length || 0
             return (
               <div key={s.id}
+                onClick={() => ouvrirApercu(s)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '12px',
-                  padding: '12px 16px', borderRadius: '12px', cursor: 'default',
+                  padding: '12px 16px', borderRadius: '12px', cursor: 'pointer',
                   background: selected ? 'rgba(46,204,113,0.06)' : 'rgba(255,255,255,0.02)',
                   border: `1px solid ${selected ? '#2ECC7130' : '#1A1A28'}`,
                   transition: 'background 0.1s',
                 }}>
-                <button onClick={() => toggleSelect(s.id)}
+                <button onClick={e => { e.stopPropagation(); toggleSelect(s.id) }}
                   className={`checkbox-custom${selected ? ' checked' : ''}`}
                   style={{ borderColor: selected ? '#2ECC71' : undefined, background: selected ? '#2ECC71' : undefined, flexShrink: 0 }}>
                   {selected ? '✓' : ''}
@@ -1558,8 +1573,8 @@ function Programmes() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-                  <button onClick={() => editSeance(s)} className="btn btn-ghost btn-sm">Éditer</button>
-                  <button onClick={() => deleteSeance(s.id)} className="btn btn-danger btn-sm">✕</button>
+                  <button onClick={e => { e.stopPropagation(); editSeance(s) }} className="btn btn-ghost btn-sm">Éditer</button>
+                  <button onClick={e => { e.stopPropagation(); deleteSeance(s.id) }} className="btn btn-danger btn-sm">✕</button>
                 </div>
               </div>
             )
@@ -1572,6 +1587,117 @@ function Programmes() {
           seances={seancesSelectionnees}
           onClose={() => { setShowAttrib(false); setSelection(new Set()) }}
         />
+      )}
+
+      {/* ── Aperçu séance ── */}
+      {apercu && (
+        <div
+          onClick={() => setApercu(null)}
+          style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'rgba(0,0,0,0.75)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: '#0F0F18', borderRadius: '20px 20px 0 0', maxHeight: '85vh', display: 'flex', flexDirection: 'column', border: '1px solid #1E1E2A' }}>
+
+            {/* Handle */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0' }}>
+              <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: '#2A2A35' }} />
+            </div>
+
+            {/* Header séance */}
+            <div style={{ padding: '14px 20px 12px', borderBottom: '1px solid #1A1A28' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: '900', fontSize: '18px', letterSpacing: '-0.3px', marginBottom: '6px' }}>{apercu.nom}</div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {(() => { const tc = TYPE_COLORS[apercu.type] || TYPE_COLORS.complete; return (
+                      <span style={{ fontSize: '11px', fontWeight: '700', color: tc.text, background: tc.bg, border: `1px solid ${tc.border}`, padding: '3px 10px', borderRadius: '99px' }}>{LABELS_TYPE[apercu.type] || apercu.type}</span>
+                    )})()}
+                    <span style={{ color: '#444', fontSize: '12px' }}>
+                      {loadingApercu ? '...' : `${apercu.seance_exercices?.length || 0} exercice${(apercu.seance_exercices?.length || 0) > 1 ? 's' : ''}`}
+                    </span>
+                  </div>
+                  {apercu.notes && <div style={{ color: '#555', fontSize: '12px', marginTop: '8px', fontStyle: 'italic' }}>{apercu.notes}</div>}
+                </div>
+              </div>
+            </div>
+
+            {/* Corps : liste exercices */}
+            <div style={{ overflowY: 'auto', flex: 1, padding: '12px 16px' }}>
+              {loadingApercu ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', color: '#1A6FFF', fontSize: '13px', letterSpacing: '2px' }}>CHARGEMENT...</div>
+              ) : !apercu.seance_exercices || apercu.seance_exercices.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#444', fontSize: '13px' }}>Aucun exercice dans cette séance</div>
+              ) : (() => {
+                // Grouper en blocs superset
+                const exos = [...apercu.seance_exercices].sort((a, b) => (a.ordre || 0) - (b.ordre || 0))
+                const blocs: (typeof exos)[] = []
+                let cur: typeof exos = []
+                for (const e of exos) { cur.push(e); if (!e.lien_suivant) { blocs.push(cur); cur = [] } }
+                if (cur.length) blocs.push(cur)
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {blocs.map((bloc, bi) => {
+                      const isGroupe = bloc.length > 1
+                      const label = bloc.length > 2 ? 'CIRCUIT' : 'SUPERSET'
+                      return (
+                        <div key={bi} style={{
+                          borderRadius: '10px', overflow: 'hidden',
+                          border: isGroupe ? '1px solid #1A6FFF30' : '1px solid #1A1A28',
+                          background: isGroupe ? '#1A6FFF08' : '#111',
+                        }}>
+                          {isGroupe && (
+                            <div style={{ padding: '5px 12px', background: '#1A6FFF18', borderBottom: '1px solid #1A6FFF25', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontSize: '10px', fontWeight: '900', color: '#1A6FFF', letterSpacing: '1px' }}>🔗 {label}</span>
+                            </div>
+                          )}
+                          {bloc.map((exo, ei) => {
+                            const fam = (exo as unknown as { exercices?: { nom: string; familles?: { nom: string; couleur: string } | null } }).exercices
+                            const couleur = fam?.familles?.couleur || '#555'
+                            // Résumé params
+                            const params: string[] = []
+                            if ((exo as SeanceExercice).series) params.push(`${(exo as SeanceExercice).series} sér.`)
+                            if ((exo as SeanceExercice).repetitions) params.push(`${(exo as SeanceExercice).repetitions} rép.`)
+                            if ((exo as SeanceExercice).duree_secondes) params.push(`${(exo as SeanceExercice).duree_secondes}s`)
+                            if ((exo as SeanceExercice).distance_metres) params.push(`${(exo as SeanceExercice).distance_metres}m`)
+                            if ((exo as SeanceExercice).charge_kg) params.push(`${(exo as SeanceExercice).charge_kg}kg`)
+                            return (
+                              <div key={exo.id} style={{
+                                display: 'flex', alignItems: 'center', gap: '10px',
+                                padding: '10px 12px',
+                                borderTop: ei > 0 ? '1px solid #1A1A28' : 'none',
+                              }}>
+                                <div style={{ width: '3px', alignSelf: 'stretch', borderRadius: '2px', background: couleur, flexShrink: 0 }} />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontWeight: '600', fontSize: '13px', marginBottom: '2px' }} className="truncate">{fam?.nom || '—'}</div>
+                                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                    {fam?.familles && <span style={{ fontSize: '10px', fontWeight: '700', color: couleur }}>{fam.familles.nom}</span>}
+                                    {params.length > 0 && <span style={{ fontSize: '11px', color: '#555' }}>{params.join(' · ')}</span>}
+                                    {(exo as SeanceExercice).notes && <span style={{ fontSize: '10px', color: '#3A3A50', fontStyle: 'italic' }} className="truncate">{(exo as SeanceExercice).notes}</span>}
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
+            </div>
+
+            {/* Footer */}
+            <div style={{ padding: '12px 16px', borderTop: '1px solid #1A1A28', display: 'flex', gap: '10px' }}>
+              <button onClick={() => setApercu(null)} className="btn btn-ghost" style={{ flex: 1 }}>Fermer</button>
+              <button onClick={() => { toggleSelect(apercu.id); setApercu(null) }}
+                className="btn btn-ghost" style={{ flex: 1, borderColor: selection.has(apercu.id) ? '#2ECC7140' : undefined, color: selection.has(apercu.id) ? '#2ECC71' : undefined }}>
+                {selection.has(apercu.id) ? '✓ Sélectionné' : 'Sélectionner'}
+              </button>
+              <button onClick={() => { setApercu(null); editSeance(apercu) }} className="btn btn-primary" style={{ flex: 1 }}>Éditer</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
