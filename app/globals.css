@@ -179,12 +179,10 @@ button, a, [role="button"] {
 @media (max-width: 767px) {
   .main-content {
     margin-left: 0;
-    padding-bottom: 84px !important; /* espace pour la tabbar */
+    padding-bottom: 20px;
   }
   .msg-desktop { display: none !important; }
   .msg-mobile  { display: block !important; }
-  /* Hamburger caché — remplacé par la bottom tabbar */
-  .btn-hamburger { display: none !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
