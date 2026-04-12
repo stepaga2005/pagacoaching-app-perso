@@ -967,8 +967,8 @@ function Modeles() {
       if (data.length > 0 && !selectedProg) setSelectedProg(data[0])
     }
     const [{ data: tpls }, { data: exs }] = await Promise.all([
-      supabase.from('seances').select('*, seance_exercices(id)').eq('est_template', true).order('nom'),
-      supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom'),
+      supabase.from('seances').select('*, seance_exercices(id)').eq('est_template', true).order('nom').limit(2000),
+      supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom').limit(5000),
     ])
     if (tpls) setTemplates(tpls)
     if (exs) setExercices(exs)
@@ -1377,8 +1377,8 @@ function Programmes() {
 
   async function loadData() {
     const [{ data: seances }, { data: exs }] = await Promise.all([
-      supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('est_template', true).order('nom'),
-      supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom'),
+      supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('est_template', true).order('nom').limit(2000),
+      supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom').limit(5000),
     ])
     if (seances) setTemplates(seances)
     if (exs) setExercices(exs)
@@ -2751,7 +2751,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
   const [allJoueurs, setAllJoueurs] = useState<{ id: string; nom: string; prenom: string }[]>([])
 
   useEffect(() => {
-    supabase.from('seances').select('id, nom').eq('est_template', true).order('nom')
+    supabase.from('seances').select('id, nom').eq('est_template', true).order('nom').limit(2000)
       .then(({ data }) => { if (data) setMpTemplates(data) })
   }, [])
 
@@ -3557,9 +3557,9 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
   async function loadData() {
     const [{ data: reals }, { data: tmpl }, { data: exs }, { data: favs }] = await Promise.all([
       supabase.from('realisations').select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, est_template, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, notes, exercices(nom, consignes_execution, familles(nom, couleur))))').eq('joueur_id', joueur.id).order('date_realisation'),
-      supabase.from('seances').select('id, nom, type').eq('est_template', true).order('nom'),
-      supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom'),
-      supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('est_template', true).order('nom'),
+      supabase.from('seances').select('id, nom, type').eq('est_template', true).order('nom').limit(2000),
+      supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom').limit(5000),
+      supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('est_template', true).order('nom').limit(2000),
     ])
     if (reals) setRealisations(reals as unknown as Realisation[])
     if (tmpl) setTemplates(tmpl)
