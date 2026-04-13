@@ -3894,7 +3894,12 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                   {/* En-tête de jour */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '1px', color: isToday ? '#1A6FFF' : estSel ? '#2ECC71' : '#333' }}>{dateLabel}</span>
-                    {!modeSelection ? (
+                    {mpMovingSession ? (
+                      <button onClick={() => mpMoveSession(ds)}
+                        style={{ background: ds === mpMovingSession.fromDate ? '#FF475710' : '#1A6FFF15', border: `1px solid ${ds === mpMovingSession.fromDate ? '#FF475740' : '#1A6FFF60'}`, borderRadius: '8px', padding: '6px 12px', color: ds === mpMovingSession.fromDate ? '#FF4757' : '#1A6FFF', cursor: 'pointer', fontSize: '12px', fontWeight: '700' }}>
+                        {ds === mpMovingSession.fromDate ? '✕ Annuler' : '↓ Déposer'}
+                      </button>
+                    ) : !modeSelection ? (
                       <button onClick={() => { setMpActionDate(ds); setMpSeanceChoisie('') }}
                         style={{ background: '#161620', border: '1px solid #252530', borderRadius: '8px', width: '32px', height: '32px', color: '#555', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                     ) : (
@@ -3922,19 +3927,34 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                           <div style={{ width: '4px', background: statusColor, flexShrink: 0 }} />
 
                           <div style={{ flex: 1 }}>
-                            {/* Header séance — tappable pour déplier */}
-                            <button onClick={() => toggleExpandSession(r.id)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '14px 14px 12px', display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left' }}>
-                              <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `${statusColor}18`, border: `1px solid ${statusColor}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                <span style={{ color: statusColor, fontSize: '18px' }}>{r.completee ? '✓' : isPast ? '✗' : '▶'}</span>
-                              </div>
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ fontWeight: '800', fontSize: '15px', color: '#F0F0F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
-                                <div style={{ fontSize: '12px', color: '#444', marginTop: '2px' }}>
-                                  {exos.length} exercice{exos.length > 1 ? 's' : ''}{typeLabel ? ` · ${typeLabel}` : ''}
+                            {/* Header séance */}
+                            <div style={{ display: 'flex', alignItems: 'center', padding: '10px 10px 10px 14px', gap: '8px' }}>
+                              <button onClick={() => toggleExpandSession(r.id)} style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left', padding: 0, minWidth: 0 }}>
+                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: `${statusColor}18`, border: `1px solid ${statusColor}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                  <span style={{ color: statusColor, fontSize: '18px' }}>{r.completee ? '✓' : isPast ? '✗' : '▶'}</span>
                                 </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontWeight: '800', fontSize: '15px', color: '#F0F0F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
+                                  <div style={{ fontSize: '12px', color: '#444', marginTop: '2px' }}>
+                                    {exos.length} exercice{exos.length > 1 ? 's' : ''}{typeLabel ? ` · ${typeLabel}` : ''}
+                                  </div>
+                                </div>
+                                <span style={{ color: '#333', fontSize: '14px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }}>▼</span>
+                              </button>
+                              {/* Menu ⋮ session */}
+                              <div style={{ position: 'relative', flexShrink: 0 }}>
+                                <button onClick={e => { e.stopPropagation(); setMpSessionMenu(mpSessionMenu?.id === r.id ? null : { id: r.id, seanceId: r.seance_id, date: ds, nom: r.seances?.nom || '' }) }}
+                                  style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '8px', color: '#2ECC71', cursor: 'pointer', fontSize: '16px', padding: '6px 10px', lineHeight: 1 }}>⋮</button>
+                                {mpSessionMenu?.id === r.id && (
+                                  <div style={{ position: 'absolute', right: 0, top: '36px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '4px', zIndex: 50, minWidth: '160px', boxShadow: '0 8px 24px rgba(0,0,0,0.6)' }}>
+                                    <button onClick={() => { setMpDupModal({ seanceId: r.seance_id, nom: r.seances?.nom || '' }); setMpDupDate(''); setMpDupJoueurId(''); setMpSessionMenu(null) }}
+                                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#DDD', cursor: 'pointer', padding: '10px 12px', fontSize: '13px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>📋 Dupliquer</button>
+                                    <button onClick={() => { setMpMovingSession({ id: r.id, seanceId: r.seance_id, fromDate: ds, nom: r.seances?.nom || '' }); setMpSessionMenu(null) }}
+                                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#DDD', cursor: 'pointer', padding: '10px 12px', fontSize: '13px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>↔ Déplacer</button>
+                                  </div>
+                                )}
                               </div>
-                              <span style={{ color: '#333', fontSize: '14px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }}>▼</span>
-                            </button>
+                            </div>
 
                             {/* Liste exercices dépliée */}
                             {isExpanded && (
@@ -4559,9 +4579,16 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                 )}
               </div>
               {/* Footer */}
-              <div style={{ padding: '12px 16px', borderTop: '1px solid #1E1E1E' }}>
+              <div style={{ padding: '12px 16px', borderTop: '1px solid #1E1E1E', display: 'flex', gap: '8px' }}>
+                {(() => {
+                  const allExos = r?.seances?.seance_exercices || []
+                  return allExos.length > 1 ? (
+                    <button onClick={() => { setMpCopyExoModal({ fromExo: exo, realisationId: r.id }); setMpCopyExoTargets(new Set()); setExpandedExo(null) }}
+                      style={{ flex: 1, padding: '14px', background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '12px', color: '#2ECC71', cursor: 'pointer', fontSize: '13px', fontWeight: '700' }}>⊕ Copier données</button>
+                  ) : null
+                })()}
                 <button onClick={() => setExpandedExo(null)}
-                  style={{ width: '100%', padding: '14px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '12px', color: '#888', cursor: 'pointer', fontSize: '15px', fontWeight: '600' }}>Fermer</button>
+                  style={{ flex: 1, padding: '14px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '12px', color: '#888', cursor: 'pointer', fontSize: '15px', fontWeight: '600' }}>Fermer</button>
               </div>
             </div>
           </>
