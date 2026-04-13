@@ -334,14 +334,17 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                       {/* ─── Superset : frame + label ─── */}
                       {isSuperset ? (
                         <>
-                        <div style={{ border: '1px solid #1A6FFF25', borderRadius: '18px', background: '#0A0D14', overflow: 'hidden' }}>
+                        <div style={{ border: '2px solid #1A6FFF55', borderRadius: '18px', background: '#060D1E', overflow: 'hidden', boxShadow: '0 0 0 1px #1A6FFF18, inset 0 1px 0 #1A6FFF25' }}>
 
                           {/* Label superset / circuit */}
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderBottom: '1px solid #1A6FFF15' }}>
-                            <span style={{ fontSize: '13px' }}>{bloc.length > 2 ? '🔄' : '🔗'}</span>
-                            <span style={{ color: '#1A6FFF', fontSize: '11px', fontWeight: '900', letterSpacing: '1.5px' }}>{bloc.length > 2 ? 'CIRCUIT' : 'SUPERSET'}</span>
-                            {bloc.map((_, i) => i + 1).join(' → ') && <span style={{ color: '#1A6FFF40', fontSize: '11px', fontWeight: '700' }}>{bloc.map((_, i) => i + 1).join(' → ')}</span>}
-                            {seriesShared > 0 && <span style={{ color: '#1A6FFF', fontSize: '14px', fontWeight: '800' }}>· {seriesShared} séries</span>}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', background: 'linear-gradient(90deg, #1A6FFF22, #1A6FFF08)', borderBottom: '1px solid #1A6FFF30' }}>
+                            <div style={{ width: '26px', height: '26px', borderRadius: '8px', background: '#1A6FFF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <span style={{ fontSize: '13px' }}>{bloc.length > 2 ? '🔄' : '🔗'}</span>
+                            </div>
+                            <span style={{ color: '#6BAAFF', fontSize: '11px', fontWeight: '900', letterSpacing: '1.5px' }}>{bloc.length > 2 ? 'CIRCUIT' : 'SUPERSET'}</span>
+                            {seriesShared > 0 && <span style={{ color: '#1A6FFF', fontSize: '13px', fontWeight: '800' }}>{seriesShared} séries</span>}
+                            <div style={{ flex: 1 }} />
+                            <span style={{ color: '#1A6FFF60', fontSize: '11px', fontWeight: '700' }}>{bloc.length} exercices</span>
                           </div>
 
                           {/* Exercices : grille 2 colonnes max desktop, colonne mobile */}
@@ -488,6 +491,13 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                                 </div>
                               )
                             })}
+                          </div>
+
+                          {/* Footer fermeture */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', background: 'linear-gradient(90deg, #1A6FFF18, #1A6FFF06)', borderTop: '1px solid #1A6FFF25' }}>
+                            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, #1A6FFF50, transparent)' }} />
+                            <span style={{ fontSize: '9px', fontWeight: '900', color: '#1A6FFF60', letterSpacing: '1.5px', textTransform: 'uppercase' }}>fin du {bloc.length > 2 ? 'circuit' : 'superset'}</span>
+                            <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, #1A6FFF50)' }} />
                           </div>
 
                         </div>
