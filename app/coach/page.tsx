@@ -213,7 +213,7 @@ export default function CoachPage() {
 
         <div style={{
           opacity: tabVisible ? 1 : 0,
-          transform: tabVisible ? 'translateY(0)' : 'translateY(10px)',
+          ...(tabVisible ? {} : { transform: 'translateY(10px)' }),
           transition: tabVisible ? 'opacity 0.25s ease, transform 0.25s cubic-bezier(0.22,1,0.36,1)' : 'opacity 0.12s ease, transform 0.12s ease',
         }}>
         {displayTab === 'dashboard' && <Dashboard coachId={coachId} onNavTo={navTo} />}
@@ -326,8 +326,8 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '28px' }}>
         {[
           { label: 'Joueurs actifs', value: joueurs.length, color: '#1A6FFF', icon: '👥' },
-          { label: 'Séances aujourd\'hui', value: seancesJour.length, color: '#C9A84C', icon: '📅' },
-          { label: 'Réalisées', value: nbTerminees, color: nbTerminees === seancesJour.length && seancesJour.length > 0 ? '#2ECC71' : '#2ECC71', icon: '✓', sub: seancesJour.length > 0 ? `/ ${seancesJour.length}` : undefined },
+          { label: 'Séances aujourd\'hui', value: seancesJour.length, color: '#1A6FFF', icon: '📅' },
+          { label: 'Réalisées', value: nbTerminees, color: '#2ECC71', icon: '✓', sub: seancesJour.length > 0 ? `/ ${seancesJour.length}` : undefined },
           { label: 'Messages', value: unread, color: unread > 0 ? '#FF4757' : '#333', icon: '💬', onClick: () => onNavTo('messages') },
         ].map(s => (
           <div key={s.label} onClick={s.onClick} style={{
@@ -347,8 +347,8 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
       {/* ── Bloc 2 : Séances du jour ── */}
       <div style={{ marginBottom: '28px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-          <div style={{ width: '3px', height: '18px', background: '#C9A84C', borderRadius: '2px' }} />
-          <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#C9A84C', letterSpacing: '1px', textTransform: 'uppercase' }}>Séances du jour</h2>
+          <div style={{ width: '3px', height: '18px', background: '#1A6FFF', borderRadius: '2px' }} />
+          <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#1A6FFF', letterSpacing: '1px', textTransform: 'uppercase' }}>Séances du jour</h2>
         </div>
 
         {seancesJour.length === 0 ? (
@@ -502,8 +502,8 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
       {joueurs.length > 0 && (
         <div style={{ marginBottom: '28px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-            <div style={{ width: '3px', height: '18px', background: '#9B59B6', borderRadius: '2px' }} />
-            <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#9B59B6', letterSpacing: '1px', textTransform: 'uppercase' }}>État de forme</h2>
+            <div style={{ width: '3px', height: '18px', background: '#2ECC71', borderRadius: '2px' }} />
+            <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#2ECC71', letterSpacing: '1px', textTransform: 'uppercase' }}>État de forme</h2>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {joueurs.map(j => {
@@ -521,8 +521,8 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
                 : { label: '🔴 Surchargé', color: '#FF4757', bg: '#FF475710' }
               return (
                 <div key={j.id} style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: color + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ fontSize: '12px', fontWeight: '900', color }}>{j.prenom[0]}{j.nom[0]}</span>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#2ECC7115', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ fontSize: '12px', fontWeight: '900', color: '#2ECC71' }}>{j.prenom[0]}{j.nom[0]}</span>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: '700', fontSize: '14px' }}>{j.prenom} {j.nom}</div>
@@ -819,7 +819,7 @@ function Joueurs() {
 
       {/* Modal formulaire joueur */}
       {showForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 500 }}>
           <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '32px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
             <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '24px' }}>
               {editJoueur ? 'Modifier le joueur' : 'Ajouter un joueur'}
@@ -1058,9 +1058,174 @@ function Exercices() {
     />
   )
 
+  // === Vue détail exercice (plein écran — remplace la liste) ===
+  if (apercu) {
+    return (
+      <div>
+        <button onClick={() => setApercu(null)} style={{
+          display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none',
+          color: '#1A6FFF', fontSize: '14px', fontWeight: '600', cursor: 'pointer', padding: '0', marginBottom: '20px',
+        }}>← Retour aux exercices</button>
+
+        <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <h2 style={{ fontSize: '20px', fontWeight: '800' }}>{apercu.nom}</h2>
+              {apercu.familles && (
+                <span style={{
+                  display: 'inline-block', marginTop: '6px', padding: '4px 12px', borderRadius: '20px',
+                  background: apercu.familles.couleur + '20', color: apercu.familles.couleur, fontSize: '12px', fontWeight: '600',
+                }}>{apercu.familles.nom}</span>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => { const ex = apercu; setApercu(null); openEdit(ex) }} style={{
+                padding: '8px 14px', borderRadius: '8px', border: '1px solid #2A2A2A',
+                background: 'transparent', color: '#888', fontSize: '12px', cursor: 'pointer',
+              }}>Modifier</button>
+              <button onClick={() => { handleDelete(apercu.id); setApercu(null) }} style={{
+                padding: '8px 14px', borderRadius: '8px', border: '1px solid #FF4757',
+                background: 'transparent', color: '#FF4757', fontSize: '12px', cursor: 'pointer',
+              }}>Supprimer</button>
+            </div>
+          </div>
+
+          {apercu.video_url && (() => {
+            const ytId = getYoutubeId(apercu.video_url)
+            const vimeoId = getVimeoId(apercu.video_url)
+            const src = ytId
+              ? `https://www.youtube.com/embed/${ytId}`
+              : vimeoId
+              ? `https://player.vimeo.com/video/${vimeoId}`
+              : null
+            return src ? (
+              <div style={{ marginBottom: '20px', borderRadius: '12px', overflow: 'hidden', background: '#000', aspectRatio: '16/9' }}>
+                <iframe src={src} style={{ width: '100%', height: '100%', border: 'none' }} allow="autoplay; fullscreen" allowFullScreen />
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#0D1A2E', border: '1px solid #1A6FFF30', borderRadius: '10px', padding: '10px 14px', marginBottom: '20px' }}>
+                <span style={{ color: '#1A6FFF', fontSize: '13px' }}>▶</span>
+                <span style={{ color: '#888', fontSize: '12px', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{apercu.video_url}</span>
+                <button onClick={() => navigator.clipboard?.writeText(apercu.video_url!).then(() => alert('Lien copié !'))} style={{
+                  background: '#1A6FFF20', border: '1px solid #1A6FFF40', borderRadius: '6px', padding: '4px 10px', color: '#1A6FFF', cursor: 'pointer', fontSize: '11px', fontWeight: '600',
+                }}>Copier</button>
+                <button onClick={() => window.open(apercu.video_url!, '_blank')} style={{
+                  background: '#1A6FFF', border: 'none', borderRadius: '6px', padding: '4px 10px', color: '#FFF', cursor: 'pointer', fontSize: '11px', fontWeight: '600',
+                }}>Ouvrir</button>
+              </div>
+            )
+          })()}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {apercu.description && (
+              <div>
+                <div style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '6px' }}>Description</div>
+                <p style={{ color: '#CCC', fontSize: '14px', lineHeight: '1.6' }}>{apercu.description}</p>
+              </div>
+            )}
+            {apercu.consignes_execution && (
+              <div>
+                <div style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '6px' }}>Consignes d'exécution</div>
+                <p style={{ color: '#CCC', fontSize: '14px', lineHeight: '1.6' }}>{apercu.consignes_execution}</p>
+              </div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {apercu.materiel?.length > 0 && (
+                <div>
+                  <span style={{ color: '#888', fontSize: '12px' }}>Matériel : </span>
+                  <span style={{ color: '#FFF', fontSize: '12px' }}>{apercu.materiel.join(', ')}</span>
+                </div>
+              )}
+              {apercu.zone_musculaire?.length > 0 && (
+                <div>
+                  <span style={{ color: '#888', fontSize: '12px' }}>Zones : </span>
+                  <span style={{ color: '#FFF', fontSize: '12px' }}>{apercu.zone_musculaire.join(', ')}</span>
+                </div>
+              )}
+              {apercu.type_effort && <div><span style={{ color: '#888', fontSize: '12px' }}>Effort : </span><span style={{ color: '#FFF', fontSize: '12px' }}>{apercu.type_effort}</span></div>}
+              {apercu.position && <div><span style={{ color: '#888', fontSize: '12px' }}>Position : </span><span style={{ color: '#FFF', fontSize: '12px' }}>{apercu.position}</span></div>}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // === Vue formulaire (plein écran) ===
+  if (showForm) {
+    return (
+      <div>
+        <button onClick={() => setShowForm(false)} style={{
+          display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none',
+          color: '#1A6FFF', fontSize: '14px', fontWeight: '600', cursor: 'pointer', padding: '0', marginBottom: '20px',
+        }}>← Retour aux exercices</button>
+
+        <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '24px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '24px' }}>
+            {editEx ? 'Modifier l\'exercice' : 'Nouvel exercice'}
+          </h2>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {inp('Nom de l\'exercice *', 'nom')}
+
+            <select value={form.famille_id} onChange={e => setForm(f => ({ ...f, famille_id: e.target.value }))}
+              style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '11px 14px', color: form.famille_id ? '#FFF' : '#555', fontSize: '14px', outline: 'none' }}>
+              <option value="">Famille *</option>
+              {familles.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
+            </select>
+
+            {inp('URL Vimeo (ex: https://vimeo.com/123456)', 'video_url')}
+            {textarea('Description', 'description')}
+            {textarea('Consignes d\'exécution', 'consignes_execution')}
+
+            <MultiCheck
+              label="Matériel"
+              options={['Ab Wheel','Plyo Box','Slider','Step','Slam Ball','Foam Roller','Rings','Corde','Poids libres','Barre traction','Barre','Haltères','EZ Barre','Kettlebell','Medicine Ball','Disque','Sandbag','Trap Bar','Bike','Bosu','Corde à sauter','Traineau','Racks & Bancs','Banc','Chaise Romaine','Mini Band','Elastique','TRX','Cable Machine','Dip Station','Leg Press','Leg Curl','Coussin Proprio','Tapis de course','Tapis de sprint','Rameur','Wattbike','Air Bike','Ballon']}
+              selected={form.materiel}
+              onChange={vals => setForm(f => ({ ...f, materiel: vals }))}
+            />
+
+            <MultiCheck
+              label="Zone musculaire"
+              options={['Ischio-jambiers','Quadriceps','Mollets','Adducteurs','Abducteurs','Lombaires','Abdominaux','Épaules','Pectoraux','Dorsaux','Biceps','Triceps']}
+              selected={form.zone_musculaire}
+              onChange={vals => setForm(f => ({ ...f, zone_musculaire: vals }))}
+            />
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {[
+                ['type_effort', 'Type d\'effort', ['Explosif','Endurance','Force max','Vitesse','Mobilité','Récupération','Appuis','Accélération','Décélération','COD','Pliométrie','Proprioception','Isométrie','Excentrique']],
+                ['position', 'Position (optionnel)', ['Debout','Au sol','Assis','Avec ballon','À 4 pattes','En mouvement']],
+              ].map(([key, label, options]) => (
+                <select key={key as string} value={form[key as keyof typeof form] as string}
+                  onChange={e => setForm(f => ({ ...f, [key as string]: e.target.value }))}
+                  style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '11px 14px', color: form[key as keyof typeof form] ? '#FFF' : '#555', fontSize: '14px', outline: 'none' }}>
+                  <option value="">{label as string}</option>
+                  {(options as string[]).map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+            <button onClick={() => setShowForm(false)} style={{
+              flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #2A2A2A',
+              background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px',
+            }}>Annuler</button>
+            <button onClick={handleSave} disabled={saving} style={{
+              flex: 2, padding: '12px', borderRadius: '10px', border: 'none',
+              background: saving ? '#333' : '#1A6FFF', color: '#FFF',
+              cursor: saving ? 'not-allowed' : 'pointer', fontWeight: '700', fontSize: '14px',
+            }}>{saving ? 'Enregistrement...' : 'Enregistrer'}</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // === Vue liste exercices ===
   return (
     <div>
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: '800' }}>
           Exercices <span style={{ color: '#555', fontSize: '16px', fontWeight: '400' }}>({affichés.length})</span>
@@ -1071,7 +1236,6 @@ function Exercices() {
         }}>+ Nouvel exercice</button>
       </div>
 
-      {/* Recherche */}
       <input
         placeholder="Rechercher un exercice..."
         value={search}
@@ -1083,7 +1247,6 @@ function Exercices() {
         }}
       />
 
-      {/* Filtres familles */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
         {familles.map(f => {
           const actif = filtresFamille.includes(f.id)
@@ -1107,7 +1270,6 @@ function Exercices() {
         )}
       </div>
 
-      {/* Liste */}
       {affichés.length === 0 ? (
         <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '24px', color: '#555', fontSize: '14px' }}>
           Aucun exercice.
@@ -1144,170 +1306,6 @@ function Exercices() {
               </div>
             )
           })}
-        </div>
-      )}
-
-      {/* Aperçu */}
-      {apercu && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
-        }} onClick={() => setApercu(null)}>
-          <div style={{
-            background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px',
-            padding: '32px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto',
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-              <div>
-                <h2 style={{ fontSize: '20px', fontWeight: '800' }}>{apercu.nom}</h2>
-                {apercu.familles && (
-                  <span style={{
-                    display: 'inline-block', marginTop: '6px', padding: '4px 12px', borderRadius: '20px',
-                    background: apercu.familles.couleur + '20', color: apercu.familles.couleur, fontSize: '12px', fontWeight: '600',
-                  }}>{apercu.familles.nom}</span>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={() => { setApercu(null); openEdit(apercu) }} style={{
-                  padding: '8px 14px', borderRadius: '8px', border: '1px solid #2A2A2A',
-                  background: 'transparent', color: '#888', fontSize: '12px', cursor: 'pointer',
-                }}>Modifier</button>
-                <button onClick={() => { handleDelete(apercu.id); setApercu(null) }} style={{
-                  padding: '8px 14px', borderRadius: '8px', border: '1px solid #FF4757',
-                  background: 'transparent', color: '#FF4757', fontSize: '12px', cursor: 'pointer',
-                }}>Supprimer</button>
-              </div>
-            </div>
-
-            {apercu.video_url && (() => {
-              const ytId = getYoutubeId(apercu.video_url)
-              const vimeoId = getVimeoId(apercu.video_url)
-              const src = ytId
-                ? `https://www.youtube.com/embed/${ytId}`
-                : vimeoId
-                ? `https://player.vimeo.com/video/${vimeoId}`
-                : null
-              return src ? (
-                <div style={{ marginBottom: '20px', borderRadius: '12px', overflow: 'hidden', background: '#000', aspectRatio: '16/9' }}>
-                  <iframe
-                    src={src}
-                    style={{ width: '100%', height: '100%', border: 'none' }}
-                    allow="autoplay; fullscreen"
-                    allowFullScreen
-                  />
-                </div>
-              ) : null
-            })()}
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {apercu.description && (
-                <div>
-                  <div style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '6px' }}>Description</div>
-                  <p style={{ color: '#CCC', fontSize: '14px', lineHeight: '1.6' }}>{apercu.description}</p>
-                </div>
-              )}
-              {apercu.consignes_execution && (
-                <div>
-                  <div style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '6px' }}>Consignes d'exécution</div>
-                  <p style={{ color: '#CCC', fontSize: '14px', lineHeight: '1.6' }}>{apercu.consignes_execution}</p>
-                </div>
-              )}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {apercu.materiel?.length > 0 && (
-                  <div>
-                    <span style={{ color: '#888', fontSize: '12px' }}>Matériel : </span>
-                    <span style={{ color: '#FFF', fontSize: '12px' }}>{apercu.materiel.join(', ')}</span>
-                  </div>
-                )}
-                {apercu.zone_musculaire?.length > 0 && (
-                  <div>
-                    <span style={{ color: '#888', fontSize: '12px' }}>Zones : </span>
-                    <span style={{ color: '#FFF', fontSize: '12px' }}>{apercu.zone_musculaire.join(', ')}</span>
-                  </div>
-                )}
-                {apercu.type_effort && <div><span style={{ color: '#888', fontSize: '12px' }}>Effort : </span><span style={{ color: '#FFF', fontSize: '12px' }}>{apercu.type_effort}</span></div>}
-                {apercu.position && <div><span style={{ color: '#888', fontSize: '12px' }}>Position : </span><span style={{ color: '#FFF', fontSize: '12px' }}>{apercu.position}</span></div>}
-              </div>
-            </div>
-
-            <button onClick={() => setApercu(null)} style={{
-              marginTop: '24px', width: '100%', padding: '12px', borderRadius: '10px',
-              border: '1px solid #2A2A2A', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px',
-            }}>Fermer</button>
-          </div>
-        </div>
-      )}
-
-      {/* Formulaire */}
-      {showForm && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100,
-        }}>
-          <div style={{
-            background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px',
-            padding: '32px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto',
-          }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '24px' }}>
-              {editEx ? 'Modifier l\'exercice' : 'Nouvel exercice'}
-            </h2>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {inp('Nom de l\'exercice *', 'nom')}
-
-              <select value={form.famille_id} onChange={e => setForm(f => ({ ...f, famille_id: e.target.value }))}
-                style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '11px 14px', color: form.famille_id ? '#FFF' : '#555', fontSize: '14px', outline: 'none' }}>
-                <option value="">Famille *</option>
-                {familles.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
-              </select>
-
-              {inp('URL Vimeo (ex: https://vimeo.com/123456)', 'video_url')}
-              {textarea('Description', 'description')}
-              {textarea('Consignes d\'exécution', 'consignes_execution')}
-
-              {/* Matériel — multi-select */}
-              <MultiCheck
-                label="Matériel"
-                options={['Ab Wheel','Plyo Box','Slider','Step','Slam Ball','Foam Roller','Rings','Corde','Poids libres','Barre traction','Barre','Haltères','EZ Barre','Kettlebell','Medicine Ball','Disque','Sandbag','Trap Bar','Bike','Bosu','Corde à sauter','Traineau','Racks & Bancs','Banc','Chaise Romaine','Mini Band','Elastique','TRX','Cable Machine','Dip Station','Leg Press','Leg Curl','Coussin Proprio','Tapis de course','Tapis de sprint','Rameur','Wattbike','Air Bike','Ballon']}
-                selected={form.materiel}
-                onChange={vals => setForm(f => ({ ...f, materiel: vals }))}
-              />
-
-              {/* Zone musculaire — multi-select */}
-              <MultiCheck
-                label="Zone musculaire"
-                options={['Ischio-jambiers','Quadriceps','Mollets','Adducteurs','Abducteurs','Lombaires','Abdominaux','Épaules','Pectoraux','Dorsaux','Biceps','Triceps']}
-                selected={form.zone_musculaire}
-                onChange={vals => setForm(f => ({ ...f, zone_musculaire: vals }))}
-              />
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                {[
-                  ['type_effort', 'Type d\'effort', ['Explosif','Endurance','Force max','Vitesse','Mobilité','Récupération','Appuis','Accélération','Décélération','COD','Pliométrie','Proprioception','Isométrie','Excentrique']],
-                  ['position', 'Position (optionnel)', ['Debout','Au sol','Assis','Avec ballon','À 4 pattes','En mouvement']],
-                ].map(([key, label, options]) => (
-                  <select key={key as string} value={form[key as keyof typeof form] as string}
-                    onChange={e => setForm(f => ({ ...f, [key as string]: e.target.value }))}
-                    style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '11px 14px', color: form[key as keyof typeof form] ? '#FFF' : '#555', fontSize: '14px', outline: 'none' }}>
-                    <option value="">{label as string}</option>
-                    {(options as string[]).map(o => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-              <button onClick={() => setShowForm(false)} style={{
-                flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #2A2A2A',
-                background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px',
-              }}>Annuler</button>
-              <button onClick={handleSave} disabled={saving} style={{
-                flex: 2, padding: '12px', borderRadius: '10px', border: 'none',
-                background: saving ? '#333' : '#1A6FFF', color: '#FFF',
-                cursor: saving ? 'not-allowed' : 'pointer', fontWeight: '700', fontSize: '14px',
-              }}>{saving ? 'Enregistrement...' : 'Enregistrer'}</button>
-            </div>
-          </div>
         </div>
       )}
     </div>
@@ -3055,7 +3053,7 @@ type Realisation = {
       duree_secondes?: number; distance_metres?: number; charge_kg?: number
       recuperation_secondes?: number; lien_suivant?: boolean; notes?: string
       sets_config?: SetConfig[] | null
-      exercices?: { nom: string; consignes_execution?: string; familles?: { nom: string; couleur: string } | null } | null
+      exercices?: { nom: string; video_url?: string; consignes_execution?: string; familles?: { nom: string; couleur: string } | null } | null
     }[]
   } | null
 }
@@ -3485,6 +3483,14 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
   const [mpTemplates, setMpTemplates] = useState<{ id: string; nom: string }[]>([])
   const [mpSeanceChoisie, setMpSeanceChoisie] = useState('')
   const [mpNouvelleSeanceDate, setMpNouvelleSeanceDate] = useState<string | null>(null)
+  const [mpSessionMenu, setMpSessionMenu] = useState<{ id: string; seanceId: string; date: string; nom: string } | null>(null)
+  const [mpMovingSession, setMpMovingSession] = useState<{ id: string; seanceId: string; fromDate: string; nom: string } | null>(null)
+  const [mpDupModal, setMpDupModal] = useState<{ seanceId: string; nom: string } | null>(null)
+  const [mpDupDate, setMpDupDate] = useState('')
+  const [mpDupJoueurId, setMpDupJoueurId] = useState('')
+  const [mpCopiedExo, setMpCopiedExo] = useState<Partial<MPSeanceExercice> | null>(null)
+  const [mpCopyExoModal, setMpCopyExoModal] = useState<{ fromExo: MPSeanceExercice; realisationId: string } | null>(null)
+  const [mpCopyExoTargets, setMpCopyExoTargets] = useState<Set<string>>(new Set())
   const [modeSelection, setModeSelection] = useState(false)
   const [joursSelectionnes, setJoursSelectionnes] = useState<Set<string>>(new Set())
   const [showCopierModal, setShowCopierModal] = useState(false)
@@ -3506,6 +3512,82 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
       .select('id, seance_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur))))')
       .eq('joueur_id', joueur.id).order('date_realisation')
     if (data) setReals(data as unknown as MPRealisation[])
+  }
+
+  const mpReload = async () => {
+    const { data } = await supabase.from('realisations')
+      .select('id, seance_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur))))')
+      .eq('joueur_id', joueur.id).order('date_realisation')
+    if (data) setReals(data as unknown as MPRealisation[])
+  }
+
+  async function mpDeleteRealisation(id: string) {
+    await supabase.from('realisations').delete().eq('id', id)
+    setReals(prev => prev.filter(r => r.id !== id))
+    setMpSessionMenu(null)
+  }
+
+  async function mpMoveSession(toDate: string) {
+    if (!mpMovingSession) return
+    await supabase.from('realisations').update({ date_realisation: toDate }).eq('id', mpMovingSession.id)
+    await mpReload()
+    setMpMovingSession(null)
+  }
+
+  async function mpDupSession() {
+    if (!mpDupModal || !mpDupDate) return
+    const jId = mpDupJoueurId || joueur.id
+    await supabase.from('realisations').insert({ joueur_id: jId, seance_id: mpDupModal.seanceId, date_realisation: mpDupDate, completee: false })
+    if (jId === joueur.id) await mpReload()
+    setMpDupModal(null); setMpDupDate(''); setMpDupJoueurId('')
+  }
+
+  async function mpPasteExo(realisationId: string, exoId: string) {
+    if (!mpCopiedExo) return
+    const upd: Record<string, unknown> = {
+      series: mpCopiedExo.series ?? null,
+      sets_config: mpCopiedExo.sets_config ?? null,
+      repetitions: mpCopiedExo.sets_config ? null : (mpCopiedExo.repetitions ?? null),
+      duree_secondes: mpCopiedExo.sets_config ? null : (mpCopiedExo.duree_secondes ?? null),
+      distance_metres: mpCopiedExo.sets_config ? null : (mpCopiedExo.distance_metres ?? null),
+      charge_kg: mpCopiedExo.sets_config ? null : (mpCopiedExo.charge_kg ?? null),
+      recuperation_secondes: mpCopiedExo.sets_config ? null : (mpCopiedExo.recuperation_secondes ?? null),
+    }
+    await supabase.from('seance_exercices').update(upd).eq('id', exoId)
+    patchExoLocal(realisationId, exoId, {
+      series: mpCopiedExo.series, sets_config: mpCopiedExo.sets_config,
+      repetitions: upd.repetitions as number, duree_secondes: upd.duree_secondes as number,
+      distance_metres: upd.distance_metres as number, charge_kg: upd.charge_kg as number,
+      recuperation_secondes: upd.recuperation_secondes as number,
+    })
+    setMpCopiedExo(null)
+  }
+
+  async function mpCopyExoToTargets() {
+    if (!mpCopyExoModal || mpCopyExoTargets.size === 0) return
+    const src = mpCopyExoModal.fromExo
+    const upd: Record<string, unknown> = {
+      series: src.series ?? null,
+      sets_config: src.sets_config ?? null,
+      repetitions: src.sets_config ? null : (src.repetitions ?? null),
+      duree_secondes: src.sets_config ? null : (src.duree_secondes ?? null),
+      distance_metres: src.sets_config ? null : (src.distance_metres ?? null),
+      charge_kg: src.sets_config ? null : (src.charge_kg ?? null),
+      recuperation_secondes: src.sets_config ? null : (src.recuperation_secondes ?? null),
+    }
+    await Promise.all([...mpCopyExoTargets].map(exoId =>
+      supabase.from('seance_exercices').update(upd).eq('id', exoId)
+    ))
+    for (const exoId of mpCopyExoTargets) {
+      patchExoLocal(mpCopyExoModal.realisationId, exoId, {
+        series: src.series, sets_config: src.sets_config,
+        repetitions: upd.repetitions as number, duree_secondes: upd.duree_secondes as number,
+        distance_metres: upd.distance_metres as number, charge_kg: upd.charge_kg as number,
+        recuperation_secondes: upd.recuperation_secondes as number,
+      })
+    }
+    setMpCopyExoModal(null)
+    setMpCopyExoTargets(new Set())
   }
 
   async function mpAttribuerSession(ds: string) {
@@ -3748,6 +3830,15 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
         </div>
       </div>
 
+      {/* Bannière mode déplacement */}
+      {mpMovingSession && (
+        <div style={{ padding: '8px 12px', background: '#1A6FFF15', borderBottom: '1px solid #1A6FFF30', display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+          <span style={{ color: '#1A6FFF', fontSize: '14px' }}>↔</span>
+          <span style={{ color: '#AAC8FF', fontWeight: '700', fontSize: '12px', flex: 1 }}>Déplacer : <span style={{ color: '#FFF' }}>{mpMovingSession.nom}</span></span>
+          <button onClick={() => setMpMovingSession(null)} style={{ background: 'transparent', border: '1px solid #1A6FFF40', borderRadius: '6px', padding: '4px 10px', color: '#1A6FFF', cursor: 'pointer', fontSize: '11px', fontWeight: '700' }}>✕ Annuler</button>
+        </div>
+      )}
+
       {/* Chargement */}
       {loading && (
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -3905,7 +3996,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
 
       {/* ══ DESKTOP : grille de colonnes ══ */}
       {!loading && !isMobile && (
-      <div style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, 1fr)`, gap: '1px', background: '#1E1E1E', overflow: 'hidden' }}>
+      <div onClick={() => mpSessionMenu && setMpSessionMenu(null)} style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, 1fr)`, gap: '1px', background: '#1E1E1E', overflow: 'hidden' }}>
         {days.map((ds, di) => {
           const isToday = ds === today
           const dateObj = new Date(ds + 'T12:00:00')
@@ -3927,9 +4018,15 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                   <div style={{ color: estSelectionne ? '#2ECC71' : (isToday ? '#007AFF' : '#888'), fontSize: '22px', fontWeight: '900', lineHeight: 1, marginTop: '1px' }}>{dateNum}</div>
                   <div style={{ color: '#444', fontSize: '10px', marginTop: '1px' }}>{mois}</div>
                 </div>
-                {!modeSelection && (
+                {!modeSelection && !mpMovingSession && (
                   <button onClick={() => { setMpActionDate(ds); setMpSeanceChoisie('') }}
                     style={{ width: '100%', minHeight: '28px', borderRadius: '6px', border: '1px solid #252530', background: 'transparent', color: '#444', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 0' }}>+</button>
+                )}
+                {mpMovingSession && (
+                  <button onClick={() => mpMoveSession(ds)}
+                    style={{ width: '100%', minHeight: '28px', borderRadius: '6px', border: `1px solid ${ds === mpMovingSession.fromDate ? '#FF475740' : '#1A6FFF60'}`, background: ds === mpMovingSession.fromDate ? '#FF475710' : '#1A6FFF15', color: ds === mpMovingSession.fromDate ? '#FF4757' : '#1A6FFF', cursor: 'pointer', fontSize: '11px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 0' }}>
+                    {ds === mpMovingSession.fromDate ? '✕ Annuler' : '↓ Déposer'}
+                  </button>
                 )}
                 {modeSelection && (
                   <button onClick={() => toggleJour(ds)} style={{
@@ -3949,9 +4046,22 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                   const typeLabel = (LABELS_TYPE[r.seances?.type || ''] || 'SÉANCE').toUpperCase()
                   return (
                     <div key={r.id} style={{ background: '#111', border: '1px solid #252525', borderRadius: '8px', overflow: 'hidden' }}>
-                      <div style={{ padding: '7px 8px', borderBottom: '1px solid #1E1E1E', display: 'flex', alignItems: 'center', gap: '5px', background: '#111' }}>
+                      <div style={{ padding: '7px 8px', borderBottom: '1px solid #1E1E1E', display: 'flex', alignItems: 'center', gap: '5px', background: '#111', position: 'relative' }}>
                         <div style={{ flex: 1, fontWeight: '700', fontSize: '12px', color: '#DDD', lineHeight: 1.3, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
                         <span style={{ fontSize: '9px', fontWeight: '800', color: '#555', background: '#181818', border: '1px solid #242424', borderRadius: '4px', padding: '2px 5px', whiteSpace: 'nowrap', flexShrink: 0 }}>{typeLabel}</span>
+                        <button onClick={e => { e.stopPropagation(); setMpSessionMenu(mpSessionMenu?.id === r.id ? null : { id: r.id, seanceId: r.seance_id, date: ds, nom: r.seances?.nom || '' }) }}
+                          style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '5px', color: '#2ECC71', cursor: 'pointer', fontSize: '13px', padding: '2px 6px', lineHeight: 1, flexShrink: 0 }}>⋮</button>
+                        {mpSessionMenu?.id === r.id && (
+                          <div style={{ position: 'absolute', top: '100%', right: 0, zIndex: 50, background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '6px', minWidth: '180px', boxShadow: '0 8px 24px #000A' }}>
+                            <button onClick={() => { setMpDupModal({ seanceId: r.seance_id, nom: r.seances?.nom || '' }); setMpDupDate(ds); setMpSessionMenu(null) }}
+                              style={{ width: '100%', background: 'transparent', border: 'none', color: '#DDD', cursor: 'pointer', padding: '8px 10px', fontSize: '12px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>📋 Dupliquer</button>
+                            <button onClick={() => { setMpMovingSession({ id: r.id, seanceId: r.seance_id, fromDate: ds, nom: r.seances?.nom || '' }); setMpSessionMenu(null) }}
+                              style={{ width: '100%', background: 'transparent', border: 'none', color: '#1A6FFF', cursor: 'pointer', padding: '8px 10px', fontSize: '12px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>↔ Déplacer</button>
+                            <div style={{ height: '1px', background: '#2A2A2A', margin: '4px 0' }} />
+                            <button onClick={() => { if (confirm('Supprimer cette séance ?')) mpDeleteRealisation(r.id) }}
+                              style={{ width: '100%', background: 'transparent', border: 'none', color: '#FF4757', cursor: 'pointer', padding: '8px 10px', fontSize: '12px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>🗑 Supprimer</button>
+                          </div>
+                        )}
                       </div>
                       {(() => {
                         const blocs: MPSeanceExercice[][] = []
@@ -4046,8 +4156,30 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                                   </div>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <button onClick={() => addSet(r.id, exo.id, exo)} style={{ background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 7px', color: '#666', cursor: 'pointer', fontSize: '8px', fontWeight: '600', whiteSpace: 'nowrap' }}>+ Série</button>
-                                    <input type="number" placeholder="×" value={exo.series ?? ''} onChange={async e => { const val = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value)); patchExoLocal(r.id, exo.id, { series: val }); await saveExoField(exo.id, { series: val ?? null }) }} style={{ width: '28px', background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 3px', color: '#888', fontSize: '9px', outline: 'none', textAlign: 'center' }} />
+                                    <input type="number" placeholder="×" value={exo.series ?? ''} onChange={async e => {
+                                      const val = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value))
+                                      if (!val) return
+                                      const current = exo.sets_config || []
+                                      if (current.length > 0) {
+                                        let newSets: SetConfig[]
+                                        if (val > current.length) {
+                                          const last = current[current.length - 1] || {}
+                                          newSets = [...current, ...Array.from({ length: val - current.length }, () => ({ ...last }))]
+                                        } else {
+                                          newSets = current.slice(0, val)
+                                        }
+                                        const updates = { sets_config: newSets, series: newSets.length }
+                                        patchExoLocal(r.id, exo.id, updates)
+                                        await saveExoField(exo.id, updates)
+                                      } else {
+                                        patchExoLocal(r.id, exo.id, { series: val })
+                                        await saveExoField(exo.id, { series: val })
+                                      }
+                                    }} style={{ width: '28px', background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 3px', color: '#888', fontSize: '9px', outline: 'none', textAlign: 'center' }} />
                                     <div style={{ flex: 1 }} />
+                                    {exos.length > 1 && (
+                                      <button onClick={() => { setMpCopyExoModal({ fromExo: exo, realisationId: r.id }); setMpCopyExoTargets(new Set()) }} title="Dupliquer les données vers d'autres exercices" style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '4px', padding: '2px 7px', color: '#2ECC71', cursor: 'pointer', fontSize: '8px', fontWeight: '700', whiteSpace: 'nowrap' }}>⊕ copier</button>
+                                    )}
                                     <button onClick={() => toggleLienSuivant(r.id, exo)} title={exo.lien_suivant ? 'Délier' : 'Lier en superset'} style={{ background: exo.lien_suivant ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#222'}`, borderRadius: '4px', padding: '2px 6px', color: exo.lien_suivant ? '#1A6FFF' : '#333', cursor: 'pointer', fontSize: '10px' }}>⇌</button>
                                   </div>
                                 </div>
@@ -4078,6 +4210,93 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           )
         })}
       </div>
+      )}
+
+      {/* MP — Modal Copier données exercice vers autres exercices */}
+      {mpCopyExoModal && (() => {
+        const r = reals.find(rx => rx.id === mpCopyExoModal.realisationId)
+        const allExos = [...(r?.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
+        const otherExos = allExos.filter(e => e.id !== mpCopyExoModal.fromExo.id)
+        return (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 500 }}
+            onClick={() => { setMpCopyExoModal(null); setMpCopyExoTargets(new Set()) }}>
+            <div onClick={e => e.stopPropagation()} style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '520px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontWeight: '800', fontSize: '16px', marginBottom: '4px' }}>Dupliquer les données d'exercice</div>
+              <div style={{ color: '#888', fontSize: '13px', marginBottom: '16px' }}>
+                Vers quels exercices copier les données de <span style={{ color: '#FFF', fontWeight: '700' }}>{mpCopyExoModal.fromExo.exercices?.nom}</span> ?
+              </div>
+              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+                {otherExos.map(exo => {
+                  const fam = exo.exercices?.familles
+                  const couleur = fam?.couleur || '#555'
+                  const isSelected = mpCopyExoTargets.has(exo.id)
+                  const hasSets = exo.sets_config && exo.sets_config.length > 0
+                  const summary = hasSets
+                    ? `${exo.sets_config!.length} séries configurées`
+                    : [exo.series ? `${exo.series}×` : '', exo.repetitions ? `${exo.repetitions}r` : '', exo.charge_kg ? `${exo.charge_kg}kg` : ''].filter(Boolean).join(' ') || '—'
+                  return (
+                    <div key={exo.id} onClick={() => setMpCopyExoTargets(prev => { const next = new Set(prev); isSelected ? next.delete(exo.id) : next.add(exo.id); return next })}
+                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: isSelected ? '#1A6FFF15' : '#181818', border: `1px solid ${isSelected ? '#1A6FFF50' : '#252525'}`, borderRadius: '12px', cursor: 'pointer', transition: 'all 0.15s' }}>
+                      <div style={{ width: '32px', height: '32px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ color: couleur, fontSize: '11px', fontWeight: '900' }}>{exo.ordre}</span>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        {fam && <div style={{ color: couleur, fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{fam.nom}</div>}
+                        <div style={{ color: isSelected ? '#FFF' : '#CCC', fontWeight: '700', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
+                        <div style={{ color: '#555', fontSize: '11px', marginTop: '1px' }}>{summary}</div>
+                      </div>
+                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${isSelected ? '#1A6FFF' : '#333'}`, background: isSelected ? '#1A6FFF' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        {isSelected && <span style={{ color: '#FFF', fontSize: '11px', fontWeight: '900' }}>✓</span>}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={() => { setMpCopyExoModal(null); setMpCopyExoTargets(new Set()) }}
+                  style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+                <button onClick={mpCopyExoToTargets} disabled={mpCopyExoTargets.size === 0}
+                  style={{ flex: 2, padding: '12px', borderRadius: '12px', border: 'none', background: mpCopyExoTargets.size > 0 ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpCopyExoTargets.size > 0 ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>
+                  Copier vers {mpCopyExoTargets.size > 0 ? `${mpCopyExoTargets.size} exercice${mpCopyExoTargets.size > 1 ? 's' : ''}` : '…'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* MP — Modal Dupliquer session */}
+      {mpDupModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}
+          onClick={() => { setMpDupModal(null); setMpDupDate(''); setMpDupJoueurId('') }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '340px' }}>
+            <div style={{ fontWeight: '800', fontSize: '16px', marginBottom: '4px' }}>📋 Dupliquer la séance</div>
+            <div style={{ color: '#888', fontSize: '13px', marginBottom: '20px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{mpDupModal.nom}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+              <div>
+                <div style={{ color: '#555', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px' }}>Date cible</div>
+                <input type="date" value={mpDupDate} onChange={e => setMpDupDate(e.target.value)}
+                  style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '10px 12px', color: '#FFF', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }} />
+              </div>
+              <div>
+                <div style={{ color: '#555', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px' }}>Joueur (optionnel)</div>
+                <select value={mpDupJoueurId} onChange={e => setMpDupJoueurId(e.target.value)}
+                  style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '10px 12px', color: mpDupJoueurId ? '#FFF' : '#555', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }}>
+                  <option value="">— Même joueur ({joueur.prenom} {joueur.nom}) —</option>
+                  {allJoueurs.filter(j => j.id !== joueur.id).map(j => (
+                    <option key={j.id} value={j.id}>{j.nom} {j.prenom}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => { setMpDupModal(null); setMpDupDate(''); setMpDupJoueurId('') }}
+                style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+              <button onClick={mpDupSession} disabled={!mpDupDate}
+                style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: mpDupDate ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpDupDate ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>Dupliquer</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* MP — Menu action + / Wellness */}
@@ -4243,19 +4462,37 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                 <div style={{ width: '36px', height: '4px', background: '#333', borderRadius: '2px' }} />
               </div>
               {/* Header */}
-              <div style={{ padding: '8px 16px 12px', borderBottom: '1px solid #1E1E1E', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '32px', height: '32px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ color: couleur, fontSize: '12px', fontWeight: '900' }}>{exo.ordre}</span>
+              <div style={{ padding: '8px 16px 12px', borderBottom: '1px solid #1E1E1E' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: exo.exercices?.video_url ? '10px' : '0' }}>
+                  <div style={{ width: '32px', height: '32px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ color: couleur, fontSize: '12px', fontWeight: '900' }}>{exo.ordre}</span>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {fam && <div style={{ color: couleur, fontSize: '10px', fontWeight: '800', textTransform: 'uppercase' }}>{fam.nom}</div>}
+                    <div style={{ color: '#FFF', fontWeight: '800', fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={() => { moveExo(r.id, exo.id, -1) }} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>▲</button>
+                    <button onClick={() => { moveExo(r.id, exo.id, 1) }} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>▼</button>
+                    <button onClick={() => { removeExo(r.id, exo.id); setExpandedExo(null) }} style={{ background: '#FF475710', border: '1px solid #FF475730', borderRadius: '8px', padding: '8px 12px', color: '#FF4757', cursor: 'pointer', fontSize: '14px' }}>✕</button>
+                  </div>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {fam && <div style={{ color: couleur, fontSize: '10px', fontWeight: '800', textTransform: 'uppercase' }}>{fam.nom}</div>}
-                  <div style={{ color: '#FFF', fontWeight: '800', fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button onClick={() => { moveExo(r.id, exo.id, -1) }} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>▲</button>
-                  <button onClick={() => { moveExo(r.id, exo.id, 1) }} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>▼</button>
-                  <button onClick={() => { removeExo(r.id, exo.id); setExpandedExo(null) }} style={{ background: '#FF475710', border: '1px solid #FF475730', borderRadius: '8px', padding: '8px 12px', color: '#FF4757', cursor: 'pointer', fontSize: '14px' }}>✕</button>
-                </div>
+                {exo.exercices?.video_url && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#0D1A2E', border: '1px solid #1A6FFF30', borderRadius: '10px', padding: '8px 12px' }}>
+                    <span style={{ color: '#1A6FFF', fontSize: '13px' }}>▶</span>
+                    <span style={{ color: '#888', fontSize: '11px', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices.video_url}</span>
+                    <button
+                      onClick={() => navigator.clipboard.writeText(exo.exercices!.video_url!).then(() => alert('Lien copié !'))}
+                      style={{ background: '#1A6FFF20', border: '1px solid #1A6FFF40', borderRadius: '7px', padding: '5px 10px', color: '#1A6FFF', cursor: 'pointer', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
+                      Copier
+                    </button>
+                    <button
+                      onClick={() => window.open(exo.exercices!.video_url!, '_blank')}
+                      style={{ background: '#1A6FFF', border: 'none', borderRadius: '7px', padding: '5px 10px', color: '#FFF', cursor: 'pointer', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
+                      Ouvrir
+                    </button>
+                  </div>
+                )}
               </div>
               {/* Body scrollable */}
               <div style={{ overflowY: 'auto', flex: 1, padding: '16px' }}>
@@ -4425,7 +4662,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
 
   async function loadData() {
     const [{ data: reals }, { data: tmpl }, { data: exs }, { data: favs }] = await Promise.all([
-      supabase.from('realisations').select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, est_template, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, notes, sets_config, exercices(nom, consignes_execution, familles(nom, couleur))))').eq('joueur_id', joueur.id).order('date_realisation'),
+      supabase.from('realisations').select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, est_template, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur))))').eq('joueur_id', joueur.id).order('date_realisation'),
       supabase.from('seances').select('id, nom, type').eq('est_template', true).order('nom').limit(2000),
       supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom').limit(5000),
       supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('est_template', true).order('nom').limit(2000),
@@ -4823,6 +5060,10 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                                     {ex.exercices?.familles && <div style={{ fontSize: '9px', fontWeight: '800', color: couleur, textTransform: 'uppercase' as const, letterSpacing: '0.8px', marginBottom: '2px' }}>{ex.exercices.familles.nom}</div>}
                                     <div style={{ fontSize: '15px', fontWeight: '800', color: '#EEE', letterSpacing: '-0.2px', lineHeight: 1.2 }}>{ex.exercices?.nom}</div>
                                   </div>
+                                  {ex.exercices?.video_url && (
+                                    <button onClick={() => window.open(ex.exercices!.video_url!, '_blank')}
+                                      style={{ background: '#1A6FFF20', border: '1px solid #1A6FFF40', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', cursor: 'pointer', fontSize: '13px', flexShrink: 0 }}>▶</button>
+                                  )}
                                 </div>
                                 {ex.notes && (
                                   <div style={{ marginBottom: '8px' }}>
