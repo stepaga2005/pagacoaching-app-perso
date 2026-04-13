@@ -3905,7 +3905,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
 
       {/* ══ DESKTOP : grille de colonnes ══ */}
       {!loading && !isMobile && (
-      <div style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, 1fr)`, gap: '1px', background: '#1E1E1E', overflow: 'hidden' }}>
+      <div style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, 1fr)`, gap: '1px', background: '#1E1E1E', overflow: 'hidden', alignItems: 'stretch' }}>
         {days.map((ds, di) => {
           const isToday = ds === today
           const dateObj = new Date(ds + 'T12:00:00')
@@ -3915,9 +3915,11 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           const estSelectionne = joursSelectionnes.has(ds)
           return (
             <div key={ds} style={{
+              height: '100%',
               background: estSelectionne ? '#0A1F10' : (isToday ? '#0C0C14' : '#0D0D0D'),
-              display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0,
+              display: 'flex', flexDirection: 'column', overflow: 'hidden',
               outline: estSelectionne ? '2px solid #2ECC7150' : 'none', outlineOffset: '-1px',
+              boxSizing: 'border-box',
             }}>
               {/* Day header */}
               <div style={{ padding: '8px 6px 6px', borderBottom: '1px solid #1A1A1A', background: estSelectionne ? '#0D2015' : (isToday ? '#0C1020' : '#0D0D0D'), flexShrink: 0 }}>
@@ -3942,7 +3944,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                 )}
               </div>
               {/* Sessions scroll area */}
-              <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '6px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', padding: '6px', display: 'flex', flexDirection: 'column', gap: '6px' } as React.CSSProperties}>
                 {dayReals.map(r => {
                   const exos = [...(r.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
                   const typeLabel = (LABELS_TYPE[r.seances?.type || ''] || 'SÉANCE').toUpperCase()
