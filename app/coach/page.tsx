@@ -3941,19 +3941,9 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                                 </div>
                                 <span style={{ color: '#333', fontSize: '14px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }}>▼</span>
                               </button>
-                              {/* Menu ⋮ session */}
-                              <div style={{ position: 'relative', flexShrink: 0 }}>
-                                <button onClick={e => { e.stopPropagation(); setMpSessionMenu(mpSessionMenu?.id === r.id ? null : { id: r.id, seanceId: r.seance_id, date: ds, nom: r.seances?.nom || '' }) }}
-                                  style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '8px', color: '#2ECC71', cursor: 'pointer', fontSize: '16px', padding: '6px 10px', lineHeight: 1 }}>⋮</button>
-                                {mpSessionMenu?.id === r.id && (
-                                  <div style={{ position: 'absolute', right: 0, top: '36px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '4px', zIndex: 200, minWidth: '160px', boxShadow: '0 8px 24px rgba(0,0,0,0.9)' }}>
-                                    <button onClick={() => { setMpDupModal({ seanceId: r.seance_id, nom: r.seances?.nom || '' }); setMpDupDate(''); setMpDupJoueurId(''); setMpSessionMenu(null) }}
-                                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#DDD', cursor: 'pointer', padding: '10px 12px', fontSize: '13px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>📋 Dupliquer</button>
-                                    <button onClick={() => { setMpMovingSession({ id: r.id, seanceId: r.seance_id, fromDate: ds, nom: r.seances?.nom || '' }); setMpSessionMenu(null) }}
-                                      style={{ width: '100%', background: 'transparent', border: 'none', color: '#DDD', cursor: 'pointer', padding: '10px 12px', fontSize: '13px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>↔ Déplacer</button>
-                                  </div>
-                                )}
-                              </div>
+                              {/* Bouton ⋮ → bottom sheet actions session */}
+                              <button onClick={e => { e.stopPropagation(); setMpSessionMenu({ id: r.id, seanceId: r.seance_id, date: ds, nom: r.seances?.nom || '' }) }}
+                                style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '8px', color: '#2ECC71', cursor: 'pointer', fontSize: '16px', padding: '6px 10px', lineHeight: 1, flexShrink: 0 }}>⋮</button>
                             </div>
 
                             {/* Liste exercices dépliée */}
@@ -4290,6 +4280,32 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           </>
         )
       })()}
+
+      {/* MP — Bottom sheet actions session (⋮) */}
+      {mpSessionMenu && !mpDupModal && (
+        <>
+          <div onClick={() => setMpSessionMenu(null)}
+            style={{ position: 'fixed', inset: 0, zIndex: 450, background: 'rgba(0,0,0,0.6)' }} />
+          <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 451, background: '#131313', borderRadius: '16px 16px 0 0', border: '1px solid #252525', padding: '16px 16px 32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <div style={{ width: '36px', height: '4px', background: '#333', borderRadius: '2px' }} />
+            </div>
+            <div style={{ color: '#888', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{mpSessionMenu.nom}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button onClick={() => { setMpDupModal({ seanceId: mpSessionMenu.seanceId, nom: mpSessionMenu.nom }); setMpDupDate(''); setMpDupJoueurId(''); setMpSessionMenu(null) }}
+                style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '14px 16px', color: '#FFF', cursor: 'pointer', fontSize: '15px', fontWeight: '600', textAlign: 'left', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <span style={{ fontSize: '20px' }}>📋</span> Dupliquer la séance
+              </button>
+              <button onClick={() => { setMpMovingSession({ id: mpSessionMenu.id, seanceId: mpSessionMenu.seanceId, fromDate: mpSessionMenu.date, nom: mpSessionMenu.nom }); setMpSessionMenu(null) }}
+                style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '14px 16px', color: '#FFF', cursor: 'pointer', fontSize: '15px', fontWeight: '600', textAlign: 'left', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <span style={{ fontSize: '20px' }}>↔</span> Déplacer la séance
+              </button>
+              <button onClick={() => setMpSessionMenu(null)}
+                style={{ width: '100%', background: 'transparent', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '14px', color: '#555', cursor: 'pointer', fontSize: '15px', marginTop: '4px' }}>Annuler</button>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* MP — Modal Dupliquer session (bottom sheet) */}
       {mpDupModal && (
