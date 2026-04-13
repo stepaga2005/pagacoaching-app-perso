@@ -3759,7 +3759,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
         <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
 
           {/* Strip 7 jours */}
-          <div style={{ display: 'flex', gap: '4px', padding: '12px 14px 0', flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: '4px', padding: '12px 14px 0', flexShrink: 0, position: 'sticky', top: 0, background: '#0A0A0A', zIndex: 10 }}>
             {days.map((ds, i) => {
               const dayReals = byDate[ds] || []
               const isToday = ds === today
@@ -3904,7 +3904,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
 
       {/* ══ DESKTOP : grille de colonnes ══ */}
       {!loading && !isMobile && (
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, 1fr)`, gap: '1px', background: '#1E1E1E', overflow: 'hidden' }}>
+      <div style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, 1fr)`, gap: '1px', background: '#1E1E1E', overflow: 'hidden' }}>
         {days.map((ds, di) => {
           const isToday = ds === today
           const dateObj = new Date(ds + 'T12:00:00')
@@ -3915,7 +3915,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           return (
             <div key={ds} style={{
               background: estSelectionne ? '#0A1F10' : (isToday ? '#0C0C14' : '#0D0D0D'),
-              display: 'flex', flexDirection: 'column', overflow: 'hidden',
+              display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0,
               outline: estSelectionne ? '2px solid #2ECC7150' : 'none', outlineOffset: '-1px',
             }}>
               {/* Day header */}
@@ -3941,7 +3941,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                 )}
               </div>
               {/* Sessions scroll area */}
-              <div style={{ flex: 1, overflowY: 'auto', padding: '6px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '6px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {dayReals.map(r => {
                   const exos = [...(r.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
                   const typeLabel = (LABELS_TYPE[r.seances?.type || ''] || 'SÉANCE').toUpperCase()
