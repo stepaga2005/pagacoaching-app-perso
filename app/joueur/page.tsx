@@ -26,6 +26,138 @@ type WellnessForm = {
   rpe: number | null; qualite_sommeil: number | null; notes_joueur: string
 }
 
+function playBeep() {
+  try {
+    const ctx = new AudioContext()
+    const seq = [880, 1100, 1320]
+    seq.forEach((freq, i) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain); gain.connect(ctx.destination)
+      osc.frequency.value = freq
+      const t = ctx.currentTime + i * 0.18
+      gain.gain.setValueAtTime(0.25, t)
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15)
+      osc.start(t); osc.stop(t + 0.15)
+    })
+  } catch {}
+}
+
+function hapticJ(type: 'tap' | 'done' = 'tap') {
+  if (typeof navigator === 'undefined' || !navigator.vibrate) return
+  navigator.vibrate(type === 'done' ? [80, 60, 80, 60, 160] : [12])
+}
+
+function RecupTimer({ initialSec, onClose }: { initialSec: number; onClose: () => void }) {
+  const [total, setTotal] = useState(initialSec)
+  const [remaining, setRemaining] = useState(initialSec)
+  const [running, setRunning] = useState(true)
+  const doneRef = useRef(false)
+
+  useEffect(() => {
+    if (!running || remaining <= 0) return
+    const t = setTimeout(() => setRemaining(r => r - 1), 1000)
+    return () => clearTimeout(t)
+  }, [remaining, running])
+
+  useEffect(() => {
+    if (remaining === 0 && !doneRef.current) {
+      doneRef.current = true
+      playBeep()
+      hapticJ('done')
+      setTimeout(onClose, 2000)
+    }
+  }, [remaining, onClose])
+
+  const pct = total > 0 ? remaining / total : 0
+  const R = 88
+  const circumference = 2 * Math.PI * R
+  const done = remaining === 0
+  const mins = Math.floor(remaining / 60)
+  const secs = remaining % 60
+  const arcColor = done ? '#2ECC71' : pct > 0.5 ? '#1A6FFF' : pct > 0.25 ? '#F39C12' : '#FF4757'
+  const presets = [30, 45, 60, 90, 120, 180]
+
+  function reset(s: number) {
+    setTotal(s); setRemaining(s)
+    doneRef.current = false; setRunning(true)
+    hapticJ('tap')
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 600, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)' }} />
+      <div style={{
+        position: 'relative', background: '#0D0D12',
+        borderRadius: '24px 24px 0 0', padding: '20px 24px 44px',
+        animation: 'slideUp 0.35s cubic-bezier(0.22,1,0.36,1)',
+        boxShadow: '0 -20px 60px rgba(0,0,0,0.6)',
+      }}>
+        {/* Handle */}
+        <div style={{ width: '36px', height: '4px', background: '#2A2A2A', borderRadius: '2px', margin: '0 auto 20px' }} />
+
+        <div style={{ textAlign: 'center', marginBottom: '4px' }}>
+          <span style={{ fontSize: '10px', fontWeight: '900', letterSpacing: '2.5px', textTransform: 'uppercase', color: '#333' }}>Récupération</span>
+        </div>
+
+        {/* Cercle SVG */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px', position: 'relative' }}>
+          <div style={{ position: 'relative', width: '216px', height: '216px' }}>
+            <svg width="216" height="216" style={{ transform: 'rotate(-90deg)', display: 'block' }}>
+              <circle cx="108" cy="108" r={R} fill="none" stroke="#18181F" strokeWidth="10" />
+              <circle
+                cx="108" cy="108" r={R} fill="none"
+                stroke={arcColor} strokeWidth="10" strokeLinecap="round"
+                strokeDasharray={`${circumference}`}
+                strokeDashoffset={`${circumference * (1 - pct)}`}
+                style={{ transition: 'stroke-dashoffset 0.95s linear, stroke 0.4s ease' }}
+              />
+            </svg>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              {done ? (
+                <div style={{ fontSize: '52px', animation: 'splashWordIn 0.3s ease' }}>✅</div>
+              ) : (
+                <>
+                  <div style={{ fontSize: mins > 0 ? '48px' : '62px', fontWeight: '900', color: '#FFF', letterSpacing: '-3px', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                    {mins > 0 ? `${mins}:${String(secs).padStart(2, '0')}` : String(secs)}
+                  </div>
+                  {mins === 0 && <div style={{ fontSize: '11px', color: '#333', fontWeight: '700', marginTop: '2px' }}>sec</div>}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Contrôles */}
+        {!done && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '20px' }}>
+            <button onClick={() => { hapticJ('tap'); setRemaining(r => Math.max(5, r - 15)) }} style={{ width: '52px', height: '52px', borderRadius: '50%', background: '#18181F', border: '1px solid #2A2A2A', color: '#666', fontSize: '12px', fontWeight: '800', cursor: 'pointer' }}>−15s</button>
+            <button onClick={() => { hapticJ('tap'); setRunning(r => !r) }} style={{ width: '68px', height: '68px', borderRadius: '50%', background: running ? '#1A6FFF' : '#2A2A2A', border: 'none', color: '#FFF', fontSize: '22px', cursor: 'pointer', transition: 'background 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {running ? '⏸' : '▶'}
+            </button>
+            <button onClick={() => { hapticJ('tap'); setRemaining(r => r + 15); setTotal(t => t + 15) }} style={{ width: '52px', height: '52px', borderRadius: '50%', background: '#18181F', border: '1px solid #2A2A2A', color: '#666', fontSize: '12px', fontWeight: '800', cursor: 'pointer' }}>+15s</button>
+          </div>
+        )}
+
+        {/* Presets */}
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {presets.map(s => (
+            <button key={s} onClick={() => reset(s)} style={{
+              padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', fontWeight: '700',
+              border: `1px solid ${total === s && !done ? '#1A6FFF' : '#1F1F2A'}`,
+              background: total === s && !done ? '#1A6FFF18' : '#13131A',
+              color: total === s && !done ? '#1A6FFF' : '#444',
+              transition: 'all 0.15s',
+            }}>
+              {s >= 60 ? `${s / 60}min` : `${s}s`}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function RatingChips({ label, value, couleur, onChange }: {
   label: string; value: number | null; couleur: string; onChange: (v: number | null) => void
 }) {
@@ -65,6 +197,7 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onClose, is
   const [chronoRunning, setChronoRunning] = useState(false)
   const [videoOpen, setVideoOpen] = useState<string | null>(null)
   const [consignesOpen, setConsignesOpen] = useState<Set<string>>(new Set())
+  const [timerSec, setTimerSec] = useState<number | null>(null)
 
   useEffect(() => {
     if (!chronoRunning) return
@@ -118,6 +251,11 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onClose, is
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: '#080808', color: '#FFF', fontFamily: 'system-ui, -apple-system, sans-serif', zIndex: 500, display: 'flex', flexDirection: 'column' }}>
+
+      {/* Timer de récupération */}
+      {timerSec !== null && (
+        <RecupTimer initialSec={timerSec} onClose={() => setTimerSec(null)} />
+      )}
 
       {/* Header gradient — style Everfit */}
       <div style={{ background: 'linear-gradient(160deg, #1A40C8 0%, #0D1F6B 60%, #080C2A 100%)', flexShrink: 0, padding: isMobile ? `0 16px calc(24px + env(safe-area-inset-top, 0px))` : '0 24px 28px', paddingTop: `max(16px, env(safe-area-inset-top, 16px))` }}>
@@ -326,7 +464,11 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onClose, is
                                           <span style={{ fontSize: '12px', fontWeight: '800', color: couleur }}>{si + 1}</span>
                                           <span style={{ fontSize: '13px', fontWeight: '900', color: '#DDD' }}>{metrVal}</span>
                                           <span style={{ fontSize: '13px', fontWeight: '700', color: ex.charge_kg ? '#777' : '#252525' }}>{ex.charge_kg ? `${ex.charge_kg}kg` : '—'}</span>
-                                          <span style={{ fontSize: '13px', fontWeight: '700', color: recupColor(rv) }}>{rv}</span>
+                                          {rv !== '—' && rv !== 'Direct' ? (
+                                            <span onClick={() => { hapticJ('tap'); setTimerSec(parseInt(rv)) }} style={{ fontSize: '13px', fontWeight: '700', color: recupColor(rv), cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', textDecorationColor: recupColor(rv) + '60' }}>⏱ {rv}</span>
+                                          ) : (
+                                            <span style={{ fontSize: '13px', fontWeight: '700', color: recupColor(rv) }}>{rv}</span>
+                                          )}
                                         </div>
                                       )
                                     })}
@@ -353,10 +495,10 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onClose, is
                         {recuperBloc > 0 && (
                           <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                             <div style={{ width: '2px', height: '14px', background: '#1A6FFF30' }} />
-                            <div style={{ borderRadius: '14px', padding: isMobile ? '12px 20px' : '14px 32px', width: isMobile ? '100%' : 'auto', background: 'linear-gradient(90deg,#1A6FFF10,#1A6FFF06)', border: '1px solid #1A6FFF25', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', boxSizing: 'border-box' }}>
-                              <div style={{ fontSize: '9px', fontWeight: '900', color: '#1A6FFF60', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Récup après le superset</div>
+                            <button onClick={() => { hapticJ('tap'); setTimerSec(recuperBloc) }} style={{ borderRadius: '14px', padding: isMobile ? '12px 20px' : '14px 32px', width: isMobile ? '100%' : 'auto', background: 'linear-gradient(90deg,#1A6FFF15,#1A6FFF08)', border: '1px solid #1A6FFF40', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', boxSizing: 'border-box', cursor: 'pointer' }}>
+                              <div style={{ fontSize: '9px', fontWeight: '900', color: '#1A6FFF80', textTransform: 'uppercase', letterSpacing: '1.5px' }}>⏱ Récup superset — tap pour lancer</div>
                               <div style={{ fontSize: isMobile ? '42px' : '48px', fontWeight: '900', color: '#1A6FFF', letterSpacing: '-3px', lineHeight: 1 }}>{recuperBloc}s</div>
-                            </div>
+                            </button>
                             <div style={{ width: '2px', height: '14px', background: '#1A6FFF30' }} />
                           </div>
                         )}
@@ -471,10 +613,10 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onClose, is
                               {recuperBloc > 0 && (
                                 <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                                   <div style={{ width: '2px', height: '14px', background: '#2ECC7130' }} />
-                                  <div style={{ borderRadius: '14px', padding: isMobile ? '12px 20px' : '14px 32px', width: isMobile ? '100%' : 'auto', background: 'linear-gradient(90deg,#2ECC7112,#2ECC7108)', border: '1px solid #2ECC7130', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', boxSizing: 'border-box' }}>
-                                    <div style={{ fontSize: '9px', fontWeight: '900', color: '#2ECC7155', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Récupération</div>
+                                  <button onClick={() => { hapticJ('tap'); setTimerSec(recuperBloc) }} style={{ borderRadius: '14px', padding: isMobile ? '12px 20px' : '14px 32px', width: isMobile ? '100%' : 'auto', background: 'linear-gradient(90deg,#2ECC7115,#2ECC7108)', border: '1px solid #2ECC7140', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', boxSizing: 'border-box', cursor: 'pointer' }}>
+                                    <div style={{ fontSize: '9px', fontWeight: '900', color: '#2ECC7175', textTransform: 'uppercase', letterSpacing: '1.5px' }}>⏱ Récupération — tap pour lancer</div>
                                     <div style={{ fontSize: isMobile ? '42px' : '48px', fontWeight: '900', color: '#2ECC71', letterSpacing: '-3px', lineHeight: 1 }}>{recuperBloc}s</div>
-                                  </div>
+                                  </button>
                                   <div style={{ width: '2px', height: '14px', background: '#2ECC7130' }} />
                                 </div>
                               )}
