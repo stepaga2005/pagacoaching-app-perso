@@ -2703,13 +2703,11 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
       </div>
 
       {/* Infos séance */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
-        <input value={nom} onChange={e => setNom(e.target.value)} placeholder="Nom de la séance *"
-          className="input" style={{ flex: 1, fontSize: '15px', fontWeight: '600' }} />
-        <select value={type} onChange={e => setType(e.target.value)} className="select">
-          {TYPES_SEANCE.map(t => <option key={t} value={t}>{LABELS_TYPE[t]}</option>)}
-        </select>
-      </div>
+      <input value={nom} onChange={e => setNom(e.target.value)} placeholder="Nom de la séance *"
+        className="input" style={{ width: '100%', fontSize: '18px', fontWeight: '700', marginBottom: '10px', padding: '14px 16px', letterSpacing: '-0.3px' }} />
+      <select value={type} onChange={e => setType(e.target.value)} className="select" style={{ marginBottom: '12px' }}>
+        {TYPES_SEANCE.map(t => <option key={t} value={t}>{LABELS_TYPE[t]}</option>)}
+      </select>
 
       <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Notes générales de la séance..."
         rows={2} className="textarea" style={{ marginBottom: '24px' }} />
