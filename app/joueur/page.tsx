@@ -6,10 +6,12 @@ import { subscribePush, sendPush } from '@/lib/push'
 import { useRouter } from 'next/navigation'
 
 type Joueur = { id: string; nom: string; prenom: string; email: string; poste?: string; club?: string; auth_id?: string; coach_id?: string }
+type SetConfig = { reps?: number; duree?: number; dist?: number; charge?: number; recup?: number }
 type SeanceExercice = {
   id: string; ordre: number; series?: number; repetitions?: number
   duree_secondes?: number; distance_metres?: number; charge_kg?: number
   recuperation_secondes?: number; recuperation_inter_sets?: number; lien_suivant?: boolean; uni_podal?: boolean; notes?: string
+  sets_config?: SetConfig[] | null
   exercices?: {
     nom: string; video_url?: string; consignes_execution?: string
     familles?: { nom: string; couleur: string } | null
@@ -356,10 +358,11 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                               const isVideoOpen = videoOpen === ex.id
                               // Séries : shared si défini, sinon propre à l'exercice
                               const nbSeries = seriesShared > 0 ? seriesShared : (ex.series || 1)
-                              const metrLabel = ex.repetitions ? 'Reps' : ex.duree_secondes ? 'Durée' : ex.distance_metres ? 'Dist.' : 'Reps'
-                              const metrVal = ex.repetitions ? `${ex.repetitions}`
-                                : ex.duree_secondes ? `${ex.duree_secondes}''`
-                                : ex.distance_metres ? `${ex.distance_metres}m` : '—'
+                              const ssFirstSet = ex.sets_config?.[0]
+                              const metrLabel = (ssFirstSet?.reps ?? ex.repetitions) ? 'Reps' : (ssFirstSet?.duree ?? ex.duree_secondes) ? 'Durée' : (ssFirstSet?.dist ?? ex.distance_metres) ? 'Dist.' : 'Reps'
+                              const metrVal = (ssFirstSet?.reps ?? ex.repetitions) ? `${ssFirstSet?.reps ?? ex.repetitions}`
+                                : (ssFirstSet?.duree ?? ex.duree_secondes) ? `${ssFirstSet?.duree ?? ex.duree_secondes}''`
+                                : (ssFirstSet?.dist ?? ex.distance_metres) ? `${ssFirstSet?.dist ?? ex.distance_metres}m` : '—'
                               const thumbUrl = hasVideo ? vimeoThumb(ex.exercices!.video_url!) : ''
                               const showConsignes = consignesOpen.has(ex.id)
                               // Recovery column:
@@ -463,11 +466,16 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                                     </div>
                                     {Array.from({ length: nbSeries }, (_, si) => {
                                       const rv = getRecupSerie(si)
+                                      const setData = ex.sets_config?.[si]
+                                      const rowMetr = setData
+                                        ? (setData.reps ? `${setData.reps}` : setData.duree ? `${setData.duree}''` : setData.dist ? `${setData.dist}m` : metrVal)
+                                        : metrVal
+                                      const rowCharge = setData?.charge ?? ex.charge_kg
                                       return (
                                         <div key={si} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr', padding: '7px 6px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '6px' }}>
                                           <span style={{ fontSize: '12px', fontWeight: '800', color: couleur }}>{si + 1}</span>
-                                          <span style={{ fontSize: '13px', fontWeight: '900', color: '#DDD' }}>{metrVal}</span>
-                                          <span style={{ fontSize: '13px', fontWeight: '700', color: ex.charge_kg ? '#777' : '#252525' }}>{ex.charge_kg ? `${ex.charge_kg}kg` : '—'}</span>
+                                          <span style={{ fontSize: '13px', fontWeight: '900', color: '#DDD' }}>{rowMetr}</span>
+                                          <span style={{ fontSize: '13px', fontWeight: '700', color: rowCharge ? '#777' : '#252525' }}>{rowCharge ? `${rowCharge}kg` : '—'}</span>
                                           {rv !== '—' && rv !== 'Direct' ? (
                                             <span onClick={() => { hapticJ('tap'); setTimerSec(parseInt(rv)) }} style={{ fontSize: '13px', fontWeight: '700', color: recupColor(rv), cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', textDecorationColor: recupColor(rv) + '60' }}>⏱ {rv}</span>
                                           ) : (
@@ -523,10 +531,11 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                           const hasVideo = !!ex.exercices?.video_url
                           const isVideoOpen = videoOpen === ex.id
                           const nbSeries = ex.series || 0
-                          const metrLabel = ex.repetitions ? 'Reps' : ex.duree_secondes ? 'Durée' : ex.distance_metres ? 'Dist.' : 'Reps'
-                          const metrVal = ex.repetitions ? `${ex.repetitions}`
-                            : ex.duree_secondes ? `${ex.duree_secondes}''`
-                            : ex.distance_metres ? `${ex.distance_metres}m` : '—'
+                          const firstSet = ex.sets_config?.[0]
+                          const metrLabel = (firstSet?.reps ?? ex.repetitions) ? 'Reps' : (firstSet?.duree ?? ex.duree_secondes) ? 'Durée' : (firstSet?.dist ?? ex.distance_metres) ? 'Dist.' : 'Reps'
+                          const metrVal = (firstSet?.reps ?? ex.repetitions) ? `${firstSet?.reps ?? ex.repetitions}`
+                            : (firstSet?.duree ?? ex.duree_secondes) ? `${firstSet?.duree ?? ex.duree_secondes}''`
+                            : (firstSet?.dist ?? ex.distance_metres) ? `${firstSet?.dist ?? ex.distance_metres}m` : '—'
                           const thumbUrl = hasVideo ? vimeoThumb(ex.exercices!.video_url!) : ''
                           const showConsignes = consignesOpen.has(ex.id)
 
@@ -606,13 +615,22 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                                     </div>
                                     {Array.from({ length: nbSeries }, (_, si) => {
                                       const isLast = si === nbSeries - 1
-                                      const rv = !isLast && ex.recuperation_secondes ? `${ex.recuperation_secondes}s` : '—'
+                                      const setData = ex.sets_config?.[si]
+                                      const rowMetr = setData
+                                        ? (setData.reps ? `${setData.reps}` : setData.duree ? `${setData.duree}''` : setData.dist ? `${setData.dist}m` : '—')
+                                        : metrVal
+                                      const rowCharge = setData?.charge ?? ex.charge_kg
+                                      const rowRecup = setData ? (!isLast && setData.recup ? `${setData.recup}s` : '—') : (!isLast && ex.recuperation_secondes ? `${ex.recuperation_secondes}s` : '—')
                                       return (
                                         <div key={si} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr', padding: '7px 6px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '6px' }}>
                                           <span style={{ fontSize: '12px', fontWeight: '800', color: couleur }}>{si + 1}</span>
-                                          <span style={{ fontSize: '13px', fontWeight: '900', color: '#DDD' }}>{metrVal}</span>
-                                          <span style={{ fontSize: '13px', fontWeight: '700', color: ex.charge_kg ? '#777' : '#252525' }}>{ex.charge_kg ? `${ex.charge_kg}kg` : '—'}</span>
-                                          <span style={{ fontSize: '13px', fontWeight: '700', color: rv !== '—' ? '#2ECC7170' : '#252525' }}>{rv}</span>
+                                          <span style={{ fontSize: '13px', fontWeight: '900', color: '#DDD' }}>{rowMetr}</span>
+                                          <span style={{ fontSize: '13px', fontWeight: '700', color: rowCharge ? '#777' : '#252525' }}>{rowCharge ? `${rowCharge}kg` : '—'}</span>
+                                          {rowRecup !== '—' ? (
+                                            <span onClick={() => { hapticJ('tap'); setTimerSec(parseInt(rowRecup)) }} style={{ fontSize: '13px', fontWeight: '700', color: '#2ECC7170', cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', textDecorationColor: '#2ECC7140' }}>⏱ {rowRecup}</span>
+                                          ) : (
+                                            <span style={{ fontSize: '13px', fontWeight: '700', color: '#252525' }}>—</span>
+                                          )}
                                         </div>
                                       )
                                     })}
@@ -976,7 +994,7 @@ export default function JoueurPage() {
   async function load(joueurId: string) {
     const { data } = await supabase
       .from('realisations')
-      .select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, recuperation_inter_sets, lien_suivant, uni_podal, notes, exercices(nom, video_url, consignes_execution, familles(nom, couleur))))')
+      .select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, recuperation_inter_sets, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur))))')
       .eq('joueur_id', joueurId).order('date_realisation')
     if (data) setRealisations(data as unknown as Realisation[])
   }
