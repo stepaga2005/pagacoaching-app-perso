@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { subscribePush, sendPush } from '@/lib/push'
 import { useRouter } from 'next/navigation'
@@ -4777,12 +4777,18 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                 blocs.push(bloc); bi++
               }
               return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0', marginBottom: '16px' }}>
                   {blocs.map((bloc, bIdx) => {
+                    const isLastBloc = bIdx === blocs.length - 1
                     const isSuperset = bloc.length > 1
                     const seriesCount = bloc[0].series || 0
+                    const lastEx = bloc[bloc.length - 1]
+                    const recupEntreBlocsVal = lastEx.sets_config && lastEx.sets_config.length > 0
+                      ? (lastEx.sets_config[lastEx.sets_config.length - 1].recup ?? lastEx.sets_config[0].recup)
+                      : lastEx.recuperation_secondes
                     return (
-                      <div key={bIdx} style={{ background: '#0C0C0C', border: isSuperset ? '1px solid #1A6FFF25' : '1px solid #161616', borderRadius: '14px', overflow: 'hidden' }}>
+                      <Fragment key={bIdx}>
+                      <div style={{ background: '#0C0C0C', border: isSuperset ? '1px solid #1A6FFF25' : '1px solid #161616', borderRadius: '14px', overflow: 'hidden' }}>
                         {isSuperset && (
                           <div style={{ background: 'linear-gradient(90deg,#1A6FFF18,#1A6FFF08)', borderBottom: '1px solid #1A6FFF20', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span style={{ fontSize: '12px' }}>🔗</span>
@@ -4866,16 +4872,20 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                             </div>
                           )
                         })}
-                        {(bloc[bloc.length - 1].recuperation_secondes ?? 0) > 0 && (
-                          <div style={{ borderTop: '1px solid #161616', padding: '10px 14px', background: '#080808', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '24px', height: '24px', borderRadius: '7px', background: '#2ECC7115', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⏱</div>
-                            <div>
-                              <div style={{ fontSize: '9px', fontWeight: '800', color: '#2ECC7150', textTransform: 'uppercase' as const, letterSpacing: '1px' }}>{isSuperset ? 'Récup après le superset' : 'Récupération'}</div>
-                              <div style={{ fontSize: '16px', fontWeight: '900', color: '#2ECC71' }}>{bloc[bloc.length - 1].recuperation_secondes}s</div>
-                            </div>
-                          </div>
-                        )}
                       </div>
+                      {/* Bulle récup entre exercices */}
+                      {!isLastBloc && recupEntreBlocsVal && recupEntreBlocsVal > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 8px' }}>
+                          <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, #2ECC7120)' }} />
+                          <div style={{ background: '#0A1A0E', border: '1px solid #2ECC7135', borderRadius: '20px', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ color: '#2ECC7160', fontSize: '12px' }}>⏱</span>
+                            <span style={{ color: '#2ECC71', fontWeight: '900', fontSize: '14px', letterSpacing: '-0.3px' }}>{recupEntreBlocsVal}s</span>
+                            <span style={{ color: '#2ECC7160', fontSize: '10px', fontWeight: '700' }}>récup</span>
+                          </div>
+                          <div style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, #2ECC7120, transparent)' }} />
+                        </div>
+                      )}
+                      </Fragment>
                     )
                   })}
                 </div>
