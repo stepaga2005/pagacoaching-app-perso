@@ -3483,6 +3483,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
   const [mpWellnessData, setMpWellnessData] = useState({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' })
   const [mpTemplates, setMpTemplates] = useState<{ id: string; nom: string }[]>([])
   const [mpSeanceChoisie, setMpSeanceChoisie] = useState('')
+  const [mpNouvelleSeanceDate, setMpNouvelleSeanceDate] = useState<string | null>(null)
   const [modeSelection, setModeSelection] = useState(false)
   const [joursSelectionnes, setJoursSelectionnes] = useState<Set<string>>(new Set())
   const [showCopierModal, setShowCopierModal] = useState(false)
@@ -3497,6 +3498,14 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
     supabase.from('joueurs').select('id, nom, prenom').eq('actif', true).order('nom')
       .then(({ data }) => { if (data) setAllJoueurs([...data].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))) })
   }, [])
+
+  async function mpAttribuerSessionId(ds: string, seanceId: string) {
+    await supabase.from('realisations').insert({ joueur_id: joueur.id, seance_id: seanceId, date_realisation: ds, completee: false })
+    const { data } = await supabase.from('realisations')
+      .select('id, seance_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur))))')
+      .eq('joueur_id', joueur.id).order('date_realisation')
+    if (data) setReals(data as unknown as MPRealisation[])
+  }
 
   async function mpAttribuerSession(ds: string) {
     if (!mpSeanceChoisie) return
@@ -4089,9 +4098,18 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                   triggerStyle={{ width: '100%', fontSize: '13px' }}
                   zIndex={450}
                 />
-                <button onClick={() => mpAttribuerSession(mpActionDate)} disabled={!mpSeanceChoisie}
+                <button onClick={() => mpAttribuerSession(mpActionDate!)} disabled={!mpSeanceChoisie}
                   style={{ padding: '10px', borderRadius: '10px', border: 'none', background: mpSeanceChoisie ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpSeanceChoisie ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>
                   Ajouter au planning
+                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '2px 0' }}>
+                  <div style={{ flex: 1, height: '1px', background: '#1A6FFF20' }} />
+                  <span style={{ color: '#1A6FFF40', fontSize: '11px', fontWeight: '700' }}>OU</span>
+                  <div style={{ flex: 1, height: '1px', background: '#1A6FFF20' }} />
+                </div>
+                <button onClick={() => { setMpNouvelleSeanceDate(mpActionDate); setMpActionDate(null) }}
+                  style={{ padding: '10px', borderRadius: '10px', border: '1px solid #1A6FFF40', background: 'transparent', color: '#5599FF', cursor: 'pointer', fontWeight: '700', fontSize: '14px' }}>
+                  + Créer une nouvelle séance
                 </button>
               </div>
               <button onClick={() => { setMpWellnessDate(mpActionDate); setMpWellnessData({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' }); setMpActionDate(null) }}
@@ -4169,6 +4187,36 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MP — Créer une nouvelle séance */}
+      {mpNouvelleSeanceDate && (
+        <div style={{ position: 'fixed', inset: 0, background: '#0A0A0A', zIndex: 500, overflowY: 'auto' }}>
+          <div style={{ maxWidth: '860px', margin: '0 auto', padding: '24px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <button onClick={() => setMpNouvelleSeanceDate(null)}
+                style={{ background: 'none', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '13px' }}>← Annuler</button>
+              <div>
+                <div style={{ fontWeight: '800', fontSize: '16px' }}>Nouvelle séance</div>
+                <div style={{ color: '#C9A84C', fontSize: '12px' }}>
+                  {new Date(mpNouvelleSeanceDate + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} — {joueur.prenom} {joueur.nom}
+                </div>
+              </div>
+            </div>
+            <EditeurSeance
+              seance={{ id: '', nom: '', type: 'complete', notes: '', est_template: false, seance_exercices: [] }}
+              exercices={exercices}
+              joueurId={joueur.id}
+              dateAttribution={mpNouvelleSeanceDate}
+              sauvegarderFavori={false}
+              onSave={async (seanceId) => {
+                if (seanceId) await mpAttribuerSessionId(mpNouvelleSeanceDate, seanceId)
+                setMpNouvelleSeanceDate(null)
+              }}
+              onCancel={() => setMpNouvelleSeanceDate(null)}
+            />
           </div>
         </div>
       )}
