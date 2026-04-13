@@ -3054,6 +3054,7 @@ type Realisation = {
       id: string; ordre: number; series?: number; repetitions?: number
       duree_secondes?: number; distance_metres?: number; charge_kg?: number
       recuperation_secondes?: number; lien_suivant?: boolean; notes?: string
+      sets_config?: SetConfig[] | null
       exercices?: { nom: string; consignes_execution?: string; familles?: { nom: string; couleur: string } | null } | null
     }[]
   } | null
@@ -4423,7 +4424,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
 
   async function loadData() {
     const [{ data: reals }, { data: tmpl }, { data: exs }, { data: favs }] = await Promise.all([
-      supabase.from('realisations').select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, est_template, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, notes, exercices(nom, consignes_execution, familles(nom, couleur))))').eq('joueur_id', joueur.id).order('date_realisation'),
+      supabase.from('realisations').select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, est_template, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, notes, sets_config, exercices(nom, consignes_execution, familles(nom, couleur))))').eq('joueur_id', joueur.id).order('date_realisation'),
       supabase.from('seances').select('id, nom, type').eq('est_template', true).order('nom').limit(2000),
       supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom').limit(5000),
       supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('est_template', true).order('nom').limit(2000),
@@ -4791,10 +4792,11 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                         )}
                         {bloc.map((ex, ei) => {
                           const couleur = ex.exercices?.familles?.couleur || '#555'
-                          const nbSeries = isSuperset ? seriesCount : (ex.series || 0)
-                          const metrique = ex.repetitions ? `${ex.repetitions} reps`
-                            : ex.duree_secondes ? `${ex.duree_secondes}s`
-                            : ex.distance_metres ? `${ex.distance_metres}m` : null
+                          const nbSeries = isSuperset ? seriesCount : (ex.series || (ex.sets_config?.length ?? 0))
+                          const firstSet = ex.sets_config?.[0]
+                          const metrique = (firstSet?.reps ?? ex.repetitions) ? `${firstSet?.reps ?? ex.repetitions} reps`
+                            : (firstSet?.duree ?? ex.duree_secondes) ? `${firstSet?.duree ?? ex.duree_secondes}s`
+                            : (firstSet?.dist ?? ex.distance_metres) ? `${firstSet?.dist ?? ex.distance_metres}m` : null
                           return (
                             <div key={ex.id}>
                               {isSuperset && ei > 0 && (
@@ -4829,20 +4831,27 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                                 {nbSeries > 0 && (
                                   <div style={{ marginBottom: '10px' }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr 1fr', gap: '2px', padding: '4px 8px', marginBottom: '2px' }}>
-                                      {['N°', ex.repetitions ? 'Reps' : ex.duree_secondes ? 'Durée' : 'Reps', 'Charge', 'Récup'].map(h => (
+                                      {['N°', (firstSet?.reps ?? ex.repetitions) ? 'Reps' : (firstSet?.duree ?? ex.duree_secondes) ? 'Durée' : 'Reps', 'Charge', 'Récup'].map(h => (
                                         <span key={h} style={{ fontSize: '9px', fontWeight: '800', color: '#252525', textTransform: 'uppercase' as const, letterSpacing: '0.5px' }}>{h}</span>
                                       ))}
                                     </div>
-                                    {Array.from({ length: nbSeries }, (_, si) => (
-                                      <div key={si} style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr 1fr', gap: '2px', padding: '7px 8px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '6px' }}>
-                                        <span style={{ fontSize: '12px', fontWeight: '700', color: couleur }}>{si + 1}</span>
-                                        <span style={{ fontSize: '13px', fontWeight: '800', color: '#CCC' }}>{metrique || '—'}</span>
-                                        <span style={{ fontSize: '13px', fontWeight: '700', color: ex.charge_kg ? '#777' : '#252525' }}>{ex.charge_kg ? `${ex.charge_kg}kg` : '—'}</span>
-                                        <span style={{ fontSize: '12px', fontWeight: '700', color: !isSuperset && ex.recuperation_secondes && si < nbSeries - 1 ? '#2ECC7170' : '#252525' }}>
-                                          {!isSuperset && ex.recuperation_secondes && si < nbSeries - 1 ? `${ex.recuperation_secondes}s` : '—'}
-                                        </span>
-                                      </div>
-                                    ))}
+                                    {Array.from({ length: nbSeries }, (_, si) => {
+                                      const setData = ex.sets_config?.[si]
+                                      const rowMetr = setData
+                                        ? (setData.reps ? `${setData.reps} reps` : setData.duree ? `${setData.duree}s` : setData.dist ? `${setData.dist}m` : metrique || '—')
+                                        : (metrique || '—')
+                                      const rowCharge = setData?.charge ?? ex.charge_kg
+                                      const rowRecup = setData ? (!isSuperset && si < nbSeries - 1 && setData.recup ? `${setData.recup}s` : '—')
+                                        : (!isSuperset && ex.recuperation_secondes && si < nbSeries - 1 ? `${ex.recuperation_secondes}s` : '—')
+                                      return (
+                                        <div key={si} style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr 1fr', gap: '2px', padding: '7px 8px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '6px' }}>
+                                          <span style={{ fontSize: '12px', fontWeight: '700', color: couleur }}>{si + 1}</span>
+                                          <span style={{ fontSize: '13px', fontWeight: '800', color: '#CCC' }}>{rowMetr}</span>
+                                          <span style={{ fontSize: '13px', fontWeight: '700', color: rowCharge ? '#777' : '#252525' }}>{rowCharge ? `${rowCharge}kg` : '—'}</span>
+                                          <span style={{ fontSize: '12px', fontWeight: '700', color: rowRecup !== '—' ? '#2ECC7170' : '#252525' }}>{rowRecup}</span>
+                                        </div>
+                                      )
+                                    })}
                                   </div>
                                 )}
                                 {nbSeries === 0 && (ex.repetitions || ex.duree_secondes || ex.distance_metres || ex.charge_kg) && (
