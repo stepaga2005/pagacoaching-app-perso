@@ -3915,6 +3915,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           const estSelectionne = joursSelectionnes.has(ds)
           return (
             <div key={ds} style={{
+              minHeight: 0,
               background: estSelectionne ? '#0A1F10' : (isToday ? '#0C0C14' : '#0D0D0D'),
               overflowY: 'auto', overflowX: 'hidden',
               outline: estSelectionne ? '2px solid #2ECC7150' : 'none', outlineOffset: '-1px',
