@@ -184,12 +184,13 @@ function RatingChips({ label, value, couleur, onChange }: {
   )
 }
 
-function SessionDetail({ realisation, form, setForm, saving, onSave, onClose, isMobile }: {
+function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete, onClose, isMobile }: {
   realisation: Realisation
   form: WellnessForm
   setForm: React.Dispatch<React.SetStateAction<WellnessForm>>
   saving: boolean
   onSave: () => void
+  onComplete: () => void
   onClose: () => void
   isMobile: boolean
 }) {
@@ -638,16 +639,30 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onClose, is
             <div style={{ flex: 1, height: '1px', background: '#161616' }} />
           </div>
 
-          {/* Checkbox séance réalisée */}
-          <label style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', marginBottom: '32px', padding: '18px 20px', background: form.completee ? '#2ECC7110' : '#0F0F0F', borderRadius: '16px', border: `1px solid ${form.completee ? '#2ECC7135' : '#1A1A1A'}` }}>
-            <div style={{ width: '30px', height: '30px', borderRadius: '10px', background: form.completee ? '#2ECC71' : '#161616', border: `2px solid ${form.completee ? '#2ECC71' : '#2A2A2A'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              {form.completee && <span style={{ color: '#FFF', fontSize: '16px', fontWeight: '900' }}>✓</span>}
+          {/* Bouton séance réalisée */}
+          {form.completee ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px', padding: '18px 20px', background: '#2ECC7110', borderRadius: '16px', border: '1px solid #2ECC7135' }}>
+              <div style={{ width: '30px', height: '30px', borderRadius: '10px', background: '#2ECC71', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ color: '#FFF', fontSize: '16px', fontWeight: '900' }}>✓</span>
+              </div>
+              <span style={{ fontWeight: '700', fontSize: '17px', color: '#2ECC71' }}>Séance réalisée !</span>
             </div>
-            <input type="checkbox" checked={form.completee} onChange={e => setForm(f => ({ ...f, completee: e.target.checked }))} style={{ display: 'none' }} />
-            <span style={{ fontWeight: '700', fontSize: '17px', color: form.completee ? '#2ECC71' : '#555' }}>
-              {form.completee ? 'Séance réalisée !' : "J'ai fait cette séance"}
-            </span>
-          </label>
+          ) : (
+            <button onClick={() => {
+              hapticJ('done')
+              setChronoRunning(false)
+              setForm(f => ({ ...f, completee: true }))
+              onComplete()
+            }} style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: '16px',
+              marginBottom: '32px', padding: '18px 20px', background: '#0F0F0F',
+              borderRadius: '16px', border: '1px solid #1A1A1A', cursor: 'pointer',
+              textAlign: 'left',
+            }}>
+              <div style={{ width: '30px', height: '30px', borderRadius: '10px', background: '#161616', border: '2px solid #2A2A2A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }} />
+              <span style={{ fontWeight: '700', fontSize: '17px', color: '#555' }}>J'ai fait cette séance</span>
+            </button>
+          )}
 
           <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#2A2A2A', marginBottom: '24px' }}>Ton état de forme</div>
           <RatingChips label="Fatigue" value={form.fatigue} couleur="#FF4757" onChange={v => setForm(f => ({ ...f, fatigue: v }))} />
@@ -662,12 +677,13 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onClose, is
               style={{ width: '100%', background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '14px', padding: '16px', color: '#CCC', fontSize: '14px', outline: 'none', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', lineHeight: '1.6' }} />
           </div>
 
-          <button onClick={onSave} disabled={saving} style={{
+          <button onClick={onSave} disabled={saving || !form.completee} style={{
             width: '100%', padding: isMobile ? '18px' : '20px', borderRadius: '18px', border: 'none',
-            background: saving ? '#111' : '#1A6FFF', color: saving ? '#333' : '#FFF',
-            fontWeight: '900', fontSize: '17px', cursor: saving ? 'not-allowed' : 'pointer',
+            background: saving ? '#111' : !form.completee ? '#111' : '#1A6FFF',
+            color: saving || !form.completee ? '#333' : '#FFF',
+            fontWeight: '900', fontSize: '17px', cursor: saving || !form.completee ? 'not-allowed' : 'pointer',
           }}>
-            {saving ? 'Enregistrement...' : realisation.completee ? 'Mettre à jour le bilan' : 'Enregistrer le bilan'}
+            {saving ? 'Enregistrement...' : form.completee ? 'Enregistrer mon état de forme' : 'Marque d\'abord la séance comme réalisée'}
           </button>
         </div>
       </div>
@@ -960,6 +976,15 @@ export default function JoueurPage() {
     setForm({ completee: r.completee, fatigue: r.fatigue ?? null, courbatures: r.courbatures ?? null, rpe: r.rpe ?? null, qualite_sommeil: r.qualite_sommeil ?? null, notes_joueur: r.notes_joueur ?? '' })
   }
 
+  async function completerSeance() {
+    if (!selected || !joueur) return
+    setSaving(true)
+    await supabase.from('realisations').update({ completee: true }).eq('id', selected.id)
+    await load(joueur.id)
+    setSaving(false)
+    // On reste sur la vue pour que le joueur puisse remplir le wellness
+  }
+
   async function sauvegarder() {
     if (!selected || !joueur) return
     setSaving(true)
@@ -999,6 +1024,7 @@ export default function JoueurPage() {
           setForm={setForm}
           saving={saving}
           onSave={sauvegarder}
+          onComplete={completerSeance}
           onClose={() => setSelected(null)}
           isMobile={isMobile}
         />
