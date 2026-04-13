@@ -3922,9 +3922,9 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                       const typeLabel = LABELS_TYPE[r.seances?.type || ''] || r.seances?.type || ''
 
                       return (
-                        <div key={r.id} style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '14px', overflow: 'hidden', display: 'flex' }}>
+                        <div key={r.id} style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '14px', display: 'flex' }}>
                           {/* Barre colorée */}
-                          <div style={{ width: '4px', background: statusColor, flexShrink: 0 }} />
+                          <div style={{ width: '4px', background: statusColor, flexShrink: 0, borderRadius: '14px 0 0 14px' }} />
 
                           <div style={{ flex: 1 }}>
                             {/* Header séance */}
@@ -3946,7 +3946,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                                 <button onClick={e => { e.stopPropagation(); setMpSessionMenu(mpSessionMenu?.id === r.id ? null : { id: r.id, seanceId: r.seance_id, date: ds, nom: r.seances?.nom || '' }) }}
                                   style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '8px', color: '#2ECC71', cursor: 'pointer', fontSize: '16px', padding: '6px 10px', lineHeight: 1 }}>⋮</button>
                                 {mpSessionMenu?.id === r.id && (
-                                  <div style={{ position: 'absolute', right: 0, top: '36px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '4px', zIndex: 50, minWidth: '160px', boxShadow: '0 8px 24px rgba(0,0,0,0.6)' }}>
+                                  <div style={{ position: 'absolute', right: 0, top: '36px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '4px', zIndex: 200, minWidth: '160px', boxShadow: '0 8px 24px rgba(0,0,0,0.9)' }}>
                                     <button onClick={() => { setMpDupModal({ seanceId: r.seance_id, nom: r.seances?.nom || '' }); setMpDupDate(''); setMpDupJoueurId(''); setMpSessionMenu(null) }}
                                       style={{ width: '100%', background: 'transparent', border: 'none', color: '#DDD', cursor: 'pointer', padding: '10px 12px', fontSize: '13px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>📋 Dupliquer</button>
                                     <button onClick={() => { setMpMovingSession({ id: r.id, seanceId: r.seance_id, fromDate: ds, nom: r.seances?.nom || '' }); setMpSessionMenu(null) }}
@@ -4238,14 +4238,20 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
         const allExos = [...(r?.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
         const otherExos = allExos.filter(e => e.id !== mpCopyExoModal.fromExo.id)
         return (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 500 }}
-            onClick={() => { setMpCopyExoModal(null); setMpCopyExoTargets(new Set()) }}>
-            <div onClick={e => e.stopPropagation()} style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '520px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ fontWeight: '800', fontSize: '16px', marginBottom: '4px' }}>Dupliquer les données d'exercice</div>
-              <div style={{ color: '#888', fontSize: '13px', marginBottom: '16px' }}>
-                Vers quels exercices copier les données de <span style={{ color: '#FFF', fontWeight: '700' }}>{mpCopyExoModal.fromExo.exercices?.nom}</span> ?
+          <>
+            <div onClick={() => { setMpCopyExoModal(null); setMpCopyExoTargets(new Set()) }}
+              style={{ position: 'fixed', inset: 0, zIndex: 450, background: 'rgba(0,0,0,0.7)' }} />
+            <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 451, background: '#131313', borderRadius: '16px 16px 0 0', border: '1px solid #252525', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
+                <div style={{ width: '36px', height: '4px', background: '#333', borderRadius: '2px' }} />
               </div>
-              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+              <div style={{ padding: '8px 16px 12px', borderBottom: '1px solid #1E1E1E' }}>
+                <div style={{ fontWeight: '800', fontSize: '16px', marginBottom: '4px' }}>⊕ Copier les données</div>
+                <div style={{ color: '#888', fontSize: '13px' }}>
+                  Depuis <span style={{ color: '#FFF', fontWeight: '700' }}>{mpCopyExoModal.fromExo.exercices?.nom}</span> vers :
+                </div>
+              </div>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {otherExos.map(exo => {
                   const fam = exo.exercices?.familles
                   const couleur = fam?.couleur || '#555'
@@ -4256,40 +4262,44 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                     : [exo.series ? `${exo.series}×` : '', exo.repetitions ? `${exo.repetitions}r` : '', exo.charge_kg ? `${exo.charge_kg}kg` : ''].filter(Boolean).join(' ') || '—'
                   return (
                     <div key={exo.id} onClick={() => setMpCopyExoTargets(prev => { const next = new Set(prev); isSelected ? next.delete(exo.id) : next.add(exo.id); return next })}
-                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: isSelected ? '#1A6FFF15' : '#181818', border: `1px solid ${isSelected ? '#1A6FFF50' : '#252525'}`, borderRadius: '12px', cursor: 'pointer', transition: 'all 0.15s' }}>
+                      style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', background: isSelected ? '#1A6FFF15' : '#181818', border: `1px solid ${isSelected ? '#1A6FFF50' : '#252525'}`, borderRadius: '12px', cursor: 'pointer' }}>
                       <div style={{ width: '32px', height: '32px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <span style={{ color: couleur, fontSize: '11px', fontWeight: '900' }}>{exo.ordre}</span>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        {fam && <div style={{ color: couleur, fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{fam.nom}</div>}
+                        {fam && <div style={{ color: couleur, fontSize: '9px', fontWeight: '800', textTransform: 'uppercase' }}>{fam.nom}</div>}
                         <div style={{ color: isSelected ? '#FFF' : '#CCC', fontWeight: '700', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
-                        <div style={{ color: '#555', fontSize: '11px', marginTop: '1px' }}>{summary}</div>
+                        <div style={{ color: '#555', fontSize: '11px' }}>{summary}</div>
                       </div>
-                      <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${isSelected ? '#1A6FFF' : '#333'}`, background: isSelected ? '#1A6FFF' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        {isSelected && <span style={{ color: '#FFF', fontSize: '11px', fontWeight: '900' }}>✓</span>}
+                      <div style={{ width: '22px', height: '22px', borderRadius: '50%', border: `2px solid ${isSelected ? '#1A6FFF' : '#333'}`, background: isSelected ? '#1A6FFF' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        {isSelected && <span style={{ color: '#FFF', fontSize: '12px', fontWeight: '900' }}>✓</span>}
                       </div>
                     </div>
                   )
                 })}
               </div>
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ padding: '12px 16px 32px', borderTop: '1px solid #1E1E1E', display: 'flex', gap: '10px' }}>
                 <button onClick={() => { setMpCopyExoModal(null); setMpCopyExoTargets(new Set()) }}
-                  style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+                  style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
                 <button onClick={mpCopyExoToTargets} disabled={mpCopyExoTargets.size === 0}
-                  style={{ flex: 2, padding: '12px', borderRadius: '12px', border: 'none', background: mpCopyExoTargets.size > 0 ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpCopyExoTargets.size > 0 ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>
+                  style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: mpCopyExoTargets.size > 0 ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpCopyExoTargets.size > 0 ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>
                   Copier vers {mpCopyExoTargets.size > 0 ? `${mpCopyExoTargets.size} exercice${mpCopyExoTargets.size > 1 ? 's' : ''}` : '…'}
                 </button>
               </div>
             </div>
-          </div>
+          </>
         )
       })()}
 
-      {/* MP — Modal Dupliquer session */}
+      {/* MP — Modal Dupliquer session (bottom sheet) */}
       {mpDupModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}
-          onClick={() => { setMpDupModal(null); setMpDupDate(''); setMpDupJoueurId('') }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '340px' }}>
+        <>
+          <div onClick={() => { setMpDupModal(null); setMpDupDate(''); setMpDupJoueurId('') }}
+            style={{ position: 'fixed', inset: 0, zIndex: 450, background: 'rgba(0,0,0,0.7)' }} />
+          <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 451, background: '#131313', borderRadius: '16px 16px 0 0', border: '1px solid #252525', padding: '20px 16px 32px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+              <div style={{ width: '36px', height: '4px', background: '#333', borderRadius: '2px' }} />
+            </div>
             <div style={{ fontWeight: '800', fontSize: '16px', marginBottom: '4px' }}>📋 Dupliquer la séance</div>
             <div style={{ color: '#888', fontSize: '13px', marginBottom: '20px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{mpDupModal.nom}</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
@@ -4311,12 +4321,12 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button onClick={() => { setMpDupModal(null); setMpDupDate(''); setMpDupJoueurId('') }}
-                style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+                style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
               <button onClick={mpDupSession} disabled={!mpDupDate}
-                style={{ flex: 1, padding: '12px', borderRadius: '12px', border: 'none', background: mpDupDate ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpDupDate ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>Dupliquer</button>
+                style={{ flex: 1, padding: '14px', borderRadius: '12px', border: 'none', background: mpDupDate ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpDupDate ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>Dupliquer</button>
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* MP — Menu action + / Wellness */}
