@@ -331,7 +331,7 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
           { label: 'Messages', value: unread, color: unread > 0 ? '#FF4757' : '#333', icon: '💬', onClick: () => onNavTo('messages') },
         ].map(s => (
           <div key={s.label} onClick={s.onClick} style={{
-            background: '#0F0F0F', border: `1px solid ${s.value > 0 && s.label === 'Messages' ? '#FF475730' : '#1A1A1A'}`,
+            background: '#141420', border: `1px solid ${s.value > 0 && s.label === 'Messages' ? '#FF475730' : '#212135'}`,
             borderRadius: '14px', padding: '16px 14px', cursor: s.onClick ? 'pointer' : 'default',
           }}>
             <div style={{ fontSize: '18px', marginBottom: '10px' }}>{s.icon}</div>
@@ -352,7 +352,7 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
         </div>
 
         {seancesJour.length === 0 ? (
-          <div style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '14px', padding: '28px', textAlign: 'center', color: '#333', fontSize: '14px' }}>
+          <div style={{ background: '#141420', border: '1px solid #222238', borderRadius: '14px', padding: '28px', textAlign: 'center', color: '#333', fontSize: '14px' }}>
             Aucune séance prévue aujourd'hui
           </div>
         ) : (
@@ -363,7 +363,7 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
               const statusColor = r.completee ? '#2ECC71' : '#1A6FFF'
               const fatigueColor = !r.fatigue ? null : r.fatigue <= 3 ? '#2ECC71' : r.fatigue <= 5 ? '#F39C12' : r.fatigue <= 7 ? '#FF6B35' : '#FF4757'
               return (
-                <div key={r.id} style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '14px', display: 'flex', overflow: 'hidden' }}>
+                <div key={r.id} style={{ background: '#141420', border: '1px solid #222238', borderRadius: '14px', display: 'flex', overflow: 'hidden' }}>
                   <div style={{ width: '4px', background: statusColor, flexShrink: 0 }} />
                   <div style={{ flex: 1, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                     {/* Avatar */}
@@ -457,7 +457,7 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
                 }}>{pct}%</span>
               </div>
             </div>
-            <div style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '16px', padding: '20px 16px' }}>
+            <div style={{ background: '#141420', border: '1px solid #222238', borderRadius: '16px', padding: '20px 16px' }}>
               <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', height: '72px' }}>
                 {loadByDay.map((d) => {
                   const isToday = d.d === today
@@ -469,7 +469,7 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
                     <div key={d.d} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end' }}>
                       <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
                         {/* Barre planifiée (fond) */}
-                        {d.planned > 0 && <div style={{ position: 'absolute', bottom: 0, left: '10%', right: '10%', height: `${bgH}px`, borderRadius: '4px 4px 0 0', background: '#1A1A1A' }} />}
+                        {d.planned > 0 && <div style={{ position: 'absolute', bottom: 0, left: '10%', right: '10%', height: `${bgH}px`, borderRadius: '4px 4px 0 0', background: '#212135' }} />}
                         {/* Barre réalisée */}
                         {d.count > 0 && <div style={{ position: 'relative', left: '10%', right: '10%', width: '80%', height: `${fillH}px`, borderRadius: '4px 4px 0 0', background: col, transition: 'height 0.4s cubic-bezier(0.22,1,0.36,1)' }} />}
                       </div>
@@ -479,13 +479,13 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
                 })}
               </div>
               {/* Légende */}
-              <div style={{ display: 'flex', gap: '16px', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #161616' }}>
+              <div style={{ display: 'flex', gap: '16px', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #1C1C2C' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#2ECC71' }} />
                   <span style={{ fontSize: '10px', color: '#444', fontWeight: '600' }}>Réalisé</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#1A1A1A', border: '1px solid #333' }} />
+                  <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#212135', border: '1px solid #333' }} />
                   <span style={{ fontSize: '10px', color: '#444', fontWeight: '600' }}>Planifié</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -514,13 +514,13 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
               const completedWeek = (byPlayer[j.id] || []).filter(r => r.completee && r.seance_id).length
               const plannedWeek = (byPlayer[j.id] || []).filter(r => r.seance_id).length
               const { label, color, bg } = lastFatigue === null
-                ? { label: 'Aucune donnée', color: '#444', bg: '#1A1A1A' }
+                ? { label: 'Aucune donnée', color: '#444', bg: '#212135' }
                 : lastFatigue <= 3 ? { label: '🟢 Frais', color: '#2ECC71', bg: '#2ECC7110' }
                 : lastFatigue <= 5 ? { label: '🟡 Normal', color: '#F39C12', bg: '#F39C1210' }
                 : lastFatigue <= 7 ? { label: '🟠 Fatigué', color: '#FF6B35', bg: '#FF6B3510' }
                 : { label: '🔴 Surchargé', color: '#FF4757', bg: '#FF475710' }
               return (
-                <div key={j.id} style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div key={j.id} style={{ background: '#141420', border: '1px solid #222238', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#2ECC7115', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <span style={{ fontSize: '12px', fontWeight: '900', color: '#2ECC71' }}>{j.prenom[0]}{j.nom[0]}</span>
                   </div>
@@ -550,8 +550,8 @@ function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab
             <div style={{ width: '3px', height: '18px', background: '#1A6FFF', borderRadius: '2px' }} />
             <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#1A6FFF', letterSpacing: '1px', textTransform: 'uppercase' }}>Planning semaine</h2>
           </div>
-          <div style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '16px', overflow: 'hidden' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr repeat(7, 36px)', gap: '4px', padding: '10px 14px', borderBottom: '1px solid #161616', alignItems: 'center' }}>
+          <div style={{ background: '#141420', border: '1px solid #222238', borderRadius: '16px', overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr repeat(7, 36px)', gap: '4px', padding: '10px 14px', borderBottom: '1px solid #1C1C2C', alignItems: 'center' }}>
               <div />
               {weekDays.map((ds, i) => (
                 <div key={ds} style={{ textAlign: 'center' }}>
@@ -728,7 +728,7 @@ function Joueurs() {
       value={form[key]}
       onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
       style={{
-        width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A',
+        width: '100%', background: '#212135', border: '1px solid #2C2C44',
         borderRadius: '8px', padding: '12px 14px', color: '#FFF', fontSize: '14px', outline: 'none',
       }}
     />
@@ -748,7 +748,7 @@ function Joueurs() {
         <div style={{ display: 'flex', gap: '10px' }}>
           <button onClick={() => setShowGroupesModal(true)} style={{
             background: 'transparent', color: '#888', padding: '10px 16px',
-            borderRadius: '10px', border: '1px solid #2A2A2A', cursor: 'pointer', fontWeight: '600', fontSize: '13px',
+            borderRadius: '10px', border: '1px solid #2C2C44', cursor: 'pointer', fontWeight: '600', fontSize: '13px',
           }}>🏷️ Groupes</button>
           <button onClick={openAdd} style={{
             background: '#1A6FFF', color: '#FFF', padding: '10px 18px',
@@ -760,7 +760,7 @@ function Joueurs() {
       {/* Modal gestion des groupes */}
       {showGroupesModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
-          <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px', maxHeight: '80vh', overflowY: 'auto' }}>
+          <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '420px', maxHeight: '80vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', fontWeight: '800' }}>Gérer les groupes</h2>
               <button onClick={() => setShowGroupesModal(false)} style={{ background: 'transparent', border: 'none', color: '#888', fontSize: '22px', cursor: 'pointer', lineHeight: 1 }}>×</button>
@@ -772,7 +772,7 @@ function Joueurs() {
                 <div style={{ color: '#555', fontSize: '13px', textAlign: 'center', padding: '16px' }}>Aucun groupe créé</div>
               )}
               {groupes.map(g => (
-                <div key={g.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#1A1A1A', borderRadius: '10px', padding: '12px 16px' }}>
+                <div key={g.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#212135', borderRadius: '10px', padding: '12px 16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: g.couleur, flexShrink: 0 }} />
                     <span style={{ fontWeight: '600', fontSize: '14px' }}>{g.nom}</span>
@@ -793,7 +793,7 @@ function Joueurs() {
                 value={newGroupeNom}
                 onChange={e => setNewGroupeNom(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && createGroupe()}
-                style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '12px 14px', color: '#FFF', fontSize: '14px', outline: 'none', marginBottom: '12px', boxSizing: 'border-box' }}
+                style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '12px 14px', color: '#FFF', fontSize: '14px', outline: 'none', marginBottom: '12px', boxSizing: 'border-box' }}
               />
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
                 {GROUPE_COLORS.map(c => (
@@ -806,7 +806,7 @@ function Joueurs() {
               </div>
               <button onClick={createGroupe} style={{
                 width: '100%', padding: '12px', borderRadius: '10px', border: 'none',
-                background: newGroupeNom.trim() ? newGroupeCouleur : '#2A2A2A',
+                background: newGroupeNom.trim() ? newGroupeCouleur : '#2C2C44',
                 color: newGroupeNom.trim() ? '#FFF' : '#555',
                 cursor: newGroupeNom.trim() ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px',
               }}>
@@ -820,7 +820,7 @@ function Joueurs() {
       {/* Modal formulaire joueur */}
       {showForm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 500 }}>
-          <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '32px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '16px', padding: '32px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
             <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '24px' }}>
               {editJoueur ? 'Modifier le joueur' : 'Ajouter un joueur'}
             </h2>
@@ -841,7 +841,7 @@ function Joueurs() {
                   <select
                     value={form.groupe_id}
                     onChange={e => setForm(f => ({ ...f, groupe_id: e.target.value }))}
-                    style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '12px 14px', color: form.groupe_id ? '#FFF' : '#666', fontSize: '14px', outline: 'none' }}
+                    style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '12px 14px', color: form.groupe_id ? '#FFF' : '#666', fontSize: '14px', outline: 'none' }}
                   >
                     <option value="">— Aucun groupe —</option>
                     {groupes.map(g => (
@@ -863,7 +863,7 @@ function Joueurs() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-              <button onClick={() => setShowForm(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #2A2A2A', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>
+              <button onClick={() => setShowForm(false)} style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #2C2C44', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>
                 Annuler
               </button>
               <button onClick={handleSave} disabled={saving} style={{ flex: 2, padding: '12px', borderRadius: '10px', border: 'none', background: saving ? '#333' : '#1A6FFF', color: '#FFF', cursor: saving ? 'not-allowed' : 'pointer', fontWeight: '700', fontSize: '14px' }}>
@@ -879,14 +879,14 @@ function Joueurs() {
         <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
           <button onClick={() => setFiltreGroupeId(null)} style={{
             padding: '7px 16px', borderRadius: '20px', border: 'none', cursor: 'pointer',
-            background: filtreGroupeId === null ? '#1A6FFF' : '#1A1A1A',
+            background: filtreGroupeId === null ? '#1A6FFF' : '#212135',
             color: filtreGroupeId === null ? '#FFF' : '#888', fontSize: '13px', fontWeight: '600',
           }}>Tous ({joueurs.length})</button>
           {groupes.map(g => (
             <button key={g.id} onClick={() => setFiltreGroupeId(g.id)} style={{
               padding: '7px 14px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
               border: `1px solid ${filtreGroupeId === g.id ? g.couleur : 'transparent'}`,
-              background: filtreGroupeId === g.id ? g.couleur + '25' : '#1A1A1A',
+              background: filtreGroupeId === g.id ? g.couleur + '25' : '#212135',
               color: filtreGroupeId === g.id ? g.couleur : '#888',
               display: 'flex', alignItems: 'center', gap: '6px',
             }}>
@@ -899,7 +899,7 @@ function Joueurs() {
 
       {/* Liste joueurs */}
       {joueursFiltres.length === 0 ? (
-        <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '24px', color: '#555', fontSize: '14px' }}>
+        <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '24px', color: '#555', fontSize: '14px' }}>
           Aucun joueur pour l'instant.
         </div>
       ) : (
@@ -908,12 +908,12 @@ function Joueurs() {
             const groupe = groupes.find(g => g.id === j.groupe_id)
             return (
               <div key={j.id} onClick={() => setProfilJoueur(j)} style={{
-                background: '#111', border: '1px solid #2A2A2A', borderRadius: '12px',
+                background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px',
                 display: 'flex', alignItems: 'stretch', overflow: 'hidden',
                 cursor: 'pointer', transition: 'border-color 0.15s',
               }}
               onMouseEnter={e => (e.currentTarget.style.borderColor = '#3A3A3A')}
-              onMouseLeave={e => (e.currentTarget.style.borderColor = '#2A2A2A')}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = '#2C2C44')}
               >
                 {/* Barre colorée groupe */}
                 <div style={{ width: '4px', flexShrink: 0, background: groupe ? groupe.couleur : 'transparent', borderRadius: '12px 0 0 12px' }} />
@@ -947,7 +947,7 @@ function Joueurs() {
                       color: j.actif ? '#2ECC71' : '#FF4757', fontSize: '11px', fontWeight: '600',
                     }}>{j.actif ? 'Actif' : 'Suspendu'}</button>
                     <button onClick={() => openEdit(j)} style={{
-                      padding: '5px 12px', borderRadius: '8px', border: '1px solid #2A2A2A',
+                      padding: '5px 12px', borderRadius: '8px', border: '1px solid #2C2C44',
                       background: 'transparent', color: '#888', fontSize: '11px', cursor: 'pointer',
                     }}>Modifier</button>
                     <span style={{ color: '#444', fontSize: '12px' }}>→</span>
@@ -1046,7 +1046,7 @@ function Exercices() {
   const inp = (placeholder: string, key: keyof typeof form, type = 'text') => (
     <input type={type} placeholder={placeholder} value={form[key]}
       onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-      style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '11px 14px', color: '#FFF', fontSize: '14px', outline: 'none' }}
+      style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '11px 14px', color: '#FFF', fontSize: '14px', outline: 'none' }}
     />
   )
 
@@ -1054,7 +1054,7 @@ function Exercices() {
     <textarea placeholder={placeholder} value={form[key]}
       onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
       rows={3}
-      style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '11px 14px', color: '#FFF', fontSize: '14px', outline: 'none', resize: 'vertical' }}
+      style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '11px 14px', color: '#FFF', fontSize: '14px', outline: 'none', resize: 'vertical' }}
     />
   )
 
@@ -1067,7 +1067,7 @@ function Exercices() {
           color: '#1A6FFF', fontSize: '14px', fontWeight: '600', cursor: 'pointer', padding: '0', marginBottom: '20px',
         }}>← Retour aux exercices</button>
 
-        <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '24px' }}>
+        <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '16px', padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
             <div>
               <h2 style={{ fontSize: '20px', fontWeight: '800' }}>{apercu.nom}</h2>
@@ -1080,7 +1080,7 @@ function Exercices() {
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => { const ex = apercu; setApercu(null); openEdit(ex) }} style={{
-                padding: '8px 14px', borderRadius: '8px', border: '1px solid #2A2A2A',
+                padding: '8px 14px', borderRadius: '8px', border: '1px solid #2C2C44',
                 background: 'transparent', color: '#888', fontSize: '12px', cursor: 'pointer',
               }}>Modifier</button>
               <button onClick={() => { handleDelete(apercu.id); setApercu(null) }} style={{
@@ -1160,7 +1160,7 @@ function Exercices() {
           color: '#1A6FFF', fontSize: '14px', fontWeight: '600', cursor: 'pointer', padding: '0', marginBottom: '20px',
         }}>← Retour aux exercices</button>
 
-        <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '24px' }}>
+        <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '16px', padding: '24px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '24px' }}>
             {editEx ? 'Modifier l\'exercice' : 'Nouvel exercice'}
           </h2>
@@ -1169,7 +1169,7 @@ function Exercices() {
             {inp('Nom de l\'exercice *', 'nom')}
 
             <select value={form.famille_id} onChange={e => setForm(f => ({ ...f, famille_id: e.target.value }))}
-              style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '11px 14px', color: form.famille_id ? '#FFF' : '#555', fontSize: '14px', outline: 'none' }}>
+              style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '11px 14px', color: form.famille_id ? '#FFF' : '#555', fontSize: '14px', outline: 'none' }}>
               <option value="">Famille *</option>
               {familles.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
             </select>
@@ -1199,7 +1199,7 @@ function Exercices() {
               ].map(([key, label, options]) => (
                 <select key={key as string} value={form[key as keyof typeof form] as string}
                   onChange={e => setForm(f => ({ ...f, [key as string]: e.target.value }))}
-                  style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '11px 14px', color: form[key as keyof typeof form] ? '#FFF' : '#555', fontSize: '14px', outline: 'none' }}>
+                  style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '11px 14px', color: form[key as keyof typeof form] ? '#FFF' : '#555', fontSize: '14px', outline: 'none' }}>
                   <option value="">{label as string}</option>
                   {(options as string[]).map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
@@ -1209,7 +1209,7 @@ function Exercices() {
 
           <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
             <button onClick={() => setShowForm(false)} style={{
-              flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #2A2A2A',
+              flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #2C2C44',
               background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px',
             }}>Annuler</button>
             <button onClick={handleSave} disabled={saving} style={{
@@ -1241,7 +1241,7 @@ function Exercices() {
         value={search}
         onChange={e => setSearch(e.target.value)}
         style={{
-          width: '100%', background: '#111', border: '1px solid #2A2A2A',
+          width: '100%', background: '#18182A', border: '1px solid #2C2C44',
           borderRadius: '10px', padding: '12px 16px', color: '#FFF', fontSize: '14px',
           outline: 'none', marginBottom: '16px',
         }}
@@ -1254,7 +1254,7 @@ function Exercices() {
             <button key={f.id} onClick={() => setFiltresFamille(prev =>
               actif ? prev.filter(id => id !== f.id) : [...prev, f.id]
             )} style={{
-              padding: '6px 14px', borderRadius: '20px', border: `1px solid ${actif ? f.couleur : '#2A2A2A'}`,
+              padding: '6px 14px', borderRadius: '20px', border: `1px solid ${actif ? f.couleur : '#2C2C44'}`,
               background: actif ? f.couleur + '20' : 'transparent',
               color: actif ? f.couleur : '#666', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
             }}>
@@ -1271,7 +1271,7 @@ function Exercices() {
       </div>
 
       {affichés.length === 0 ? (
-        <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '24px', color: '#555', fontSize: '14px' }}>
+        <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '24px', color: '#555', fontSize: '14px' }}>
           Aucun exercice.
         </div>
       ) : (
@@ -1280,7 +1280,7 @@ function Exercices() {
             const fam = ex.familles
             return (
               <div key={ex.id} style={{
-                background: '#111', border: '1px solid #2A2A2A', borderRadius: '12px',
+                background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px',
                 padding: '16px', cursor: 'pointer', transition: 'border-color 0.15s',
               }}
                 onClick={() => setApercu(ex)}
@@ -1400,7 +1400,7 @@ function SearchableSelect({ value, items, onChange, placeholder, triggerStyle, z
         onClick={() => setOpen(true)}
         style={{
           display: 'flex', alignItems: 'center', gap: '8px',
-          background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px',
+          background: '#212135', border: '1px solid #2C2C44', borderRadius: '10px',
           padding: '10px 14px', color: selected ? '#F0F0F8' : '#555',
           cursor: 'pointer', fontSize: '14px', outline: 'none', textAlign: 'left',
           ...triggerStyle,
@@ -1417,7 +1417,7 @@ function SearchableSelect({ value, items, onChange, placeholder, triggerStyle, z
           style={{ position: 'fixed', inset: 0, zIndex, background: 'rgba(0,0,0,0.75)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
           <div
             onClick={e => e.stopPropagation()}
-            style={{ background: '#111', borderRadius: '20px 20px 0 0', maxHeight: '70vh', display: 'flex', flexDirection: 'column', border: '1px solid #1E1E28' }}>
+            style={{ background: '#18182A', borderRadius: '20px 20px 0 0', maxHeight: '70vh', display: 'flex', flexDirection: 'column', border: '1px solid #22223A' }}>
             {/* Handle */}
             <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0' }}>
               <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: '#2A2A35' }} />
@@ -1448,7 +1448,7 @@ function SearchableSelect({ value, items, onChange, placeholder, triggerStyle, z
                     style={{
                       display: 'flex', alignItems: 'center', width: '100%',
                       padding: '14px 20px', textAlign: 'left', border: 'none',
-                      borderBottom: '1px solid #161620',
+                      borderBottom: '1px solid #1C1C2C',
                       background: isSelected ? 'rgba(0,122,255,0.08)' : 'transparent',
                       color: isSelected ? '#007AFF' : '#D0D0E8',
                       cursor: 'pointer', fontSize: '14px', fontWeight: isSelected ? '700' : '400',
@@ -1463,7 +1463,7 @@ function SearchableSelect({ value, items, onChange, placeholder, triggerStyle, z
               )}
             </div>
             {/* Fermer */}
-            <div style={{ padding: '12px 16px', borderTop: '1px solid #1A1A28' }}>
+            <div style={{ padding: '12px 16px', borderTop: '1px solid #22223A' }}>
               <button
                 onClick={() => { setOpen(false); setSearch('') }}
                 className="btn btn-ghost btn-block">Fermer</button>
@@ -1661,7 +1661,7 @@ function Modeles() {
           </div>
         </div>
       ) : (
-        <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: 'calc(100svh - 200px)', borderRadius: '12px', border: '1px solid #1A1A22', background: '#0D0D10' }}>
+        <div style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: 'calc(100svh - 200px)', borderRadius: '12px', border: '1px solid #22223A', background: '#0E0E18' }}>
           <table className="data-table" style={{ minWidth: '640px', width: '100%' }}>
             <thead>
               <tr>
@@ -1676,7 +1676,7 @@ function Modeles() {
                 const sem = si + 1
                 return (
                   <tr key={sem}>
-                    <td style={{ verticalAlign: 'top', background: '#0B0B0E', padding: '8px 6px' }}>
+                    <td style={{ verticalAlign: 'top', background: '#0B0B14', padding: '8px 6px' }}>
                       <div style={{ fontSize: '11px', fontWeight: '900', color: '#3A3A50' }}>S{sem}</div>
                     </td>
                     {Array.from({ length: 7 }, (_, ji) => {
@@ -1769,7 +1769,7 @@ function Modeles() {
                 const tc = TYPE_COLORS[t.type] || TYPE_COLORS.complete
                 return (
                   <button key={t.id} onClick={() => ajouterSessionSlot(showPicker.semaine, showPicker.jour, t)}
-                    className="list-item" style={{ textAlign: 'left', border: '1px solid #1A1A22' }}>
+                    className="list-item" style={{ textAlign: 'left', border: '1px solid #22223A' }}>
                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: tc.text, flexShrink: 0, boxShadow: `0 0 6px ${tc.text}60` }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ color: '#F0F0F8', fontSize: '13px', fontWeight: '700' }}>{t.nom}</div>
@@ -1877,7 +1877,7 @@ function AssignProgrammeModal({ programme, seances, onClose }: {
               return (
                 <button key={j.id} onClick={() => toggleJoueur(j.id)}
                   className={`list-item${sel ? ' list-item-active' : ''}`}
-                  style={{ border: sel ? '1px solid #1A6FFF40' : '1px solid #1A1A22', cursor: 'pointer', textAlign: 'left' }}>
+                  style={{ border: sel ? '1px solid #1A6FFF40' : '1px solid #22223A', cursor: 'pointer', textAlign: 'left' }}>
                   <div className={`checkbox-custom${sel ? ' checked' : ''}`}>{sel ? '✓' : ''}</div>
                   <div style={{ flex: 1 }}>
                     <span style={{ color: sel ? '#F0F0F8' : '#9494A0', fontSize: '14px', fontWeight: sel ? '700' : '400' }}>
@@ -1894,7 +1894,7 @@ function AssignProgrammeModal({ programme, seances, onClose }: {
           <button onClick={onClose} className="btn btn-ghost">Annuler</button>
           <button onClick={confirmer} disabled={saving || selectedJoueurs.size === 0}
             className={`btn${selectedJoueurs.size > 0 ? ' btn-success' : ''}`}
-            style={selectedJoueurs.size === 0 ? { background: '#1A1A22', color: '#3A3A50', cursor: 'not-allowed', padding: '10px 20px' } : {}}>
+            style={selectedJoueurs.size === 0 ? { background: '#22223A', color: '#3A3A50', cursor: 'not-allowed', padding: '10px 20px' } : {}}>
             {saving ? 'Attribution...' : `Confirmer l'attribution`}
           </button>
         </div>
@@ -2038,7 +2038,7 @@ function Programmes() {
       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
         <button onClick={() => setFiltreType('')} style={{
           padding: '5px 12px', borderRadius: '99px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
-          border: `1px solid ${!filtreType ? '#007AFF' : '#252530'}`,
+          border: `1px solid ${!filtreType ? '#007AFF' : '#2C2C44'}`,
           background: !filtreType ? 'rgba(0,122,255,0.15)' : 'transparent',
           color: !filtreType ? '#007AFF' : '#555',
         }}>Tous</button>
@@ -2048,7 +2048,7 @@ function Programmes() {
           return (
             <button key={t} onClick={() => setFiltreType(actif ? '' : t)} style={{
               padding: '5px 12px', borderRadius: '99px', fontSize: '11px', fontWeight: '700', cursor: 'pointer',
-              border: `1px solid ${actif ? tc.text : '#252530'}`,
+              border: `1px solid ${actif ? tc.text : '#2C2C44'}`,
               background: actif ? tc.bg : 'transparent',
               color: actif ? tc.text : '#555',
             }}>{LABELS_TYPE[t] || t}</button>
@@ -2093,7 +2093,7 @@ function Programmes() {
                   display: 'flex', alignItems: 'center', gap: '12px',
                   padding: '12px 16px', borderRadius: '12px', cursor: 'pointer',
                   background: selected ? 'rgba(46,204,113,0.06)' : 'rgba(255,255,255,0.02)',
-                  border: `1px solid ${selected ? '#2ECC7130' : '#1A1A28'}`,
+                  border: `1px solid ${selected ? '#2ECC7130' : '#22223A'}`,
                   transition: 'background 0.1s',
                 }}>
                 <button onClick={e => { e.stopPropagation(); toggleSelect(s.id) }}
@@ -2134,7 +2134,7 @@ function Programmes() {
           style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'rgba(0,0,0,0.75)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
           <div
             onClick={e => e.stopPropagation()}
-            style={{ background: '#0F0F18', borderRadius: '20px 20px 0 0', maxHeight: '85vh', display: 'flex', flexDirection: 'column', border: '1px solid #1E1E2A' }}>
+            style={{ background: '#141420', borderRadius: '20px 20px 0 0', maxHeight: '85vh', display: 'flex', flexDirection: 'column', border: '1px solid #22223A' }}>
 
             {/* Handle */}
             <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 0' }}>
@@ -2142,7 +2142,7 @@ function Programmes() {
             </div>
 
             {/* Header séance */}
-            <div style={{ padding: '14px 20px 12px', borderBottom: '1px solid #1A1A28' }}>
+            <div style={{ padding: '14px 20px 12px', borderBottom: '1px solid #22223A' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: '900', fontSize: '18px', letterSpacing: '-0.3px', marginBottom: '6px' }}>{apercu.nom}</div>
@@ -2181,8 +2181,8 @@ function Programmes() {
                       return (
                         <div key={bi} style={{
                           borderRadius: '10px', overflow: 'hidden',
-                          border: isGroupe ? '1px solid #1A6FFF30' : '1px solid #1A1A28',
-                          background: isGroupe ? '#1A6FFF08' : '#111',
+                          border: isGroupe ? '1px solid #1A6FFF30' : '1px solid #22223A',
+                          background: isGroupe ? '#1A6FFF08' : '#18182A',
                         }}>
                           {isGroupe && (
                             <div style={{ padding: '5px 12px', background: '#1A6FFF18', borderBottom: '1px solid #1A6FFF25', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -2203,7 +2203,7 @@ function Programmes() {
                               <div key={exo.id} style={{
                                 display: 'flex', alignItems: 'center', gap: '10px',
                                 padding: '10px 12px',
-                                borderTop: ei > 0 ? '1px solid #1A1A28' : 'none',
+                                borderTop: ei > 0 ? '1px solid #22223A' : 'none',
                               }}>
                                 <div style={{ width: '3px', alignSelf: 'stretch', borderRadius: '2px', background: couleur, flexShrink: 0 }} />
                                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -2226,7 +2226,7 @@ function Programmes() {
             </div>
 
             {/* Footer */}
-            <div style={{ padding: '12px 16px', borderTop: '1px solid #1A1A28', display: 'flex', gap: '10px' }}>
+            <div style={{ padding: '12px 16px', borderTop: '1px solid #22223A', display: 'flex', gap: '10px' }}>
               <button onClick={() => setApercu(null)} className="btn btn-ghost" style={{ flex: 1 }}>Fermer</button>
               <button onClick={() => { toggleSelect(apercu.id); setApercu(null) }}
                 className="btn btn-ghost" style={{ flex: 1, borderColor: selection.has(apercu.id) ? '#2ECC7140' : undefined, color: selection.has(apercu.id) ? '#2ECC71' : undefined }}>
@@ -2367,7 +2367,7 @@ function VideoThumb({ url, size = 72, famille }: { url?: string | null; size?: n
 
   // URL directe (mp4) — uniquement si ce n'est pas Vimeo/YouTube
   return (
-    <div style={{ width: size, height: size * 0.56, borderRadius: '8px', overflow: 'hidden', flexShrink: 0, background: '#111' }}>
+    <div style={{ width: size, height: size * 0.56, borderRadius: '8px', overflow: 'hidden', flexShrink: 0, background: '#18182A' }}>
       <video
         src={url}
         muted
@@ -2459,7 +2459,7 @@ function ExercicePicker({ exercices, onConfirm, onClose }: {
           {/* Sidebar familles (gauche) */}
           <div style={{
             width: '90px', flexShrink: 0,
-            overflowY: 'auto', borderRight: '1px solid #1A1A28',
+            overflowY: 'auto', borderRight: '1px solid #22223A',
             display: 'flex', flexDirection: 'column', gap: '2px', padding: '4px 6px',
           }}>
             <button
@@ -2503,7 +2503,7 @@ function ExercicePicker({ exercices, onConfirm, onClose }: {
                     display: 'flex', gap: '10px', alignItems: 'center',
                     padding: '9px 10px', borderRadius: '12px', cursor: 'pointer', textAlign: 'left', width: '100%',
                     background: selected ? 'rgba(0,122,255,0.1)' : 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${selected ? 'rgba(0,122,255,0.4)' : '#1A1A28'}`,
+                    border: `1px solid ${selected ? 'rgba(0,122,255,0.4)' : '#22223A'}`,
                     transition: 'all 0.15s ease',
                   }}>
                   <VideoThumb url={ex.video_url} size={44} famille={ex.familles} />
@@ -2534,7 +2534,7 @@ function ExercicePicker({ exercices, onConfirm, onClose }: {
         </div>
 
         {/* Footer — bouton Ajouter */}
-        <div style={{ padding: '12px 16px', borderTop: '1px solid #1A1A28' }}>
+        <div style={{ padding: '12px 16px', borderTop: '1px solid #22223A' }}>
           <button onClick={handleConfirm}
             className="btn btn-primary btn-block btn-lg"
             style={{ borderRadius: '14px' }}>
@@ -2677,7 +2677,7 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
       value={(lignes[idx][key] as number) ?? ''}
       onChange={e => updateLigne(idx, key, e.target.value)}
       style={{
-        width, background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '6px',
+        width, background: '#212135', border: '1px solid #2C2C44', borderRadius: '6px',
         padding: '6px 8px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center',
       }}
     />
@@ -2788,7 +2788,7 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                         type="number" placeholder="-"
                         value={l.series ?? ''}
                         onChange={e => syncSeries(e.target.value)}
-                        style={{ width: '55px', background: '#1A1A1A', border: '1px solid #1A6FFF40', borderRadius: '6px', padding: '5px 8px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }}
+                        style={{ width: '55px', background: '#212135', border: '1px solid #1A6FFF40', borderRadius: '6px', padding: '5px 8px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }}
                       />
                     </div>
                   </div>
@@ -2813,12 +2813,12 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                       <div style={{ display: 'flex', gap: '5px', marginTop: '3px', flexWrap: 'wrap' }}>
                         {fam && <span style={{ fontSize: '10px', color: fam.couleur }}>{fam.nom}</span>}
                         <button onClick={() => setLignes(prev => prev.map((li, i) => i === idx ? { ...li, uni_podal: !li.uni_podal } : li))}
-                          style={{ background: l.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${l.uni_podal ? '#1A6FFF60' : '#2A2A2A'}`, color: l.uni_podal ? '#1A6FFF' : '#444', fontSize: '9px', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer', fontWeight: '700' }}>↔ 2 côtés</button>
+                          style={{ background: l.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${l.uni_podal ? '#1A6FFF60' : '#2C2C44'}`, color: l.uni_podal ? '#1A6FFF' : '#444', fontSize: '9px', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer', fontWeight: '700' }}>↔ 2 côtés</button>
                       </div>
                     </div>
                     <input value={l.notes || ''} onChange={e => updateLigne(idx, 'notes', e.target.value)}
                       placeholder="note..."
-                      style={{ width: '80px', flexShrink: 0, background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '6px', padding: '5px 7px', color: '#FFF', fontSize: '11px', outline: 'none' }} />
+                      style={{ width: '80px', flexShrink: 0, background: '#212135', border: '1px solid #2C2C44', borderRadius: '6px', padding: '5px 7px', color: '#FFF', fontSize: '11px', outline: 'none' }} />
                     <button onClick={() => removeLigne(idx)} style={{
                       flexShrink: 0, background: 'transparent', border: '1px solid #FF475730', color: '#FF4757',
                       borderRadius: '6px', padding: '5px 7px', cursor: 'pointer', fontSize: '12px',
@@ -2852,7 +2852,7 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                       type="number" placeholder="0"
                       value={l.recuperation_secondes ?? ''}
                       onChange={e => updateLigne(idx, 'recuperation_secondes', e.target.value)}
-                      style={{ width: '50px', background: '#1A1A1A', border: '1px solid #333', borderRadius: '6px', padding: '4px 6px', color: '#FFF', fontSize: '12px', outline: 'none', textAlign: 'center' }}
+                      style={{ width: '50px', background: '#212135', border: '1px solid #333', borderRadius: '6px', padding: '4px 6px', color: '#FFF', fontSize: '12px', outline: 'none', textAlign: 'center' }}
                     />
                     <span style={{ color: '#444', fontSize: '11px' }}>s</span>
                   </div>
@@ -2875,7 +2875,7 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                       type="number" placeholder="0"
                       value={l.recuperation_inter_sets ?? ''}
                       onChange={e => setLignes(prev => prev.map((li, i) => i === idx ? { ...li, recuperation_inter_sets: e.target.value === '' ? undefined : Number(e.target.value) } : li))}
-                      style={{ width: '56px', background: '#1A1A1A', border: '1px solid #2ECC7140', borderRadius: '6px', padding: '5px 8px', color: '#2ECC71', fontSize: '13px', outline: 'none', textAlign: 'center' }}
+                      style={{ width: '56px', background: '#212135', border: '1px solid #2ECC7140', borderRadius: '6px', padding: '5px 8px', color: '#2ECC71', fontSize: '13px', outline: 'none', textAlign: 'center' }}
                     />
                     <span style={{ color: '#888', fontSize: '12px' }}>s</span>
                     <span style={{ color: '#888', fontSize: '12px', marginLeft: '12px' }}>↦ Après le superset :</span>
@@ -2883,7 +2883,7 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                       type="number" placeholder="0"
                       value={l.recuperation_secondes ?? ''}
                       onChange={e => updateLigne(idx, 'recuperation_secondes', e.target.value)}
-                      style={{ width: '56px', background: '#1A1A1A', border: '1px solid #1A6FFF40', borderRadius: '6px', padding: '5px 8px', color: '#1A6FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }}
+                      style={{ width: '56px', background: '#212135', border: '1px solid #1A6FFF40', borderRadius: '6px', padding: '5px 8px', color: '#1A6FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }}
                     />
                     <span style={{ color: '#888', fontSize: '12px' }}>s</span>
                     <button onClick={delierId} style={{
@@ -2902,8 +2902,8 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
           return (
             <div key={idx} style={{ marginTop: idx > 0 ? '8px' : '0' }}>
               <div style={{
-                background: '#111',
-                border: '1px solid #2A2A2A',
+                background: '#18182A',
+                border: '1px solid #2C2C44',
                 borderRadius: hasPerSet ? '10px 10px 0 0' : '10px',
               }}>
                 {/* Ligne principale : nom + séries + notes + supprimer */}
@@ -2921,7 +2921,7 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                       <div style={{ display: 'flex', gap: '5px', marginTop: '3px', flexWrap: 'wrap' }}>
                         {fam && <span style={{ fontSize: '10px', color: fam.couleur }}>{fam.nom}</span>}
                         <button onClick={() => setLignes(prev => prev.map((li, i) => i === idx ? { ...li, uni_podal: !li.uni_podal } : li))}
-                          style={{ background: l.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${l.uni_podal ? '#1A6FFF60' : '#2A2A2A'}`, color: l.uni_podal ? '#1A6FFF' : '#444', fontSize: '9px', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer', fontWeight: '700' }}>↔ 2 côtés</button>
+                          style={{ background: l.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${l.uni_podal ? '#1A6FFF60' : '#2C2C44'}`, color: l.uni_podal ? '#1A6FFF' : '#444', fontSize: '9px', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer', fontWeight: '700' }}>↔ 2 côtés</button>
                       </div>
                     </div>
                   </div>
@@ -2932,13 +2932,13 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                       type="number" placeholder="-"
                       value={l.series ?? ''}
                       onChange={e => handleSeriesChange(idx, e.target.value)}
-                      style={{ width: '55px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '6px', padding: '6px 8px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }}
+                      style={{ width: '55px', background: '#212135', border: '1px solid #2C2C44', borderRadius: '6px', padding: '6px 8px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }}
                     />
                   </div>
                   {/* Notes */}
                   <input value={l.notes || ''} onChange={e => updateLigne(idx, 'notes', e.target.value)}
                     placeholder="note..."
-                    style={{ width: '110px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '6px', padding: '6px 8px', color: '#FFF', fontSize: '12px', outline: 'none' }} />
+                    style={{ width: '110px', background: '#212135', border: '1px solid #2C2C44', borderRadius: '6px', padding: '6px 8px', color: '#FFF', fontSize: '12px', outline: 'none' }} />
                   <button onClick={() => removeLigne(idx)} style={{
                     background: 'transparent', border: '1px solid #FF475730', color: '#FF4757',
                     borderRadius: '6px', padding: '6px', cursor: 'pointer', fontSize: '12px',
@@ -2949,7 +2949,7 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                 {hasPerSet && (
                   <div style={{ borderTop: '1px solid #2A2A2A' }}>
                     {/* Sous-header */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '60px 65px 65px 65px 65px 65px', gap: '6px', padding: '5px 12px', background: '#0A0A0A' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '60px 65px 65px 65px 65px 65px', gap: '6px', padding: '5px 12px', background: '#0B0B14' }}>
                       {['Série', 'Reps', 'Durée(s)', 'Dist(m)', 'Charge(kg)', 'Récup(s)'].map(h => (
                         <div key={h} style={{ color: '#444', fontSize: '10px', letterSpacing: '0.3px', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
                       ))}
@@ -2957,8 +2957,8 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                     {l.sets_config!.map((s, si) => (
                       <div key={si} style={{
                         display: 'grid', gridTemplateColumns: '60px 65px 65px 65px 65px 65px', gap: '6px',
-                        padding: '6px 12px', borderTop: '1px solid #1A1A1A', alignItems: 'center',
-                        background: si % 2 === 0 ? '#0D0D0D' : '#111',
+                        padding: '6px 12px', borderTop: '1px solid #222238', alignItems: 'center',
+                        background: si % 2 === 0 ? '#0E0E18' : '#18182A',
                       }}>
                         <div style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '700', textAlign: 'center' }}>S{si + 1}</div>
                         {(['reps', 'duree', 'dist', 'charge', 'recup'] as (keyof SetConfig)[]).map(key => (
@@ -2968,7 +2968,7 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                             placeholder="-"
                             value={s[key] ?? ''}
                             onChange={e => updateSetField(idx, si, key, e.target.value)}
-                            style={{ width: '100%', background: '#1A1A1A', border: '1px solid #222', borderRadius: '5px', padding: '5px 6px', color: '#FFF', fontSize: '12px', outline: 'none', textAlign: 'center' }}
+                            style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '5px', padding: '5px 6px', color: '#FFF', fontSize: '12px', outline: 'none', textAlign: 'center' }}
                           />
                         ))}
                       </div>
@@ -2978,8 +2978,8 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
 
                 {/* Mode simple (pas de sets_config) */}
                 {!hasPerSet && (
-                  <div style={{ borderTop: '1px solid #1E1E1E' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '65px 65px 65px 65px 65px', gap: '6px', padding: '5px 12px', background: '#0A0A0A' }}>
+                  <div style={{ borderTop: '1px solid #1E1E30' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '65px 65px 65px 65px 65px', gap: '6px', padding: '5px 12px', background: '#0B0B14' }}>
                       {['Reps', 'Durée(s)', 'Dist(m)', 'Charge(kg)', 'Récup(s)'].map(h => (
                         <div key={h} style={{ color: '#444', fontSize: '10px', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
                       ))}
@@ -3000,7 +3000,7 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '6px 0' }}>
                   <button onClick={() => setLignes(prev => prev.map((li, i) => i === idx ? { ...li, lien_suivant: true } : li))}
                     style={{
-                      background: '#1A1A1A', border: '1px solid #2A2A2A',
+                      background: '#212135', border: '1px solid #2C2C44',
                       borderRadius: '20px', padding: '3px 14px', cursor: 'pointer',
                       fontSize: '12px', color: '#555', display: 'flex', alignItems: 'center', gap: '6px',
                     }}>
@@ -3014,7 +3014,7 @@ function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttr
       </div>
 
       {lignes.length === 0 && (
-        <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '32px', textAlign: 'center', color: '#555', fontSize: '14px' }}>
+        <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '32px', textAlign: 'center', color: '#555', fontSize: '14px' }}>
           Aucun exercice. Clique sur "+ Ajouter un exercice".
         </div>
       )}
@@ -3151,7 +3151,7 @@ function WellnessGraphiques({ realisations }: { realisations: Realisation[] }) {
     const filled = points.filter(p => p.y != null)
     if (filled.length < 1) return (
       <div style={{ height: `${H}px`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ color: '#2A2A2A', fontSize: '11px' }}>Aucune donnée sur cette période</span>
+        <span style={{ color: '#2C2C44', fontSize: '11px' }}>Aucune donnée sur cette période</span>
       </div>
     )
 
@@ -3180,7 +3180,7 @@ function WellnessGraphiques({ realisations }: { realisations: Realisation[] }) {
       <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: 'block', overflow: 'visible' }}>
         {/* Grilles horizontales */}
         {[2, 4, 6, 8, 10].map(v => (
-          <line key={v} x1={PADX} y1={toY(v)} x2={W - PADX} y2={toY(v)} stroke="#161616" strokeWidth="1" />
+          <line key={v} x1={PADX} y1={toY(v)} x2={W - PADX} y2={toY(v)} stroke="#1C1C2C" strokeWidth="1" />
         ))}
         {/* Zone rouge danger (8-10) */}
         <rect x={PADX} y={toY(10)} width={W - PADX * 2} height={toY(8) - toY(10)} fill={color + '08'} />
@@ -3215,13 +3215,13 @@ function WellnessGraphiques({ realisations }: { realisations: Realisation[] }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
       {/* Sélecteur de période */}
-      <div style={{ background: '#111', border: '1px solid #1A1A1A', borderRadius: '14px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+      <div style={{ background: '#18182A', border: '1px solid #222238', borderRadius: '14px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
         {/* Raccourcis */}
         <div style={{ display: 'flex', gap: '6px' }}>
           {[7, 14, 28, 56].map(n => (
             <button key={n} onClick={() => { setNbJours(n); setFin(todayStr) }} style={{
               padding: '5px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '700',
-              background: nbJours === n && fin === todayStr ? '#1A6FFF' : '#1A1A1A',
+              background: nbJours === n && fin === todayStr ? '#1A6FFF' : '#212135',
               color: nbJours === n && fin === todayStr ? '#FFF' : '#555',
             }}>{n === 7 ? '7j' : n === 14 ? '14j' : n === 28 ? '1 mois' : '2 mois'}</button>
           ))}
@@ -3229,41 +3229,41 @@ function WellnessGraphiques({ realisations }: { realisations: Realisation[] }) {
         <div style={{ flex: 1 }} />
         {/* Navigation */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button onClick={() => decaler(-1)} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '5px 10px', color: '#888', cursor: 'pointer', fontSize: '13px' }}>‹</button>
+          <button onClick={() => decaler(-1)} style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '5px 10px', color: '#888', cursor: 'pointer', fontSize: '13px' }}>‹</button>
           <span style={{ fontSize: '12px', color: '#666', fontWeight: '600', minWidth: '160px', textAlign: 'center' }}>
             {new Date(debut + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
             {' — '}
             {new Date(fin + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
           </span>
-          <button onClick={() => decaler(1)} disabled={fin >= todayStr} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '5px 10px', color: fin >= todayStr ? '#2A2A2A' : '#888', cursor: fin >= todayStr ? 'default' : 'pointer', fontSize: '13px' }}>›</button>
+          <button onClick={() => decaler(1)} disabled={fin >= todayStr} style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '5px 10px', color: fin >= todayStr ? '#2C2C44' : '#888', cursor: fin >= todayStr ? 'default' : 'pointer', fontSize: '13px' }}>›</button>
         </div>
       </div>
 
       {!hasDonnees ? (
-        <div style={{ background: '#111', border: '1px solid #1A1A1A', borderRadius: '16px', padding: '48px 24px', textAlign: 'center' }}>
+        <div style={{ background: '#18182A', border: '1px solid #222238', borderRadius: '16px', padding: '48px 24px', textAlign: 'center' }}>
           <div style={{ fontSize: '40px', marginBottom: '12px' }}>📊</div>
           <div style={{ color: '#444', fontSize: '14px' }}>Aucune donnée sur cette période</div>
         </div>
       ) : (
         <>
           {/* Résumé de la période */}
-          <div style={{ background: '#111', border: '1px solid #1A1A1A', borderRadius: '16px', padding: '18px 20px' }}>
+          <div style={{ background: '#18182A', border: '1px solid #222238', borderRadius: '16px', padding: '18px 20px' }}>
             <div style={{ fontSize: '10px', fontWeight: '800', color: '#333', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '14px' }}>
               Moyenne sur la période · {moyennes[0].nb} séance{moyennes[0].nb > 1 ? 's' : ''} renseignée{moyennes[0].nb > 1 ? 's' : ''}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
               {moyennes.map(m => (
-                <div key={m.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#0C0C0C', borderRadius: '12px', padding: '12px 8px', border: `1px solid ${m.color}20` }}>
+                <div key={m.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#0E0E18', borderRadius: '12px', padding: '12px 8px', border: `1px solid ${m.color}20` }}>
                   <span style={{ fontSize: '9px', fontWeight: '700', color: '#444', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', textAlign: 'center' }}>{m.label}</span>
                   {m.moy != null ? (
                     <>
                       <span style={{ fontSize: '26px', fontWeight: '900', color: m.color, lineHeight: 1 }}>{m.moy}</span>
                       <span style={{ fontSize: '9px', color: '#333', marginTop: '2px' }}>/10</span>
-                      <div style={{ width: '100%', height: '3px', background: '#1A1A1A', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
+                      <div style={{ width: '100%', height: '3px', background: '#212135', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
                         <div style={{ width: `${m.moy * 10}%`, height: '100%', background: m.color, borderRadius: '2px' }} />
                       </div>
                     </>
-                  ) : <span style={{ fontSize: '20px', color: '#2A2A2A' }}>—</span>}
+                  ) : <span style={{ fontSize: '20px', color: '#2C2C44' }}>—</span>}
                 </div>
               ))}
             </div>
@@ -3271,7 +3271,7 @@ function WellnessGraphiques({ realisations }: { realisations: Realisation[] }) {
 
           {/* Graphiques quotidiens */}
           {metrics.map(m => (
-            <div key={m.key} style={{ background: '#111', border: '1px solid #1A1A1A', borderRadius: '16px', padding: '16px 20px' }}>
+            <div key={m.key} style={{ background: '#18182A', border: '1px solid #222238', borderRadius: '16px', padding: '16px 20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <span style={{ fontSize: '13px', fontWeight: '800', color: m.color }}>{m.label}</span>
                 {moyennes.find(x => x.key === m.key)?.moy != null && (
@@ -3283,7 +3283,7 @@ function WellnessGraphiques({ realisations }: { realisations: Realisation[] }) {
               <div style={{ display: 'flex', gap: '0' }}>
                 {/* Axe Y */}
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingRight: '8px', height: '120px', flexShrink: 0 }}>
-                  {[10, 8, 6, 4, 2].map(v => <span key={v} style={{ fontSize: '9px', color: '#2A2A2A', lineHeight: 1 }}>{v}</span>)}
+                  {[10, 8, 6, 4, 2].map(v => <span key={v} style={{ fontSize: '9px', color: '#2C2C44', lineHeight: 1 }}>{v}</span>)}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <Chart metricKey={m.key} color={m.color} />
@@ -3394,7 +3394,7 @@ function CopierJoursModal({ joursSelectionnes, byDate, joueurCourant, allJoueurs
           {(['joueur', 'modele'] as const).map(m => (
             <button key={m} onClick={() => setMode(m)} style={{
               flex: 1, padding: '10px', borderRadius: '10px', cursor: 'pointer', fontWeight: '700', fontSize: '13px',
-              border: `1px solid ${mode === m ? (m === 'joueur' ? '#007AFF' : '#C9A84C') : '#252530'}`,
+              border: `1px solid ${mode === m ? (m === 'joueur' ? '#007AFF' : '#C9A84C') : '#2C2C44'}`,
               background: mode === m ? (m === 'joueur' ? 'rgba(0,122,255,0.12)' : 'rgba(201,168,76,0.12)') : 'transparent',
               color: mode === m ? (m === 'joueur' ? '#007AFF' : '#C9A84C') : '#666',
             }}>{m === 'joueur' ? '👤 Vers un joueur' : '📋 Créer un modèle'}</button>
@@ -3429,7 +3429,7 @@ function CopierJoursModal({ joursSelectionnes, byDate, joueurCourant, allJoueurs
               <label style={{ color: '#888', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>Nom du modèle</label>
               <input value={nomModele} onChange={e => setNomModele(e.target.value)} placeholder="Ex : Semaine type pré-saison" className="input" style={{ width: '100%' }} />
             </div>
-            <div style={{ background: '#0D0D0D', border: '1px solid #1E1E1E', borderRadius: '10px', padding: '12px' }}>
+            <div style={{ background: '#0E0E18', border: '1px solid #1E1E30', borderRadius: '10px', padding: '12px' }}>
               <div style={{ color: '#444', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '8px' }}>Aperçu</div>
               {datesTriees.filter(d => (byDate[d] || []).some(r => r.seance_id)).map(d => {
                 const offset = daysBetween(datesTriees[0], d)
@@ -3793,13 +3793,13 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
 
   const setInput = (style?: React.CSSProperties) => ({
     type: 'number' as const,
-    style: { width: '100%', background: '#161616', border: '1px solid #1E1E1E', borderRadius: '3px', padding: '3px 2px', color: '#FFF', fontSize: '10px', outline: 'none', textAlign: 'center' as const, ...style },
+    style: { width: '100%', background: '#1C1C2C', border: '1px solid #1E1E30', borderRadius: '3px', padding: '3px 2px', color: '#FFF', fontSize: '10px', outline: 'none', textAlign: 'center' as const, ...style },
   })
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#0A0A0A', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#0B0B14', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{ display: 'flex', flexDirection: 'column', borderBottom: '1px solid #222', background: '#111', flexShrink: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', borderBottom: '1px solid #2C2C44', background: '#18182A', flexShrink: 0 }}>
         {/* Ligne 1 : fermer + titre + joueur */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px 6px' }}>
           <button onClick={onClose} style={{ background: '#FF475720', border: '1px solid #FF475740', borderRadius: '8px', padding: '8px 14px', color: '#FF4757', cursor: 'pointer', fontSize: '13px', fontWeight: '700', whiteSpace: 'nowrap', flexShrink: 0 }}>✕ Fermer</button>
@@ -3811,7 +3811,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
             onClick={() => { setModeSelection(v => !v); setJoursSelectionnes(new Set()) }}
             style={{
               background: modeSelection ? 'rgba(46,204,113,0.15)' : '#181820',
-              border: `1px solid ${modeSelection ? '#2ECC7150' : '#252530'}`,
+              border: `1px solid ${modeSelection ? '#2ECC7150' : '#2C2C44'}`,
               borderRadius: '8px', padding: '6px 12px',
               color: modeSelection ? '#2ECC71' : '#666',
               cursor: 'pointer', fontSize: '12px', fontWeight: '700',
@@ -3822,11 +3822,11 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
         </div>
         {/* Ligne 2 : nav semaine + date picker */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px 10px' }}>
-          <button onClick={prevWeek} style={{ background: '#181820', border: '1px solid #252530', borderRadius: '8px', padding: '8px 14px', color: '#888', cursor: 'pointer', fontSize: '16px', minHeight: '36px', minWidth: '36px' }}>‹</button>
-          <button onClick={nextWeek} style={{ background: '#181820', border: '1px solid #252530', borderRadius: '8px', padding: '8px 14px', color: '#888', cursor: 'pointer', fontSize: '16px', minHeight: '36px', minWidth: '36px' }}>›</button>
+          <button onClick={prevWeek} style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 14px', color: '#888', cursor: 'pointer', fontSize: '16px', minHeight: '36px', minWidth: '36px' }}>‹</button>
+          <button onClick={nextWeek} style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 14px', color: '#888', cursor: 'pointer', fontSize: '16px', minHeight: '36px', minWidth: '36px' }}>›</button>
           <span style={{ color: '#666', fontSize: '12px', whiteSpace: 'nowrap', flex: 1, fontWeight: '600' }}>{weekLabel}</span>
           <input type="date" onChange={e => e.target.value && jumpToDate(e.target.value)}
-            style={{ background: '#181820', border: '1px solid #252530', borderRadius: '8px', padding: '6px 10px', color: '#007AFF', fontSize: '12px', outline: 'none', cursor: 'pointer', minHeight: '36px' }} />
+            style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#007AFF', fontSize: '12px', outline: 'none', cursor: 'pointer', minHeight: '36px' }} />
         </div>
       </div>
 
@@ -3851,7 +3851,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
         <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
 
           {/* Strip 7 jours */}
-          <div style={{ display: 'flex', gap: '4px', padding: '12px 14px 0', flexShrink: 0, position: 'sticky', top: 0, background: '#0A0A0A', zIndex: 10 }}>
+          <div style={{ display: 'flex', gap: '4px', padding: '12px 14px 0', flexShrink: 0, position: 'sticky', top: 0, background: '#0B0B14', zIndex: 10 }}>
             {days.map((ds, i) => {
               const dayReals = byDate[ds] || []
               const isToday = ds === today
@@ -3868,10 +3868,10 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                     width: '100%', aspectRatio: '1', borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: estSel ? '#2ECC71' : isToday ? '#1A6FFF' : allDone ? '#2ECC7122' : hasSessions ? '#1A6FFF18' : 'transparent',
-                    border: `2px solid ${estSel ? '#2ECC71' : isToday ? '#1A6FFF' : allDone ? '#2ECC7160' : someMissed ? '#FF475760' : hasSessions ? '#1A6FFF50' : '#1A1A1A'}`,
+                    border: `2px solid ${estSel ? '#2ECC71' : isToday ? '#1A6FFF' : allDone ? '#2ECC7160' : someMissed ? '#FF475760' : hasSessions ? '#1A6FFF50' : '#212135'}`,
                     cursor: hasSessions ? 'pointer' : 'default',
                   }}>
-                    <span style={{ fontSize: '12px', fontWeight: '800', color: estSel || isToday || allDone ? '#FFF' : hasSessions ? (isPast ? '#FF4757' : '#1A6FFF') : '#2A2A2A' }}>
+                    <span style={{ fontSize: '12px', fontWeight: '800', color: estSel || isToday || allDone ? '#FFF' : hasSessions ? (isPast ? '#FF4757' : '#1A6FFF') : '#2C2C44' }}>
                       {allDone && !estSel ? '✓' : new Date(ds + 'T12:00:00').getDate()}
                     </span>
                   </div>
@@ -3901,11 +3901,11 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                       </button>
                     ) : !modeSelection ? (
                       <button onClick={() => { setMpActionDate(ds); setMpSeanceChoisie('') }}
-                        style={{ background: '#161620', border: '1px solid #252530', borderRadius: '8px', width: '32px', height: '32px', color: '#555', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                        style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', width: '32px', height: '32px', color: '#555', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                     ) : (
                       <button onClick={() => toggleJour(ds)} style={{
                         background: estSel ? 'rgba(46,204,113,0.2)' : '#161620',
-                        border: `1px solid ${estSel ? '#2ECC71' : '#252530'}`,
+                        border: `1px solid ${estSel ? '#2ECC71' : '#2C2C44'}`,
                         borderRadius: '8px', width: '32px', height: '32px',
                         color: estSel ? '#2ECC71' : '#555', cursor: 'pointer',
                         fontSize: estSel ? '16px' : '18px', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -3922,7 +3922,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                       const typeLabel = LABELS_TYPE[r.seances?.type || ''] || r.seances?.type || ''
 
                       return (
-                        <div key={r.id} style={{ background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '14px', display: 'flex' }}>
+                        <div key={r.id} style={{ background: '#141420', border: '1px solid #222238', borderRadius: '14px', display: 'flex' }}>
                           {/* Barre colorée */}
                           <div style={{ width: '4px', background: statusColor, flexShrink: 0, borderRadius: '14px 0 0 14px' }} />
 
@@ -3948,7 +3948,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
 
                             {/* Liste exercices dépliée */}
                             {isExpanded && (
-                              <div style={{ borderTop: '1px solid #161616', padding: '8px 0 4px' }}>
+                              <div style={{ borderTop: '1px solid #1C1C2C', padding: '8px 0 4px' }}>
                                 {exos.map((exo, ei) => {
                                   const fam = exo.exercices?.familles
                                   const couleur = fam?.couleur || '#555'
@@ -3965,7 +3965,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                                   return (
                                     <div key={exo.id}>
                                       {exo.lien_suivant === false && ei > 0 && (
-                                        <div style={{ height: '1px', background: '#161616', margin: '0 14px' }} />
+                                        <div style={{ height: '1px', background: '#1C1C2C', margin: '0 14px' }} />
                                       )}
                                       <button onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
                                         style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', minHeight: '44px' }}>
@@ -3975,14 +3975,14 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                                           {exo.lien_suivant && <span style={{ fontSize: '10px', color: '#1A6FFF60' }}>⇌ superset</span>}
                                         </div>
                                         <span style={{ color: '#555', fontSize: '11px', fontWeight: '600', flexShrink: 0 }}>{seriesSummary}</span>
-                                        <span style={{ color: '#2A2A2A', fontSize: '14px', flexShrink: 0 }}>›</span>
+                                        <span style={{ color: '#2C2C44', fontSize: '14px', flexShrink: 0 }}>›</span>
                                       </button>
                                     </div>
                                   )
                                 })}
                                 <div style={{ padding: '6px 14px 10px' }}>
                                   <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }}
-                                    style={{ width: '100%', background: 'transparent', border: '1px dashed #252530', borderRadius: '10px', padding: '10px', color: '#444', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}>
+                                    style={{ width: '100%', background: 'transparent', border: '1px dashed #2C2C44', borderRadius: '10px', padding: '10px', color: '#444', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}>
                                     + Ajouter un exercice
                                   </button>
                                 </div>
@@ -3994,7 +3994,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                     })}
 
                     {dayReals.length === 0 && (
-                      <div style={{ color: '#1E1E28', fontSize: '11px', fontWeight: '600', paddingLeft: '2px' }}>Aucune séance</div>
+                      <div style={{ color: '#2E2E50', fontSize: '11px', fontWeight: '600', paddingLeft: '2px' }}>Aucune séance</div>
                     )}
                   </div>
                 </div>
@@ -4006,7 +4006,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
 
       {/* ══ DESKTOP : grille de colonnes ══ */}
       {!loading && !isMobile && (
-      <div onClick={() => mpSessionMenu && setMpSessionMenu(null)} style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, 1fr)`, gap: '1px', background: '#1E1E1E', overflow: 'hidden' }}>
+      <div onClick={() => mpSessionMenu && setMpSessionMenu(null)} style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, 1fr)`, gap: '1px', background: '#1E1E30', overflow: 'hidden' }}>
         {days.map((ds, di) => {
           const isToday = ds === today
           const dateObj = new Date(ds + 'T12:00:00')
@@ -4017,12 +4017,12 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           return (
             <div key={ds} style={{
               minHeight: 0,
-              background: estSelectionne ? '#0A1F10' : (isToday ? '#0C0C14' : '#0D0D0D'),
+              background: estSelectionne ? '#0A1F10' : (isToday ? '#0D0D1C' : '#0E0E18'),
               overflowY: 'auto', overflowX: 'hidden',
               outline: estSelectionne ? '2px solid #2ECC7150' : 'none', outlineOffset: '-1px',
             } as React.CSSProperties}>
               {/* Day header — sticky */}
-              <div style={{ position: 'sticky', top: 0, zIndex: 2, padding: '8px 6px 6px', borderBottom: '1px solid #1A1A1A', background: estSelectionne ? '#0D2015' : (isToday ? '#0C1020' : '#0D0D0D') }}>
+              <div style={{ position: 'sticky', top: 0, zIndex: 2, padding: '8px 6px 6px', borderBottom: '1px solid #222238', background: estSelectionne ? '#0D2015' : (isToday ? '#0C1020' : '#0E0E18') }}>
                 <div style={{ textAlign: 'center', marginBottom: '4px' }}>
                   <div style={{ color: estSelectionne ? '#2ECC71' : (isToday ? '#5AABFF' : '#555'), fontSize: '10px', fontWeight: '800', letterSpacing: '0.8px', textTransform: 'uppercase' }}>{JOUR_NOMS[di]}</div>
                   <div style={{ color: estSelectionne ? '#2ECC71' : (isToday ? '#007AFF' : '#888'), fontSize: '22px', fontWeight: '900', lineHeight: 1, marginTop: '1px' }}>{dateNum}</div>
@@ -4030,7 +4030,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                 </div>
                 {!modeSelection && !mpMovingSession && (
                   <button onClick={() => { setMpActionDate(ds); setMpSeanceChoisie('') }}
-                    style={{ width: '100%', minHeight: '28px', borderRadius: '6px', border: '1px solid #252530', background: 'transparent', color: '#444', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 0' }}>+</button>
+                    style={{ width: '100%', minHeight: '28px', borderRadius: '6px', border: '1px solid #2C2C44', background: 'transparent', color: '#444', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 0' }}>+</button>
                 )}
                 {mpMovingSession && (
                   <button onClick={() => mpMoveSession(ds)}
@@ -4041,7 +4041,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                 {modeSelection && (
                   <button onClick={() => toggleJour(ds)} style={{
                     width: '100%', minHeight: '28px', borderRadius: '6px', cursor: 'pointer',
-                    border: `1px solid ${estSelectionne ? '#2ECC71' : '#252530'}`,
+                    border: `1px solid ${estSelectionne ? '#2ECC71' : '#2C2C44'}`,
                     background: estSelectionne ? 'rgba(46,204,113,0.2)' : 'transparent',
                     color: estSelectionne ? '#2ECC71' : '#444',
                     fontSize: estSelectionne ? '16px' : '13px', fontWeight: '700',
@@ -4055,19 +4055,19 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                   const exos = [...(r.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
                   const typeLabel = (LABELS_TYPE[r.seances?.type || ''] || 'SÉANCE').toUpperCase()
                   return (
-                    <div key={r.id} style={{ background: '#111', border: '1px solid #252525', borderRadius: '8px', overflow: 'hidden' }}>
-                      <div style={{ padding: '7px 8px', borderBottom: '1px solid #1E1E1E', display: 'flex', alignItems: 'center', gap: '5px', background: '#111', position: 'relative' }}>
+                    <div key={r.id} style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '8px', overflow: 'hidden' }}>
+                      <div style={{ padding: '7px 8px', borderBottom: '1px solid #1E1E30', display: 'flex', alignItems: 'center', gap: '5px', background: '#18182A', position: 'relative' }}>
                         <div style={{ flex: 1, fontWeight: '700', fontSize: '12px', color: '#DDD', lineHeight: 1.3, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
-                        <span style={{ fontSize: '9px', fontWeight: '800', color: '#555', background: '#181818', border: '1px solid #242424', borderRadius: '4px', padding: '2px 5px', whiteSpace: 'nowrap', flexShrink: 0 }}>{typeLabel}</span>
+                        <span style={{ fontSize: '9px', fontWeight: '800', color: '#555', background: '#18182A', border: '1px solid #282840', borderRadius: '4px', padding: '2px 5px', whiteSpace: 'nowrap', flexShrink: 0 }}>{typeLabel}</span>
                         <button onClick={e => { e.stopPropagation(); setMpSessionMenu(mpSessionMenu?.id === r.id ? null : { id: r.id, seanceId: r.seance_id, date: ds, nom: r.seances?.nom || '' }) }}
                           style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '5px', color: '#2ECC71', cursor: 'pointer', fontSize: '13px', padding: '2px 6px', lineHeight: 1, flexShrink: 0 }}>⋮</button>
                         {mpSessionMenu?.id === r.id && (
-                          <div style={{ position: 'absolute', top: '100%', right: 0, zIndex: 50, background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '6px', minWidth: '180px', boxShadow: '0 8px 24px #000A' }}>
+                          <div style={{ position: 'absolute', top: '100%', right: 0, zIndex: 50, background: '#212135', border: '1px solid #2C2C44', borderRadius: '10px', padding: '6px', minWidth: '180px', boxShadow: '0 8px 24px #000A' }}>
                             <button onClick={() => { setMpDupModal({ seanceId: r.seance_id, nom: r.seances?.nom || '' }); setMpDupDate(ds); setMpSessionMenu(null) }}
                               style={{ width: '100%', background: 'transparent', border: 'none', color: '#DDD', cursor: 'pointer', padding: '8px 10px', fontSize: '12px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>📋 Dupliquer</button>
                             <button onClick={() => { setMpMovingSession({ id: r.id, seanceId: r.seance_id, fromDate: ds, nom: r.seances?.nom || '' }); setMpSessionMenu(null) }}
                               style={{ width: '100%', background: 'transparent', border: 'none', color: '#1A6FFF', cursor: 'pointer', padding: '8px 10px', fontSize: '12px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>↔ Déplacer</button>
-                            <div style={{ height: '1px', background: '#2A2A2A', margin: '4px 0' }} />
+                            <div style={{ height: '1px', background: '#2C2C44', margin: '4px 0' }} />
                             <button onClick={() => { if (confirm('Supprimer cette séance ?')) mpDeleteRealisation(r.id) }}
                               style={{ width: '100%', background: 'transparent', border: 'none', color: '#FF4757', cursor: 'pointer', padding: '8px 10px', fontSize: '12px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>🗑 Supprimer</button>
                           </div>
@@ -4118,12 +4118,12 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                                 <div style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !insideGroup ? '1px solid #1A1A1A' : 'none', background: 'transparent' }}>
                                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginBottom: '5px' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0', flexShrink: 0, marginTop: '2px' }}>
-                                      <button onClick={() => moveExo(r.id, exo.id, -1)} style={{ background: 'none', border: 'none', color: '#2A2A2A', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▲</button>
-                                      <button onClick={() => moveExo(r.id, exo.id, 1)} style={{ background: 'none', border: 'none', color: '#2A2A2A', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▼</button>
+                                      <button onClick={() => moveExo(r.id, exo.id, -1)} style={{ background: 'none', border: 'none', color: '#2C2C44', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▲</button>
+                                      <button onClick={() => moveExo(r.id, exo.id, 1)} style={{ background: 'none', border: 'none', color: '#2C2C44', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▼</button>
                                     </div>
                                     {hasVideo ? (
                                       <button onClick={() => window.open(exo.exercices!.video_url!.replace('vimeo.com/', 'player.vimeo.com/video/'), '_blank')}
-                                        style={{ width: '24px', height: '24px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '9px', color: '#1A6FFF' }}>▶</button>
+                                        style={{ width: '24px', height: '24px', background: '#212135', border: '1px solid #2C2C44', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '9px', color: '#1A6FFF' }}>▶</button>
                                     ) : (
                                       <div style={{ width: '24px', height: '24px', background: couleur + '18', border: `1px solid ${couleur}30`, borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                         <span style={{ color: couleur, fontSize: '8px', fontWeight: '900' }}>{exo.ordre}</span>
@@ -4141,7 +4141,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                                   <div style={{ marginBottom: '4px' }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '1px 2px', marginBottom: '1px' }}>
                                       {['', 'Reps', 'Dur', 'Dist', 'Kg', 'Réc', ''].map((h, hi) => (
-                                        <div key={hi} style={{ color: '#2A2A2A', fontSize: '7px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
+                                        <div key={hi} style={{ color: '#2C2C44', fontSize: '7px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
                                       ))}
                                     </div>
                                     {hasSets ? (
@@ -4165,7 +4165,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                                     )}
                                   </div>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <button onClick={() => addSet(r.id, exo.id, exo)} style={{ background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 7px', color: '#666', cursor: 'pointer', fontSize: '8px', fontWeight: '600', whiteSpace: 'nowrap' }}>+ Série</button>
+                                    <button onClick={() => addSet(r.id, exo.id, exo)} style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '4px', padding: '2px 7px', color: '#666', cursor: 'pointer', fontSize: '8px', fontWeight: '600', whiteSpace: 'nowrap' }}>+ Série</button>
                                     <input type="number" placeholder="×" value={exo.series ?? ''} onChange={async e => {
                                       const val = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value))
                                       if (!val) return
@@ -4185,12 +4185,12 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                                         patchExoLocal(r.id, exo.id, { series: val })
                                         await saveExoField(exo.id, { series: val })
                                       }
-                                    }} style={{ width: '28px', background: '#161616', border: '1px solid #222', borderRadius: '4px', padding: '2px 3px', color: '#888', fontSize: '9px', outline: 'none', textAlign: 'center' }} />
+                                    }} style={{ width: '28px', background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '4px', padding: '2px 3px', color: '#888', fontSize: '9px', outline: 'none', textAlign: 'center' }} />
                                     <div style={{ flex: 1 }} />
                                     {exos.length > 1 && (
                                       <button onClick={() => { setMpCopyExoModal({ fromExo: exo, realisationId: r.id }); setMpCopyExoTargets(new Set()) }} title="Dupliquer les données vers d'autres exercices" style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '4px', padding: '2px 7px', color: '#2ECC71', cursor: 'pointer', fontSize: '8px', fontWeight: '700', whiteSpace: 'nowrap' }}>⊕ copier</button>
                                     )}
-                                    <button onClick={() => toggleLienSuivant(r.id, exo)} title={exo.lien_suivant ? 'Délier' : 'Lier en superset'} style={{ background: exo.lien_suivant ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#222'}`, borderRadius: '4px', padding: '2px 6px', color: exo.lien_suivant ? '#1A6FFF' : '#333', cursor: 'pointer', fontSize: '10px' }}>⇌</button>
+                                    <button onClick={() => toggleLienSuivant(r.id, exo)} title={exo.lien_suivant ? 'Délier' : 'Lier en superset'} style={{ background: exo.lien_suivant ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#2C2C44'}`, borderRadius: '4px', padding: '2px 6px', color: exo.lien_suivant ? '#1A6FFF' : '#333', cursor: 'pointer', fontSize: '10px' }}>⇌</button>
                                   </div>
                                 </div>
                               </div>
@@ -4209,12 +4209,12 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                         })
                       })()}
                       <div style={{ padding: '5px' }}>
-                        <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }} style={{ width: '100%', background: '#0A0A0A', border: '1px dashed #252525', borderRadius: '6px', padding: '8px 4px', color: '#444', cursor: 'pointer', fontSize: '11px', fontWeight: '600', minHeight: '36px' }}>+ exercice</button>
+                        <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }} style={{ width: '100%', background: '#0B0B14', border: '1px dashed #2C2C44', borderRadius: '6px', padding: '8px 4px', color: '#444', cursor: 'pointer', fontSize: '11px', fontWeight: '600', minHeight: '36px' }}>+ exercice</button>
                       </div>
                     </div>
                   )
                 })}
-                {dayReals.length === 0 && <div style={{ color: '#1A1A1A', fontSize: '12px', textAlign: 'center', paddingTop: '24px' }}>—</div>}
+                {dayReals.length === 0 && <div style={{ color: '#212135', fontSize: '12px', textAlign: 'center', paddingTop: '24px' }}>—</div>}
               </div>
             </div>
           )
@@ -4231,11 +4231,11 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
           <>
             <div onClick={() => { setMpCopyExoModal(null); setMpCopyExoTargets(new Set()) }}
               style={{ position: 'fixed', inset: 0, zIndex: 450, background: 'rgba(0,0,0,0.7)' }} />
-            <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 451, background: '#131313', borderRadius: '16px 16px 0 0', border: '1px solid #252525', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 451, background: '#18182A', borderRadius: '16px 16px 0 0', border: '1px solid #2C2C44', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
-                <div style={{ width: '36px', height: '4px', background: '#333', borderRadius: '2px' }} />
+                <div style={{ width: '36px', height: '4px', background: '#3A3A55', borderRadius: '2px' }} />
               </div>
-              <div style={{ padding: '8px 16px 12px', borderBottom: '1px solid #1E1E1E' }}>
+              <div style={{ padding: '8px 16px 12px', borderBottom: '1px solid #1E1E30' }}>
                 <div style={{ fontWeight: '800', fontSize: '16px', marginBottom: '4px' }}>⊕ Copier les données</div>
                 <div style={{ color: '#888', fontSize: '13px' }}>
                   Depuis <span style={{ color: '#FFF', fontWeight: '700' }}>{mpCopyExoModal.fromExo.exercices?.nom}</span> vers :
@@ -4268,9 +4268,9 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                   )
                 })}
               </div>
-              <div style={{ padding: '12px 16px 32px', borderTop: '1px solid #1E1E1E', display: 'flex', gap: '10px' }}>
+              <div style={{ padding: '12px 16px 32px', borderTop: '1px solid #1E1E30', display: 'flex', gap: '10px' }}>
                 <button onClick={() => { setMpCopyExoModal(null); setMpCopyExoTargets(new Set()) }}
-                  style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+                  style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
                 <button onClick={mpCopyExoToTargets} disabled={mpCopyExoTargets.size === 0}
                   style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: mpCopyExoTargets.size > 0 ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpCopyExoTargets.size > 0 ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>
                   Copier vers {mpCopyExoTargets.size > 0 ? `${mpCopyExoTargets.size} exercice${mpCopyExoTargets.size > 1 ? 's' : ''}` : '…'}
@@ -4286,22 +4286,22 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
         <>
           <div onClick={() => setMpSessionMenu(null)}
             style={{ position: 'fixed', inset: 0, zIndex: 450, background: 'rgba(0,0,0,0.6)' }} />
-          <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 451, background: '#131313', borderRadius: '16px 16px 0 0', border: '1px solid #252525', padding: '16px 16px 32px' }}>
+          <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 451, background: '#18182A', borderRadius: '16px 16px 0 0', border: '1px solid #2C2C44', padding: '16px 16px 32px' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-              <div style={{ width: '36px', height: '4px', background: '#333', borderRadius: '2px' }} />
+              <div style={{ width: '36px', height: '4px', background: '#3A3A55', borderRadius: '2px' }} />
             </div>
             <div style={{ color: '#888', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{mpSessionMenu.nom}</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button onClick={() => { setMpDupModal({ seanceId: mpSessionMenu.seanceId, nom: mpSessionMenu.nom }); setMpDupDate(''); setMpDupJoueurId(''); setMpSessionMenu(null) }}
-                style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '14px 16px', color: '#FFF', cursor: 'pointer', fontSize: '15px', fontWeight: '600', textAlign: 'left', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '12px', padding: '14px 16px', color: '#FFF', cursor: 'pointer', fontSize: '15px', fontWeight: '600', textAlign: 'left', display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <span style={{ fontSize: '20px' }}>📋</span> Dupliquer la séance
               </button>
               <button onClick={() => { setMpMovingSession({ id: mpSessionMenu.id, seanceId: mpSessionMenu.seanceId, fromDate: mpSessionMenu.date, nom: mpSessionMenu.nom }); setMpSessionMenu(null) }}
-                style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '14px 16px', color: '#FFF', cursor: 'pointer', fontSize: '15px', fontWeight: '600', textAlign: 'left', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '12px', padding: '14px 16px', color: '#FFF', cursor: 'pointer', fontSize: '15px', fontWeight: '600', textAlign: 'left', display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <span style={{ fontSize: '20px' }}>↔</span> Déplacer la séance
               </button>
               <button onClick={() => setMpSessionMenu(null)}
-                style={{ width: '100%', background: 'transparent', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '14px', color: '#555', cursor: 'pointer', fontSize: '15px', marginTop: '4px' }}>Annuler</button>
+                style={{ width: '100%', background: 'transparent', border: '1px solid #2C2C44', borderRadius: '12px', padding: '14px', color: '#555', cursor: 'pointer', fontSize: '15px', marginTop: '4px' }}>Annuler</button>
             </div>
           </div>
         </>
@@ -4312,9 +4312,9 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
         <>
           <div onClick={() => { setMpDupModal(null); setMpDupDate(''); setMpDupJoueurId('') }}
             style={{ position: 'fixed', inset: 0, zIndex: 450, background: 'rgba(0,0,0,0.7)' }} />
-          <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 451, background: '#131313', borderRadius: '16px 16px 0 0', border: '1px solid #252525', padding: '20px 16px 32px' }}>
+          <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 451, background: '#18182A', borderRadius: '16px 16px 0 0', border: '1px solid #2C2C44', padding: '20px 16px 32px' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-              <div style={{ width: '36px', height: '4px', background: '#333', borderRadius: '2px' }} />
+              <div style={{ width: '36px', height: '4px', background: '#3A3A55', borderRadius: '2px' }} />
             </div>
             <div style={{ fontWeight: '800', fontSize: '16px', marginBottom: '4px' }}>📋 Dupliquer la séance</div>
             <div style={{ color: '#888', fontSize: '13px', marginBottom: '20px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{mpDupModal.nom}</div>
@@ -4322,12 +4322,12 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
               <div>
                 <div style={{ color: '#555', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px' }}>Date cible</div>
                 <input type="date" value={mpDupDate} onChange={e => setMpDupDate(e.target.value)}
-                  style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '10px 12px', color: '#FFF', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }} />
+                  style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '10px', padding: '10px 12px', color: '#FFF', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }} />
               </div>
               <div>
                 <div style={{ color: '#555', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px' }}>Joueur (optionnel)</div>
                 <select value={mpDupJoueurId} onChange={e => setMpDupJoueurId(e.target.value)}
-                  style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '10px 12px', color: mpDupJoueurId ? '#FFF' : '#555', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }}>
+                  style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '10px', padding: '10px 12px', color: mpDupJoueurId ? '#FFF' : '#555', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }}>
                   <option value="">— Même joueur ({joueur.prenom} {joueur.nom}) —</option>
                   {allJoueurs.filter(j => j.id !== joueur.id).map(j => (
                     <option key={j.id} value={j.id}>{j.nom} {j.prenom}</option>
@@ -4337,7 +4337,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button onClick={() => { setMpDupModal(null); setMpDupDate(''); setMpDupJoueurId('') }}
-                style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+                style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
               <button onClick={mpDupSession} disabled={!mpDupDate}
                 style={{ flex: 1, padding: '14px', borderRadius: '12px', border: 'none', background: mpDupDate ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpDupDate ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>Dupliquer</button>
             </div>
@@ -4349,7 +4349,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
       {mpActionDate && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}
           onClick={() => setMpActionDate(null)}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '340px' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '340px' }}>
             <div style={{ fontWeight: '800', fontSize: '16px', marginBottom: '4px' }}>Ajouter</div>
             <div style={{ color: '#C9A84C', fontSize: '13px', marginBottom: '20px' }}>
               {new Date(mpActionDate + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -4384,7 +4384,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                 💚 Indices Wellness
               </button>
             </div>
-            <button onClick={() => setMpActionDate(null)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+            <button onClick={() => setMpActionDate(null)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
           </div>
         </div>
       )}
@@ -4392,7 +4392,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
       {/* MP — Modal Wellness */}
       {mpWellnessDate && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}>
-          <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '85vh', overflowY: 'auto' }}>
+          <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '85vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
               <div style={{ fontWeight: '800', fontSize: '17px' }}>💚 Wellness</div>
               <button onClick={() => setMpWellnessDate(null)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '20px', cursor: 'pointer' }}>✕</button>
@@ -4426,9 +4426,9 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
             ))}
             <textarea placeholder="Notes (optionnel)..." value={mpWellnessData.notes}
               onChange={e => setMpWellnessData(prev => ({ ...prev, notes: e.target.value }))}
-              style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '12px', color: '#FFF', fontSize: '14px', outline: 'none', resize: 'none', minHeight: '80px', marginBottom: '16px', boxSizing: 'border-box' }} />
+              style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '10px', padding: '12px', color: '#FFF', fontSize: '14px', outline: 'none', resize: 'none', minHeight: '80px', marginBottom: '16px', boxSizing: 'border-box' }} />
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={() => setMpWellnessDate(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+              <button onClick={() => setMpWellnessDate(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
               <button onClick={mpSauvegarderWellness} style={{ flex: 2, padding: '13px', borderRadius: '12px', border: 'none', background: '#2ECC71', color: '#FFF', cursor: 'pointer', fontWeight: '700', fontSize: '14px' }}>Enregistrer</button>
             </div>
           </div>
@@ -4437,18 +4437,18 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
 
       {addExoTo && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}>
-          <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
               <h3 style={{ fontSize: '15px', fontWeight: '700' }}>Ajouter un exercice</h3>
               <button onClick={() => setAddExoTo(null)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '18px', cursor: 'pointer' }}>✕</button>
             </div>
             <input value={rechercheExo} onChange={e => setRechercheExo(e.target.value)} placeholder="Rechercher..."
               autoFocus
-              style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '10px 14px', color: '#FFF', fontSize: '14px', outline: 'none', marginBottom: '10px' }} />
+              style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '10px 14px', color: '#FFF', fontSize: '14px', outline: 'none', marginBottom: '10px' }} />
             <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {exercices.filter(e => e.nom.toLowerCase().includes(rechercheExo.toLowerCase())).map(ex => (
                 <button key={ex.id} onClick={() => addExoToSession(addExoTo, ex)}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '10px 14px', cursor: 'pointer', textAlign: 'left' }}>
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '10px 14px', cursor: 'pointer', textAlign: 'left' }}>
                   <span style={{ color: '#FFF', fontSize: '13px', fontWeight: '600' }}>{ex.nom}</span>
                   {ex.familles && <span style={{ fontSize: '10px', color: ex.familles.couleur, background: ex.familles.couleur + '20', padding: '2px 8px', borderRadius: '8px' }}>{ex.familles.nom}</span>}
                 </button>
@@ -4460,11 +4460,11 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
 
       {/* MP — Créer une nouvelle séance */}
       {mpNouvelleSeanceDate && (
-        <div style={{ position: 'fixed', inset: 0, background: '#0A0A0A', zIndex: 500, overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, background: '#0B0B14', zIndex: 500, overflowY: 'auto' }}>
           <div style={{ maxWidth: '860px', margin: '0 auto', padding: '24px 16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
               <button onClick={() => setMpNouvelleSeanceDate(null)}
-                style={{ background: 'none', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '13px' }}>← Annuler</button>
+                style={{ background: 'none', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '13px' }}>← Annuler</button>
               <div>
                 <div style={{ fontWeight: '800', fontSize: '16px' }}>Nouvelle séance</div>
                 <div style={{ color: '#C9A84C', fontSize: '12px' }}>
@@ -4496,19 +4496,19 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
         const fam = exo.exercices?.familles
         const couleur = fam?.couleur || '#555'
         const hasSets = exo.sets_config && exo.sets_config.length > 0
-        const inputLg: React.CSSProperties = { background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '10px', color: '#FFF', fontSize: '16px', outline: 'none', textAlign: 'center', width: '100%', boxSizing: 'border-box' as const }
+        const inputLg: React.CSSProperties = { background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '10px', color: '#FFF', fontSize: '16px', outline: 'none', textAlign: 'center', width: '100%', boxSizing: 'border-box' as const }
         return (
           <>
             {/* Backdrop */}
             <div onClick={() => setExpandedExo(null)} style={{ position: 'fixed', inset: 0, zIndex: 400, background: '#00000080' }} />
             {/* Sheet */}
-            <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 401, background: '#131313', borderRadius: '16px 16px 0 0', border: '1px solid #252525', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 401, background: '#18182A', borderRadius: '16px 16px 0 0', border: '1px solid #2C2C44', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
               {/* Handle */}
               <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
-                <div style={{ width: '36px', height: '4px', background: '#333', borderRadius: '2px' }} />
+                <div style={{ width: '36px', height: '4px', background: '#3A3A55', borderRadius: '2px' }} />
               </div>
               {/* Header */}
-              <div style={{ padding: '8px 16px 12px', borderBottom: '1px solid #1E1E1E' }}>
+              <div style={{ padding: '8px 16px 12px', borderBottom: '1px solid #1E1E30' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: exo.exercices?.video_url ? '10px' : '0' }}>
                   <div style={{ width: '32px', height: '32px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <span style={{ color: couleur, fontSize: '12px', fontWeight: '900' }}>{exo.ordre}</span>
@@ -4518,8 +4518,8 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                     <div style={{ color: '#FFF', fontWeight: '800', fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={() => { moveExo(r.id, exo.id, -1) }} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>▲</button>
-                    <button onClick={() => { moveExo(r.id, exo.id, 1) }} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>▼</button>
+                    <button onClick={() => { moveExo(r.id, exo.id, -1) }} style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>▲</button>
+                    <button onClick={() => { moveExo(r.id, exo.id, 1) }} style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>▼</button>
                     <button onClick={() => { removeExo(r.id, exo.id); setExpandedExo(null) }} style={{ background: '#FF475710', border: '1px solid #FF475730', borderRadius: '8px', padding: '8px 12px', color: '#FF4757', cursor: 'pointer', fontSize: '14px' }}>✕</button>
                   </div>
                 </div>
@@ -4556,7 +4556,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                     style={{ background: '#1A6FFF20', border: '1px solid #1A6FFF40', borderRadius: '10px', padding: '10px 18px', color: '#1A6FFF', cursor: 'pointer', fontSize: '13px', fontWeight: '700' }}>+ Série</button>
                   <div style={{ flex: 1 }} />
                   <button onClick={() => toggleLienSuivant(r.id, exo)}
-                    style={{ background: exo.lien_suivant ? '#1A6FFF20' : '#1A1A1A', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#2A2A2A'}`, borderRadius: '10px', padding: '10px 14px', color: exo.lien_suivant ? '#1A6FFF' : '#555', cursor: 'pointer', fontSize: '14px' }}>⇌</button>
+                    style={{ background: exo.lien_suivant ? '#1A6FFF20' : '#212135', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#2C2C44'}`, borderRadius: '10px', padding: '10px 14px', color: exo.lien_suivant ? '#1A6FFF' : '#555', cursor: 'pointer', fontSize: '14px' }}>⇌</button>
                 </div>
 
                 {/* Table sets */}
@@ -4605,7 +4605,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                 )}
               </div>
               {/* Footer */}
-              <div style={{ padding: '12px 16px', borderTop: '1px solid #1E1E1E', display: 'flex', gap: '8px' }}>
+              <div style={{ padding: '12px 16px', borderTop: '1px solid #1E1E30', display: 'flex', gap: '8px' }}>
                 {(() => {
                   const allExos = r?.seances?.seance_exercices || []
                   return allExos.length > 1 ? (
@@ -4614,7 +4614,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
                   ) : null
                 })()}
                 <button onClick={() => setExpandedExo(null)}
-                  style={{ flex: 1, padding: '14px', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '12px', color: '#888', cursor: 'pointer', fontSize: '15px', fontWeight: '600' }}>Fermer</button>
+                  style={{ flex: 1, padding: '14px', background: '#212135', border: '1px solid #2C2C44', borderRadius: '12px', color: '#888', cursor: 'pointer', fontSize: '15px', fontWeight: '600' }}>Fermer</button>
               </div>
             </div>
           </>
@@ -4637,7 +4637,7 @@ function MasterPlannerView({ joueur, realisations: initialReals, exercices, week
               {[...joursSelectionnes].reduce((n, d) => n + ((byDate[d] || []).filter(r => r.seance_id).length), 0)} séance(s)
             </div>
           </div>
-          <button onClick={() => setJoursSelectionnes(new Set())} style={{ background: 'none', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '6px 10px', color: '#555', cursor: 'pointer', fontSize: '11px' }}>Effacer</button>
+          <button onClick={() => setJoursSelectionnes(new Set())} style={{ background: 'none', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#555', cursor: 'pointer', fontSize: '11px' }}>Effacer</button>
           <button onClick={() => setShowCopierModal(true)} style={{
             background: '#2ECC71', border: 'none', borderRadius: '10px',
             padding: '10px 20px', color: '#000', cursor: 'pointer',
@@ -4819,7 +4819,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
     return (
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <button onClick={() => { setSeanceEdit(null); setCreateDate(null) }} style={{ background: 'none', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '13px' }}>← Annuler</button>
+          <button onClick={() => { setSeanceEdit(null); setCreateDate(null) }} style={{ background: 'none', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '13px' }}>← Annuler</button>
           <span style={{ color: '#888', fontSize: '13px' }}>
             Nouvelle séance pour <strong style={{ color: '#FFF' }}>{joueur.prenom}</strong> — <span style={{ color: '#C9A84C' }}>{new Date(createDate! + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
           </span>
@@ -4844,7 +4844,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-        <button onClick={onBack} style={{ background: 'none', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '13px' }}>← Retour</button>
+        <button onClick={onBack} style={{ background: 'none', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '13px' }}>← Retour</button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1 }}>
           <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#1A6FFF20', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1A6FFF', fontWeight: '800', fontSize: '15px' }}>
             {joueur.prenom[0]}{joueur.nom[0]}
@@ -4857,11 +4857,11 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '4px', background: '#1A1A1A', borderRadius: '10px', padding: '4px' }}>
+        <div style={{ display: 'flex', gap: '4px', background: '#212135', borderRadius: '10px', padding: '4px' }}>
           {(['calendrier', 'graphiques', 'favoris', 'messages'] as const).map(o => (
             <button key={o} onClick={() => setOnglet(o)} style={{
               padding: '7px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
-              background: onglet === o ? '#2A2A2A' : 'transparent',
+              background: onglet === o ? '#2C2C44' : 'transparent',
               color: onglet === o ? '#FFF' : '#555',
             }}>{o === 'calendrier' ? 'Calendrier' : o === 'graphiques' ? '📊 Graphiques' : o === 'favoris' ? '⭐ Favoris' : '💬 Messages'}</button>
           ))}
@@ -4874,19 +4874,19 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
             {/* Ligne 1 : nav + Master Planner */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <button onClick={allerAujourdhui} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap' }}>Aujourd'hui</button>
-              <button onClick={() => decalerRange(-7)} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>‹</button>
-              <button onClick={() => decalerRange(7)} style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>›</button>
+              <button onClick={allerAujourdhui} style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap' }}>Aujourd'hui</button>
+              <button onClick={() => decalerRange(-7)} style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>‹</button>
+              <button onClick={() => decalerRange(7)} style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>›</button>
               <button onClick={() => setShowMasterPlanner(true)} style={{ background: '#1A6FFF20', border: '1px solid #1A6FFF50', borderRadius: '8px', padding: '7px 14px', color: '#1A6FFF', cursor: 'pointer', fontSize: '12px', fontWeight: '700', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>▦ Master Planner</button>
             </div>
             {/* Ligne 2 : plage de dates */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <span style={{ color: '#555', fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px' }}>DE</span>
               <input type="date" value={rangeDebut} onChange={e => setRangeDebut(e.target.value)}
-                style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', fontSize: '13px', fontWeight: '600', outline: 'none', cursor: 'pointer' }} />
+                style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', fontSize: '13px', fontWeight: '600', outline: 'none', cursor: 'pointer' }} />
               <span style={{ color: '#555', fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px' }}>À</span>
               <input type="date" value={rangeFin} onChange={e => setRangeFin(e.target.value)}
-                style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', fontSize: '13px', fontWeight: '600', outline: 'none', cursor: 'pointer' }} />
+                style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', fontSize: '13px', fontWeight: '600', outline: 'none', cursor: 'pointer' }} />
             </div>
           </div>
 
@@ -4909,20 +4909,20 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                   return (
                     <div key={ds} style={{
                       minHeight: '100px',
-                      background: isToday ? '#1A6FFF08' : '#111',
-                      borderTop: `2px solid ${isToday ? '#1A6FFF' : isPast ? '#1E1E1E' : '#2A2A2A'}`,
-                      borderBottom: '1px solid #1E1E1E',
-                      borderLeft: '1px solid #1E1E1E',
+                      background: isToday ? '#1A6FFF08' : '#18182A',
+                      borderTop: `2px solid ${isToday ? '#1A6FFF' : isPast ? '#1E1E1E' : '#2C2C44'}`,
+                      borderBottom: '1px solid #1E1E30',
+                      borderLeft: '1px solid #1E1E30',
                       borderRight: '1px solid #1E1E1E',
                       borderRadius: '8px',
                       display: 'flex', flexDirection: 'column',
                       overflow: 'hidden',
                     }}>
                       {/* Header jour */}
-                      <div style={{ padding: '7px 7px 5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #1A1A1A' }}>
+                      <div style={{ padding: '7px 7px 5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #222238' }}>
                         <div style={{ fontSize: '18px', fontWeight: isToday ? '900' : '600', color: isToday ? '#007AFF' : isPast ? '#444' : '#CCC', lineHeight: 1 }}>{dateNum}</div>
                         <button onClick={() => setActionMenuDate(ds)}
-                          style={{ width: '26px', height: '26px', borderRadius: '6px', border: '1px solid #252525', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, padding: 0 }}>+</button>
+                          style={{ width: '26px', height: '26px', borderRadius: '6px', border: '1px solid #2C2C44', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, padding: 0 }}>+</button>
                       </div>
 
                       {/* Cartes séances */}
@@ -4988,10 +4988,10 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
       )}
 
       {onglet === 'messages' && (
-        <div style={{ background: '#111', borderRadius: '16px', overflow: 'hidden', border: '1px solid #2A2A2A', height: 'calc(100vh - 260px)' }}>
+        <div style={{ background: '#18182A', borderRadius: '16px', overflow: 'hidden', border: '1px solid #2C2C44', height: 'calc(100vh - 260px)' }}>
           {coachId && joueurAuthId ? (
             <>
-              <div style={{ padding: '14px 20px', borderBottom: '1px solid #1E1E1E' }}>
+              <div style={{ padding: '14px 20px', borderBottom: '1px solid #1E1E30' }}>
                 <span style={{ color: '#555', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Conversation avec {joueur.prenom} {joueur.nom}</span>
               </div>
               <ChatView key={joueurAuthId} myId={coachId} otherId={joueurAuthId} height="calc(100vh - 325px)" />
@@ -5008,13 +5008,13 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
         <div>
           <p style={{ color: '#888', fontSize: '13px', marginBottom: '16px' }}>Séances sauvegardées — clique sur "Planifier" pour les ajouter au calendrier.</p>
           {favoris.length === 0 ? (
-            <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '32px', textAlign: 'center', color: '#555', fontSize: '14px' }}>
+            <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '32px', textAlign: 'center', color: '#555', fontSize: '14px' }}>
               Aucun favori. Coche "Sauvegarder en Favoris" lors de la création d'une séance.
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {favoris.map(s => (
-                <div key={s.id} style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div key={s.id} style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ fontWeight: '700', fontSize: '14px' }}>{s.nom}</div>
                     <div style={{ color: '#666', fontSize: '12px', marginTop: '2px' }}>{s.seance_exercices?.length || 0} exercices</div>
@@ -5034,7 +5034,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
       {seanceDetail && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}
           onClick={() => setSeanceDetail(null)}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '80vh', overflowY: 'auto' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '480px', maxHeight: '80vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
               <div>
                 <div style={{ fontWeight: '800', fontSize: '17px' }}>{seanceDetail.seances ? seanceDetail.seances.nom : '💚 Wellness'}</div>
@@ -5047,7 +5047,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
 
             {/* Toggle complétée — seulement pour les vraies séances */}
             {seanceDetail.seances && (
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '16px', padding: '10px 14px', background: seanceDetail.completee ? '#2ECC7115' : '#1A1A1A', borderRadius: '10px', border: `1px solid ${seanceDetail.completee ? '#2ECC7140' : '#2A2A2A'}` }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', marginBottom: '16px', padding: '10px 14px', background: seanceDetail.completee ? '#2ECC7115' : '#212135', borderRadius: '10px', border: `1px solid ${seanceDetail.completee ? '#2ECC7140' : '#2C2C44'}` }}>
                 <input type="checkbox" checked={seanceDetail.completee} onChange={() => toggleCompletee(seanceDetail)} style={{ accentColor: '#2ECC71', width: '16px', height: '16px', cursor: 'pointer' }} />
                 <span style={{ fontWeight: '600', fontSize: '13px', color: seanceDetail.completee ? '#2ECC71' : '#888' }}>
                   {seanceDetail.completee ? 'Séance réalisée' : 'Marquer comme réalisée'}
@@ -5079,7 +5079,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                       : lastEx.recuperation_secondes
                     return (
                       <Fragment key={bIdx}>
-                      <div style={{ background: '#0C0C0C', border: isSuperset ? '1px solid #1A6FFF25' : '1px solid #161616', borderRadius: '14px', overflow: 'hidden' }}>
+                      <div style={{ background: '#0E0E18', border: isSuperset ? '1px solid #1A6FFF25' : '1px solid #1C1C2C', borderRadius: '14px', overflow: 'hidden' }}>
                         {isSuperset && (
                           <div style={{ background: 'linear-gradient(90deg,#1A6FFF18,#1A6FFF08)', borderBottom: '1px solid #1A6FFF20', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span style={{ fontSize: '12px' }}>🔗</span>
@@ -5104,7 +5104,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                                     : <span style={{ marginLeft: '8px', color: '#1A6FFF35', fontSize: '10px' }}>enchaîner</span>}
                                 </div>
                               )}
-                              <div style={{ padding: '12px 14px 0', borderTop: ei > 0 && !isSuperset ? '1px solid #161616' : 'none' }}>
+                              <div style={{ padding: '12px 14px 0', borderTop: ei > 0 && !isSuperset ? '1px solid #1C1C2C' : 'none' }}>
                                 <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', marginBottom: '10px' }}>
                                   <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: couleur + '20', border: `1px solid ${couleur}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                     <span style={{ color: couleur, fontSize: '11px', fontWeight: '900' }}>{ex.ordre}</span>
@@ -5158,7 +5158,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                                 {nbSeries === 0 && (ex.repetitions || ex.duree_secondes || ex.distance_metres || ex.charge_kg) && (
                                   <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' as const, marginBottom: '10px' }}>
                                     {[ex.repetitions && `${ex.repetitions} reps`, ex.duree_secondes && `${ex.duree_secondes}s`, ex.distance_metres && `${ex.distance_metres}m`, ex.charge_kg && `${ex.charge_kg}kg`].filter(Boolean).map((p, pi) => (
-                                      <span key={pi} style={{ background: '#161616', border: '1px solid #1E1E1E', borderRadius: '6px', padding: '3px 8px', fontSize: '12px', fontWeight: '700', color: '#666' }}>{p}</span>
+                                      <span key={pi} style={{ background: '#1C1C2C', border: '1px solid #1E1E30', borderRadius: '6px', padding: '3px 8px', fontSize: '12px', fontWeight: '700', color: '#666' }}>{p}</span>
                                     ))}
                                   </div>
                                 )}
@@ -5203,7 +5203,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                 { label: 'Sommeil', val: seanceDetail.qualite_sommeil, inv: true },
               ].filter(x => x.val != null)
               return (
-                <div style={{ background: '#0D0D0D', borderRadius: '12px', padding: '14px', marginBottom: '16px' }}>
+                <div style={{ background: '#0E0E18', borderRadius: '12px', padding: '14px', marginBottom: '16px' }}>
                   <div style={{ color: '#555', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Ressenti joueur</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: seanceDetail.notes_joueur ? '10px' : '0' }}>
                     {items.map(({ label, val, inv }) => {
@@ -5218,7 +5218,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                     })}
                   </div>
                   {seanceDetail.notes_joueur && (
-                    <div style={{ color: '#AAA', fontSize: '13px', fontStyle: 'italic', borderTop: '1px solid #1E1E1E', paddingTop: '10px' }}>"{seanceDetail.notes_joueur}"</div>
+                    <div style={{ color: '#AAA', fontSize: '13px', fontStyle: 'italic', borderTop: '1px solid #1E1E30', paddingTop: '10px' }}>"{seanceDetail.notes_joueur}"</div>
                   )}
                 </div>
               )
@@ -5248,7 +5248,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
       {actionMenuDate && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}
           onClick={() => setActionMenuDate(null)}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '320px' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '320px' }}>
             <div style={{ fontWeight: '800', fontSize: '16px', marginBottom: '4px' }}>Ajouter</div>
             <div style={{ color: '#C9A84C', fontSize: '13px', marginBottom: '20px' }}>
               {new Date(actionMenuDate + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -5263,7 +5263,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                 💚 Indices Wellness
               </button>
             </div>
-            <button onClick={() => setActionMenuDate(null)} style={{ width: '100%', padding: '12px', marginTop: '12px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+            <button onClick={() => setActionMenuDate(null)} style={{ width: '100%', padding: '12px', marginTop: '12px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
           </div>
         </div>
       )}
@@ -5271,7 +5271,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
       {/* Modal Wellness */}
       {wellnessDate && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
-          <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '85vh', overflowY: 'auto' }}>
+          <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '85vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
               <div style={{ fontWeight: '800', fontSize: '17px' }}>💚 Wellness</div>
               <button onClick={() => setWellnessDate(null)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '20px', cursor: 'pointer' }}>✕</button>
@@ -5305,9 +5305,9 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
             ))}
             <textarea placeholder="Notes (optionnel)..." value={wellnessData.notes}
               onChange={e => setWellnessData(prev => ({ ...prev, notes: e.target.value }))}
-              style={{ width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '12px', color: '#FFF', fontSize: '14px', outline: 'none', resize: 'none', minHeight: '80px', marginBottom: '16px', boxSizing: 'border-box' }} />
+              style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '10px', padding: '12px', color: '#FFF', fontSize: '14px', outline: 'none', resize: 'none', minHeight: '80px', marginBottom: '16px', boxSizing: 'border-box' }} />
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={() => setWellnessDate(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', border: '1px solid #2A2A2A', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+              <button onClick={() => setWellnessDate(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
               <button onClick={sauvegarderWellness} style={{ flex: 2, padding: '13px', borderRadius: '12px', border: 'none', background: '#2ECC71', color: '#FFF', cursor: 'pointer', fontWeight: '700', fontSize: '14px' }}>Enregistrer</button>
             </div>
           </div>
@@ -5317,7 +5317,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
       {/* Modal ajouter une séance */}
       {createDate && !seanceEdit && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
-          <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '440px' }}>
+          <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '440px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
                 <div style={{ fontWeight: '800', fontSize: '16px' }}>Ajouter une séance</div>
@@ -5331,13 +5331,13 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
             <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
               <button onClick={() => setCreateMode('choisir')} style={{
                 flex: 1, padding: '10px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
-                border: `1px solid ${createMode === 'choisir' ? '#1A6FFF' : '#2A2A2A'}`,
+                border: `1px solid ${createMode === 'choisir' ? '#1A6FFF' : '#2C2C44'}`,
                 background: createMode === 'choisir' ? '#1A6FFF15' : 'transparent',
                 color: createMode === 'choisir' ? '#1A6FFF' : '#555',
               }}>Choisir un modèle</button>
               <button onClick={() => setCreateMode('creer')} style={{
                 flex: 1, padding: '10px', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
-                border: `1px solid ${createMode === 'creer' ? '#2ECC71' : '#2A2A2A'}`,
+                border: `1px solid ${createMode === 'creer' ? '#2ECC71' : '#2C2C44'}`,
                 background: createMode === 'creer' ? '#2ECC7115' : 'transparent',
                 color: createMode === 'creer' ? '#2ECC71' : '#555',
               }}>Créer une séance</button>
@@ -5353,7 +5353,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                   triggerStyle={{ width: '100%' }}
                 />
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={() => setCreateDate(null)} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: '1px solid #2A2A2A', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+                  <button onClick={() => setCreateDate(null)} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: '1px solid #2C2C44', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
                   <button onClick={attribuerTemplate} disabled={!seanceChoisie} style={{
                     flex: 2, padding: '11px', borderRadius: '10px', border: 'none',
                     background: seanceChoisie ? '#1A6FFF' : '#333', color: '#FFF',
@@ -5368,7 +5368,7 @@ function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () => void }
                   Sauvegarder aussi en Favoris (réutilisable)
                 </label>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <button onClick={() => setCreateDate(null)} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: '1px solid #2A2A2A', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+                  <button onClick={() => setCreateDate(null)} style={{ flex: 1, padding: '11px', borderRadius: '10px', border: '1px solid #2C2C44', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
                   <button onClick={() => setSeanceEdit({ id: '', nom: '', type: 'complete', notes: '', est_template: sauvegarderFavori, seance_exercices: [] })} style={{
                     flex: 2, padding: '11px', borderRadius: '10px', border: 'none',
                     background: '#2ECC71', color: '#FFF', cursor: 'pointer', fontWeight: '700', fontSize: '14px',
@@ -5454,7 +5454,7 @@ function AttributionModal({ seances, onClose }: {
         </div>
 
         {/* Liste séances + dates */}
-        <div style={{ background: '#08080A', borderRadius: '10px', overflow: 'hidden', marginBottom: '20px', border: '1px solid #1A1A22' }}>
+        <div style={{ background: '#0A0A14', borderRadius: '10px', overflow: 'hidden', marginBottom: '20px', border: '1px solid #22223A' }}>
           {seances.map((s, i) => (
             <div key={s.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: i < seances.length - 1 ? '1px solid #141418' : 'none' }}>
               <span style={{ color: '#D0D0E0', fontSize: '13px', fontWeight: '600' }}>{s.nom}</span>
@@ -5477,7 +5477,7 @@ function AttributionModal({ seances, onClose }: {
               return (
                 <button key={j.id} onClick={() => toggleJoueur(j.id)}
                   className={`list-item${sel ? ' list-item-active' : ''}`}
-                  style={{ border: sel ? '1px solid #1A6FFF40' : '1px solid #1A1A22', cursor: 'pointer', textAlign: 'left' }}>
+                  style={{ border: sel ? '1px solid #1A6FFF40' : '1px solid #22223A', cursor: 'pointer', textAlign: 'left' }}>
                   <div className={`checkbox-custom${sel ? ' checked' : ''}`}>{sel ? '✓' : ''}</div>
                   <span style={{ color: sel ? '#F0F0F8' : '#888', fontSize: '14px', fontWeight: sel ? '700' : '400' }}>{j.prenom} {j.nom}</span>
                 </button>
@@ -5490,7 +5490,7 @@ function AttributionModal({ seances, onClose }: {
           <button onClick={onClose} className="btn btn-ghost" style={{ flex: 1 }}>Annuler</button>
           <button onClick={confirmer} disabled={saving || selectedJoueurs.size === 0}
             className={`btn${selectedJoueurs.size > 0 && !saving ? ' btn-success' : ''}`}
-            style={{ flex: 2, justifyContent: 'center', padding: '12px', ...(selectedJoueurs.size === 0 || saving ? { background: '#1A1A22', color: '#3A3A50', cursor: 'not-allowed' } : {}) }}>
+            style={{ flex: 2, justifyContent: 'center', padding: '12px', ...(selectedJoueurs.size === 0 || saving ? { background: '#22223A', color: '#3A3A50', cursor: 'not-allowed' } : {}) }}>
             {saving ? 'Attribution...' : `Attribuer à ${selectedJoueurs.size || '...'} joueur${selectedJoueurs.size > 1 ? 's' : ''}`}
           </button>
         </div>
@@ -5584,7 +5584,7 @@ function DuplicationModal({ seance, onClose, onDuplique }: {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300 }}>
-      <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto' }}>
         <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '20px' }}>Dupliquer avec progression</h2>
 
         {/* 1 — Nombre de semaines */}
@@ -5593,7 +5593,7 @@ function DuplicationModal({ seance, onClose, onDuplique }: {
           {[1, 2, 3, 4].map(n => (
             <button key={n} onClick={() => setNbSemaines(n)} style={{
               width: '38px', height: '38px', borderRadius: '8px',
-              border: `1px solid ${nbSemaines === n ? '#C9A84C' : '#2A2A2A'}`,
+              border: `1px solid ${nbSemaines === n ? '#C9A84C' : '#2C2C44'}`,
               background: nbSemaines === n ? '#C9A84C20' : 'transparent',
               color: nbSemaines === n ? '#C9A84C' : '#555',
               cursor: 'pointer', fontWeight: '700', fontSize: '15px',
@@ -5605,25 +5605,25 @@ function DuplicationModal({ seance, onClose, onDuplique }: {
         </div>
 
         {/* 2 — Volume global */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px', padding: '12px 14px', background: '#1A1A1A', borderRadius: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px', padding: '12px 14px', background: '#212135', borderRadius: '10px' }}>
           <span style={{ color: '#1A6FFF', fontWeight: '700', fontSize: '13px' }}>+/semaine</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ color: '#888', fontSize: '12px' }}>Séries</span>
             <input type="number" value={deltaSeries} onChange={e => setDeltaSeries(Number(e.target.value))}
-              style={{ width: '44px', background: '#111', border: '1px solid #2A2A2A', borderRadius: '6px', padding: '5px 6px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }} />
+              style={{ width: '44px', background: '#18182A', border: '1px solid #2C2C44', borderRadius: '6px', padding: '5px 6px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{ color: '#888', fontSize: '12px' }}>Reps</span>
             <input type="number" value={deltaReps} onChange={e => setDeltaReps(Number(e.target.value))}
-              style={{ width: '44px', background: '#111', border: '1px solid #2A2A2A', borderRadius: '6px', padding: '5px 6px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }} />
+              style={{ width: '44px', background: '#18182A', border: '1px solid #2C2C44', borderRadius: '6px', padding: '5px 6px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }} />
           </div>
           <span style={{ color: '#444', fontSize: '11px' }}>(négatif = réduction)</span>
         </div>
 
         {/* 3 — Tableau : exercices × semaines */}
-        <div style={{ background: '#0A0A0A', borderRadius: '10px', overflow: 'hidden', marginBottom: '20px' }}>
+        <div style={{ background: '#0B0B14', borderRadius: '10px', overflow: 'hidden', marginBottom: '20px' }}>
           {/* Header */}
-          <div style={{ display: 'grid', gridTemplateColumns: `1fr ${Array(nbSemaines).fill('80px').join(' ')}`, background: '#1A1A1A', padding: '8px 12px', gap: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `1fr ${Array(nbSemaines).fill('80px').join(' ')}`, background: '#212135', padding: '8px 12px', gap: '8px' }}>
             <span style={{ color: '#555', fontSize: '11px', textTransform: 'uppercase' }}>Exercice</span>
             {semaines.map((s, i) => (
               <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
@@ -5631,7 +5631,7 @@ function DuplicationModal({ seance, onClose, onDuplique }: {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                   <input type="number" min={0} max={50} value={s.pct}
                     onChange={e => setSemaines(prev => prev.map((x, j) => j === i ? { ...x, pct: Number(e.target.value) } : x))}
-                    style={{ width: '40px', background: '#111', border: '1px solid #C9A84C50', borderRadius: '4px', padding: '3px 4px', color: '#C9A84C', fontSize: '12px', fontWeight: '700', outline: 'none', textAlign: 'center' }} />
+                    style={{ width: '40px', background: '#18182A', border: '1px solid #C9A84C50', borderRadius: '4px', padding: '3px 4px', color: '#C9A84C', fontSize: '12px', fontWeight: '700', outline: 'none', textAlign: 'center' }} />
                   <span style={{ color: '#555', fontSize: '10px' }}>%</span>
                 </div>
               </div>
@@ -5640,14 +5640,14 @@ function DuplicationModal({ seance, onClose, onDuplique }: {
 
           {/* Lignes exercices */}
           {lignes.map((l, exoIdx) => (
-            <div key={exoIdx} style={{ display: 'grid', gridTemplateColumns: `1fr ${Array(nbSemaines).fill('80px').join(' ')}`, padding: '10px 12px', gap: '8px', borderTop: '1px solid #1A1A1A', alignItems: 'center' }}>
+            <div key={exoIdx} style={{ display: 'grid', gridTemplateColumns: `1fr ${Array(nbSemaines).fill('80px').join(' ')}`, padding: '10px 12px', gap: '8px', borderTop: '1px solid #222238', alignItems: 'center' }}>
               <span style={{ color: '#FFF', fontSize: '13px', fontWeight: '600' }}>{l.exercices?.nom}</span>
               {semaines.map((s, semIdx) => {
                 const remp = s.remplacements[exoIdx]
                 return (
                   <div key={semIdx} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
                     <button onClick={() => { setPicker({ exoIdx, semIdx }); setRecherche('') }} style={{
-                      background: remp ? '#2ECC7115' : '#1A1A1A',
+                      background: remp ? '#2ECC7115' : '#212135',
                       border: `1px solid ${remp ? '#2ECC71' : '#333'}`,
                       borderRadius: '6px', padding: '4px 6px', cursor: 'pointer',
                       fontSize: '10px', color: remp ? '#2ECC71' : '#555',
@@ -5669,7 +5669,7 @@ function DuplicationModal({ seance, onClose, onDuplique }: {
         </div>
 
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={onClose} style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #2A2A2A', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>
+          <button onClick={onClose} style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #2C2C44', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>
             Annuler
           </button>
           <button onClick={confirmer} disabled={saving} style={{ flex: 2, padding: '12px', borderRadius: '10px', border: 'none', background: saving ? '#333' : '#1A6FFF', color: '#FFF', cursor: saving ? 'not-allowed' : 'pointer', fontWeight: '700', fontSize: '14px' }}>
@@ -5681,7 +5681,7 @@ function DuplicationModal({ seance, onClose, onDuplique }: {
       {/* Picker exercice */}
       {picker !== null && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}>
-          <div style={{ background: '#111', border: '1px solid #2A2A2A', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '420px', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '420px', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <div>
                 <div style={{ fontWeight: '700', fontSize: '14px' }}>Remplacer pour S+{picker.semIdx + 1}</div>
@@ -5690,7 +5690,7 @@ function DuplicationModal({ seance, onClose, onDuplique }: {
               <button onClick={() => setPicker(null)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '18px', cursor: 'pointer' }}>✕</button>
             </div>
             <input value={recherche} onChange={e => setRecherche(e.target.value)} placeholder="Rechercher..." autoFocus
-              style={{ background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px', padding: '10px 14px', color: '#FFF', fontSize: '14px', outline: 'none', marginBottom: '10px' }} />
+              style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '10px 14px', color: '#FFF', fontSize: '14px', outline: 'none', marginBottom: '10px' }} />
             <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '5px' }}>
               {exosFiltres.map(ex => (
                 <button key={ex.id} onClick={() => {
@@ -5700,7 +5700,7 @@ function DuplicationModal({ seance, onClose, onDuplique }: {
                   setPicker(null)
                 }} style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px',
+                  background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px',
                   padding: '10px 14px', cursor: 'pointer', textAlign: 'left',
                 }}>
                   <span style={{ color: '#FFF', fontSize: '13px', fontWeight: '600' }}>{ex.nom}</span>
@@ -5851,10 +5851,10 @@ function ChatView({ myId, otherId, height = 'calc(100vh - 220px)' }: { myId: str
       </div>
 
       {/* Input */}
-      <div style={{ padding: '12px 16px', borderTop: '1px solid #1E1E1E', display: 'flex', gap: '8px', alignItems: 'flex-end', background: '#0F0F0F' }}>
+      <div style={{ padding: '12px 16px', borderTop: '1px solid #1E1E30', display: 'flex', gap: '8px', alignItems: 'flex-end', background: '#141420' }}>
         <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{
           flexShrink: 0, width: '40px', height: '40px', borderRadius: '12px',
-          background: '#1A1A1A', border: '1px solid #2A2A2A', color: uploading ? '#333' : '#888',
+          background: '#212135', border: '1px solid #2C2C44', color: uploading ? '#333' : '#888',
           cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           {uploading ? '⏳' : '📎'}
@@ -5867,14 +5867,14 @@ function ChatView({ myId, otherId, height = 'calc(100vh - 220px)' }: { myId: str
           placeholder="Message..."
           rows={1}
           style={{
-            flex: 1, background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '14px',
+            flex: 1, background: '#212135', border: '1px solid #2C2C44', borderRadius: '14px',
             padding: '10px 14px', color: '#FFF', fontSize: '14px', outline: 'none',
             resize: 'none', maxHeight: '120px', lineHeight: 1.5, fontFamily: 'inherit',
           }}
         />
         <button onClick={send} disabled={sending || !text.trim()} style={{
           flexShrink: 0, width: '40px', height: '40px', borderRadius: '12px',
-          background: text.trim() ? '#1A6FFF' : '#111', border: 'none',
+          background: text.trim() ? '#1A6FFF' : '#18182A', border: 'none',
           color: text.trim() ? '#FFF' : '#333', cursor: text.trim() ? 'pointer' : 'default', fontSize: '18px',
           display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s',
         }}>
@@ -5969,7 +5969,7 @@ function Messages({ coachId, onUnreadChange }: { coachId: string | null; onUnrea
 
   const listeConversations = (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ padding: '14px 16px', borderBottom: '1px solid #1A1A22', flexShrink: 0 }}>
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid #22223A', flexShrink: 0 }}>
         <div className="section-label">Conversations</div>
       </div>
       <div style={{ flex: 1, overflowY: 'auto' }}>
@@ -6006,7 +6006,7 @@ function Messages({ coachId, onUnreadChange }: { coachId: string | null; onUnrea
 
   const chatView = showChat ? (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ padding: '12px 16px', borderBottom: '1px solid #1A1A22', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+      <div style={{ padding: '12px 16px', borderBottom: '1px solid #22223A', display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
         {/* Bouton retour — visible uniquement sur mobile */}
         <button onClick={() => setSelectedId(null)} className="btn btn-ghost btn-sm msg-back-btn">← Retour</button>
         <div style={{ width: '34px', height: '34px', borderRadius: '10px', background: '#1A6FFF20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900', fontSize: '13px', color: '#5599FF', flexShrink: 0 }}>
@@ -6026,8 +6026,8 @@ function Messages({ coachId, onUnreadChange }: { coachId: string | null; onUnrea
   return (
     <div className="page-section">
       {/* ── Desktop : 2 colonnes ── */}
-      <div className="msg-desktop" style={{ display: 'flex', height: 'calc(100svh - 130px)', background: '#0D0D10', borderRadius: '16px', overflow: 'hidden', border: '1px solid #1A1A22' }}>
-        <div style={{ width: '260px', borderRight: '1px solid #1A1A22', flexShrink: 0 }}>
+      <div className="msg-desktop" style={{ display: 'flex', height: 'calc(100svh - 130px)', background: '#0E0E18', borderRadius: '16px', overflow: 'hidden', border: '1px solid #22223A' }}>
+        <div style={{ width: '260px', borderRight: '1px solid #22223A', flexShrink: 0 }}>
           {listeConversations}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -6036,7 +6036,7 @@ function Messages({ coachId, onUnreadChange }: { coachId: string | null; onUnrea
       </div>
 
       {/* ── Mobile : liste OU chat (pas les deux) ── */}
-      <div className="msg-mobile" style={{ background: '#0D0D10', borderRadius: '16px', overflow: 'hidden', border: '1px solid #1A1A22', height: 'calc(100svh - 130px)' }}>
+      <div className="msg-mobile" style={{ background: '#0E0E18', borderRadius: '16px', overflow: 'hidden', border: '1px solid #22223A', height: 'calc(100svh - 130px)' }}>
         {showChat ? chatView : listeConversations}
       </div>
     </div>
@@ -6062,7 +6062,7 @@ function MultiCheck({ label, options, selected, onChange }: {
   return (
     <div style={{ position: 'relative' }}>
       <button type="button" onClick={() => setOpen(o => !o)} style={{
-        width: '100%', background: '#1A1A1A', border: '1px solid #2A2A2A',
+        width: '100%', background: '#212135', border: '1px solid #2C2C44',
         borderRadius: '8px', padding: '11px 14px', color: selected.length ? '#FFF' : '#555',
         fontSize: '14px', outline: 'none', cursor: 'pointer', textAlign: 'left',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -6073,7 +6073,7 @@ function MultiCheck({ label, options, selected, onChange }: {
       {open && (
         <div style={{
           position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 200,
-          background: '#1A1A1A', border: '1px solid #2A2A2A', borderRadius: '8px',
+          background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px',
           maxHeight: '220px', overflowY: 'auto', marginTop: '4px',
         }}>
           {options.map(opt => (

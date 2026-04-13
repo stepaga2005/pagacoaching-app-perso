@@ -26,19 +26,19 @@
 
   /* Surfaces — noir AMOLED pur, profondeur max */
   --fond:            #000000;
-  --fond-carte:      #0C0C18;
-  --fond-carte-2:    #101020;
-  --fond-hover:      #141428;
+  --fond-carte:      #14142A;
+  --fond-carte-2:    #1A1A32;
+  --fond-hover:      #20203A;
 
   /* Texte hiérarchique */
   --texte:           #FFFFFF;
-  --texte-dim:       #44445A;
-  --texte-secondaire:#888899;
+  --texte-dim:       #5A5A80;
+  --texte-secondaire:#9898B8;
 
   /* Bordures */
-  --bordure:         #18182C;
-  --bordure-hover:   #262640;
-  --bordure-bright:  rgba(255,255,255,0.07);
+  --bordure:         #22223A;
+  --bordure-hover:   #2E2E50;
+  --bordure-bright:  rgba(255,255,255,0.09);
 
   /* Radii — app native iOS feel */
   --radius-sm:       12px;
