@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-server'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,6 +8,8 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(req: Request) {
+  const auth = await requireAuth()
+  if ('error' in auth) return auth.error
   const { subscription, user_id } = await req.json()
   if (!subscription || !user_id) return NextResponse.json({ error: 'missing params' }, { status: 400 })
 

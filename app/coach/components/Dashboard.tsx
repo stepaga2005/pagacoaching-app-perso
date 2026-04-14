@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { computeAcwr, ACWR_ZONES } from '../lib/acwr'
 
 type DJoueur = { id: string; nom: string; prenom: string; poste?: string }
-type DReal = { id: string; joueur_id: string; date_realisation: string; completee: boolean; fatigue?: number | null; rpe?: number | null; seance_id?: string | null; seances?: { nom: string; type: string } | null }
-type Alerte = { joueur: DJoueur; type: 'fatigue' | 'manques'; val: number }
+type DReal  = { id: string; joueur_id: string; date_realisation: string; completee: boolean; fatigue?: number | null; rpe?: number | null; seance_id?: string | null; seances?: { nom: string; type: string } | null }
+type DReal35 = { joueur_id: string; date_realisation: string; completee: boolean; rpe?: number | null }
+type Alerte  = { joueur: DJoueur; type: 'fatigue' | 'manques' | 'acwr'; val: number; acwrZone?: 'high' | 'danger' }
 
 export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab: string) => void }) {
   const today = new Date().toISOString().split('T')[0]
@@ -19,17 +21,22 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
     const d = new Date(lundi + 'T12:00:00'); d.setDate(d.getDate() + 6)
     return d.toISOString().split('T')[0]
   })()
+  const debut35 = (() => {
+    const d = new Date(); d.setDate(d.getDate() - 34)
+    return d.toISOString().split('T')[0]
+  })()
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(lundi + 'T12:00:00'); d.setDate(d.getDate() + i)
     return d.toISOString().split('T')[0]
   })
   const dayLetters = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
-  const [joueurs, setJoueurs] = useState<DJoueur[]>([])
+  const [joueurs, setJoueurs]     = useState<DJoueur[]>([])
   const [realsToday, setRealsToday] = useState<DReal[]>([])
-  const [realsWeek, setRealsWeek] = useState<DReal[]>([])
-  const [unread, setUnread] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const [realsWeek, setRealsWeek]  = useState<DReal[]>([])
+  const [reals35, setReals35]      = useState<DReal35[]>([])
+  const [unread, setUnread]        = useState(0)
+  const [loading, setLoading]      = useState(true)
 
   useEffect(() => { loadData() }, [])
 
@@ -38,14 +45,17 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
       { data: jData },
       { data: todayData },
       { data: weekData },
+      { data: data35 },
     ] = await Promise.all([
       supabase.from('joueurs').select('id, nom, prenom, poste').eq('actif', true).order('nom'),
       supabase.from('realisations').select('id, joueur_id, completee, fatigue, rpe, seance_id, seances(nom, type)').eq('date_realisation', today),
       supabase.from('realisations').select('id, joueur_id, date_realisation, completee, fatigue, rpe, seance_id').gte('date_realisation', lundi).lte('date_realisation', dimanche),
+      supabase.from('realisations').select('joueur_id, date_realisation, completee, rpe').gte('date_realisation', debut35).lte('date_realisation', today),
     ])
-    if (jData) setJoueurs(jData)
+    if (jData)     setJoueurs(jData)
     if (todayData) setRealsToday(todayData as unknown as DReal[])
-    if (weekData) setRealsWeek(weekData)
+    if (weekData)  setRealsWeek(weekData)
+    if (data35)    setReals35(data35)
     if (coachId) {
       const { count } = await supabase.from('messages').select('*', { count: 'exact', head: true }).eq('destinataire_id', coachId).neq('lu', true)
       setUnread(count || 0)
@@ -66,15 +76,28 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
   }
   const joueursAvecSeances = joueurs.filter(j => (byPlayer[j.id] || []).some(r => r.seance_id))
 
+  // ACWR par joueur (35 jours = 28 chronique + 7 aiguë)
+  const acwrByPlayer: Record<string, ReturnType<typeof computeAcwr>> = {}
+  for (const j of joueurs) {
+    acwrByPlayer[j.id] = computeAcwr(reals35.filter(r => r.joueur_id === j.id))
+  }
+
   const alertes: Alerte[] = []
   for (const j of joueurs) {
+    // Fatigue élevée
     const jReals = (byPlayer[j.id] || []).filter(r => r.completee && r.fatigue != null)
     if (jReals.length > 0) {
       const derniere = [...jReals].sort((a, b) => b.date_realisation.localeCompare(a.date_realisation))[0]
       if ((derniere.fatigue ?? 0) >= 7) alertes.push({ joueur: j, type: 'fatigue', val: derniere.fatigue! })
     }
+    // Séances manquées
     const manques = (byPlayer[j.id] || []).filter(r => !r.completee && r.seance_id && r.date_realisation < today)
     if (manques.length >= 2) alertes.push({ joueur: j, type: 'manques', val: manques.length })
+    // ACWR > 1.3
+    const acwr = acwrByPlayer[j.id]
+    if (acwr && acwr.ratio !== null && acwr.ratio > 1.3) {
+      alertes.push({ joueur: j, type: 'acwr', val: acwr.ratio, acwrZone: acwr.ratio > 1.5 ? 'danger' : 'high' })
+    }
   }
 
   if (loading) return (
@@ -178,19 +201,35 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {alertes.map((a, i) => (
-              <div key={i} style={{ background: '#120A0A', border: '1px solid #FF475730', borderRadius: '14px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#FF475718', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ fontSize: '16px' }}>{a.type === 'fatigue' ? '⚡' : '✗'}</span>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: '800', fontSize: '14px', color: '#F0F0F0' }}>{a.joueur.prenom} {a.joueur.nom}</div>
-                  <div style={{ fontSize: '12px', color: '#FF475790', marginTop: '2px' }}>
-                    {a.type === 'fatigue' ? `Fatigue élevée : ${a.val}/10 lors de la dernière séance` : `${a.val} séances manquées cette semaine`}
+            {alertes.map((a, i) => {
+              const isAcwr = a.type === 'acwr'
+              const acwrColor = a.acwrZone === 'danger' ? '#FF4757' : '#FF6B35'
+              const borderColor = isAcwr ? acwrColor + '40' : '#FF475730'
+              const bgColor = isAcwr ? acwrColor + '10' : '#120A0A'
+              const iconBg = isAcwr ? acwrColor + '18' : '#FF475718'
+              return (
+                <div key={i} style={{ background: bgColor, border: `1px solid ${borderColor}`, borderRadius: '14px', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ fontSize: '16px' }}>{a.type === 'fatigue' ? '⚡' : a.type === 'acwr' ? '⚠' : '✗'}</span>
                   </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: '800', fontSize: '14px', color: '#F0F0F0' }}>{a.joueur.prenom} {a.joueur.nom}</div>
+                    <div style={{ fontSize: '12px', color: isAcwr ? acwrColor + 'CC' : '#FF475790', marginTop: '2px' }}>
+                      {a.type === 'fatigue'
+                        ? `Fatigue élevée : ${a.val}/10 lors de la dernière séance`
+                        : a.type === 'manques'
+                        ? `${a.val} séances manquées cette semaine`
+                        : `ACWR ${a.val.toFixed(2)} — ${a.acwrZone === 'danger' ? 'Risque très élevé de blessure' : 'Surcharge détectée'}`}
+                    </div>
+                  </div>
+                  {isAcwr && (
+                    <div style={{ padding: '4px 10px', borderRadius: '20px', background: acwrColor + '20', flexShrink: 0 }}>
+                      <span style={{ fontSize: '12px', fontWeight: '900', color: acwrColor }}>{a.val.toFixed(2)}</span>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
@@ -274,13 +313,17 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
                 ? [...jReals].sort((a, b) => b.date_realisation.localeCompare(a.date_realisation))[0].fatigue ?? null
                 : null
               const completedWeek = (byPlayer[j.id] || []).filter(r => r.completee && r.seance_id).length
-              const plannedWeek = (byPlayer[j.id] || []).filter(r => r.seance_id).length
+              const plannedWeek   = (byPlayer[j.id] || []).filter(r => r.seance_id).length
               const { label, color, bg } = lastFatigue === null
                 ? { label: 'Aucune donnée', color: '#444', bg: '#212135' }
                 : lastFatigue <= 3 ? { label: '🟢 Frais', color: '#2ECC71', bg: '#2ECC7110' }
                 : lastFatigue <= 5 ? { label: '🟡 Normal', color: '#F39C12', bg: '#F39C1210' }
                 : lastFatigue <= 7 ? { label: '🟠 Fatigué', color: '#FF6B35', bg: '#FF6B3510' }
                 : { label: '🔴 Surchargé', color: '#FF4757', bg: '#FF475710' }
+
+              const acwr     = acwrByPlayer[j.id]
+              const acwrZone = acwr && acwr.ratio !== null ? ACWR_ZONES[acwr.zone] : null
+
               return (
                 <div key={j.id} style={{ background: '#141420', border: '1px solid #222238', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#2ECC7115', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -292,6 +335,14 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
                       {plannedWeek > 0 ? `${completedWeek}/${plannedWeek} séances cette semaine` : 'Aucune séance planifiée'}
                     </div>
                   </div>
+                  {/* ACWR badge */}
+                  {acwrZone && acwr.ratio !== null && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4px 10px', borderRadius: '10px', background: acwrZone.bg, border: `1px solid ${acwrZone.color}30`, flexShrink: 0 }}>
+                      <span style={{ fontSize: '8px', color: acwrZone.color + '90', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>ACWR</span>
+                      <span style={{ fontSize: '15px', fontWeight: '900', color: acwrZone.color, lineHeight: 1.1 }}>{acwr.ratio.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {/* Fatigue badge */}
                   <div style={{ padding: '4px 12px', borderRadius: '20px', background: bg, flexShrink: 0 }}>
                     <span style={{ fontSize: '11px', fontWeight: '800', color }}>{label}</span>
                   </div>

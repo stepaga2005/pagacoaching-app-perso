@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Joueur, MPRealisation } from '../lib/types'
 import { SearchableSelect } from './shared/SearchableSelect'
+import { toast } from '../lib/toast'
 
 export function CopierJoursModal({ joursSelectionnes, byDate, joueurCourant, allJoueurs, onDone, onClose }: {
   joursSelectionnes: Set<string>
@@ -32,8 +33,8 @@ export function CopierJoursModal({ joursSelectionnes, byDate, joueurCourant, all
   const totalSessions = datesTriees.reduce((n, d) => n + (byDate[d]?.filter(r => r.seance_id)?.length || 0), 0)
 
   async function handleCopier() {
-    if (mode === 'joueur' && (!cibleJoueurId || !dateDebut)) { alert('Sélectionne un joueur et une date de début'); return }
-    if (mode === 'modele' && !nomModele.trim()) { alert('Entre un nom pour le modèle'); return }
+    if (mode === 'joueur' && (!cibleJoueurId || !dateDebut)) { toast('Sélectionne un joueur et une date de début', 'info'); return }
+    if (mode === 'modele' && !nomModele.trim()) { toast('Entre un nom pour le modèle', 'info'); return }
     setLoading(true)
     const anchor = datesTriees[0]
     try {
@@ -47,10 +48,10 @@ export function CopierJoursModal({ joursSelectionnes, byDate, joueurCourant, all
           }))
         })
         if (inserts.length > 0) await supabase.from('realisations').insert(inserts)
-        alert(`✓ ${inserts.length} séance(s) copiée(s) !`)
+        toast(`✓ ${inserts.length} séance(s) copiée(s) !`, 'success')
       } else {
         const { data: prog, error: pe } = await supabase.from('programmes').insert({ nom: nomModele.trim() }).select().single()
-        if (pe || !prog) { alert(`Erreur : ${pe?.message}`); setLoading(false); return }
+        if (pe || !prog) { toast(`Erreur : ${pe?.message}`, 'error'); setLoading(false); return }
         for (const date of datesTriees) {
           const offset = daysBetween(anchor, date)
           const weekNum = Math.floor(offset / 7) + 1
@@ -75,11 +76,11 @@ export function CopierJoursModal({ joursSelectionnes, byDate, joueurCourant, all
             }
           }
         }
-        alert(`✓ Modèle "${nomModele}" créé !`)
+        toast(`✓ Modèle "${nomModele}" créé !`, 'success')
       }
       onDone()
     } catch (e: unknown) {
-      alert(`Erreur : ${e instanceof Error ? e.message : String(e)}`)
+      toast(`Erreur : ${e instanceof Error ? e.message : String(e)}`, 'error')
     } finally { setLoading(false) }
   }
 

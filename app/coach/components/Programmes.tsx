@@ -8,6 +8,7 @@ import { EditeurSeance } from './EditeurSeance'
 import { AssignProgrammeModal } from './Modeles'
 import { DuplicationModal } from './DuplicationModal'
 import { AttributionModal } from './AttributionModal'
+import { toast } from '../lib/toast'
 
 export function Programmes() {
   const [vue, setVue] = useState<'templates' | 'editeur'>('templates')
@@ -71,8 +72,13 @@ export function Programmes() {
 
   async function deleteSeance(id: string) {
     if (!confirm('Supprimer cette séance ?')) return
-    await supabase.from('seances').delete().eq('id', id)
-    loadList()
+    try {
+      const { error } = await supabase.from('seances').delete().eq('id', id)
+      if (error) throw error
+      loadList()
+    } catch (e: unknown) {
+      toast('Erreur suppression : ' + (e instanceof Error ? e.message : String(e)), 'error')
+    }
   }
 
   async function ouvrirApercu(s: Seance) {

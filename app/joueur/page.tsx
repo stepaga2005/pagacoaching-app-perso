@@ -325,10 +325,15 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                 {blocs.map((bloc, bi) => {
                   const isSuperset = bloc.length > 1
                   const seriesShared = bloc[0].series || 0
+                  const lastExo = bloc[bloc.length - 1]
                   // Récup entre les sets (nouveau champ) sur le dernier exercice du bloc
-                  const recuperInterSets = bloc[bloc.length - 1].recuperation_inter_sets ?? 0
-                  // Récup après le superset entier (avant l'exercice suivant)
-                  const recuperBloc = bloc[bloc.length - 1].recuperation_secondes ?? 0
+                  const recuperInterSets = lastExo.recuperation_inter_sets ?? 0
+                  // Récup après le bloc : pour superset → recuperation_secondes du dernier exo
+                  //                       pour solo → dernier recup de sets_config, sinon recuperation_secondes
+                  const lastSetRecup = !isSuperset && lastExo.sets_config && lastExo.sets_config.length > 0
+                    ? (lastExo.sets_config[lastExo.sets_config.length - 1]?.recup ?? 0)
+                    : 0
+                  const recuperBloc = lastSetRecup > 0 ? lastSetRecup : (lastExo.recuperation_secondes ?? 0)
 
                   return (
                     <div key={bi}>
@@ -620,7 +625,9 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                                         ? (setData.reps ? `${setData.reps}` : setData.duree ? `${setData.duree}''` : setData.dist ? `${setData.dist}m` : '—')
                                         : metrVal
                                       const rowCharge = setData?.charge ?? ex.charge_kg
-                                      const rowRecup = setData ? (!isLast && setData.recup ? `${setData.recup}s` : '—') : (!isLast && ex.recuperation_secondes ? `${ex.recuperation_secondes}s` : '—')
+                                      const rowRecup = setData
+                                        ? (!isLast && setData.recup ? `${setData.recup}s` : '—')
+                                        : (!isLast && ex.recuperation_secondes ? `${ex.recuperation_secondes}s` : '—')
                                       return (
                                         <div key={si} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr', padding: '7px 6px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '6px' }}>
                                           <span style={{ fontSize: '12px', fontWeight: '800', color: couleur }}>{si + 1}</span>
@@ -886,6 +893,156 @@ function JoueurMessages({ myId, coachId, isMobile }: { myId: string; coachId: st
   )
 }
 
+function HistoriqueJoueur({ realisations, isMobile }: { realisations: Realisation[]; isMobile: boolean }) {
+  const todayStr = new Date().toISOString().split('T')[0]
+  const [nbSemaines, setNbSemaines] = useState(8)
+
+  const debut = (() => {
+    const d = new Date(todayStr + 'T12:00:00')
+    d.setDate(d.getDate() - nbSemaines * 7)
+    return d.toISOString().split('T')[0]
+  })()
+
+  const passees = realisations
+    .filter(r => r.completee && r.date_realisation <= todayStr && r.date_realisation >= debut && r.seances)
+    .sort((a, b) => b.date_realisation.localeCompare(a.date_realisation))
+
+  // Charge hebdo
+  function getLundi(ds: string) {
+    const d = new Date(ds + 'T12:00:00')
+    const day = d.getDay()
+    d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day))
+    return d.toISOString().split('T')[0]
+  }
+
+  const semMap: Record<string, { nb: number; rpes: number[] }> = {}
+  for (const r of passees) {
+    const lundi = getLundi(r.date_realisation)
+    if (!semMap[lundi]) semMap[lundi] = { nb: 0, rpes: [] }
+    semMap[lundi].nb++
+    if (r.rpe != null) semMap[lundi].rpes.push(r.rpe)
+  }
+
+  const semaines: { label: string; nb: number; charge: number; avgRpe: number | null }[] = []
+  const cur = new Date(getLundi(debut) + 'T12:00:00')
+  const finD = new Date(todayStr + 'T12:00:00')
+  while (cur <= finD) {
+    const lundi = cur.toISOString().split('T')[0]
+    const s = semMap[lundi] || { nb: 0, rpes: [] }
+    const avgRpe = s.rpes.length ? Math.round(s.rpes.reduce((a: number, b: number) => a + b, 0) / s.rpes.length * 10) / 10 : null
+    const charge = s.rpes.length > 0 ? Math.round(s.rpes.reduce((a: number, b: number) => a + b, 0)) : s.nb * 5
+    semaines.push({ label: new Date(lundi + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }), nb: s.nb, charge, avgRpe })
+    cur.setDate(cur.getDate() + 7)
+  }
+
+  const maxCharge = Math.max(...semaines.map(s => s.charge), 1)
+
+  function chargeColor(avgRpe: number | null, charge: number) {
+    if (charge === 0) return '#1A1A1A'
+    if (avgRpe == null) return '#1A6FFF'
+    if (avgRpe >= 8) return '#FF4757'
+    if (avgRpe >= 6) return '#FF6B35'
+    if (avgRpe >= 4) return '#C9A84C'
+    return '#2ECC71'
+  }
+
+  function cell(val: number | null | undefined, inverted = false) {
+    if (val == null) return <span style={{ color: '#333', fontSize: '12px' }}>—</span>
+    const n = inverted ? 11 - val : val
+    const color = n <= 3 ? '#2ECC71' : n <= 5 ? '#C9A84C' : n <= 7 ? '#FF6B35' : '#FF4757'
+    return <span style={{ color, fontSize: '13px', fontWeight: '800' }}>{val}</span>
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+      {/* Sélecteur période */}
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+        <span style={{ fontSize: '12px', color: '#555', fontWeight: '700' }}>Période :</span>
+        {[4, 8, 12].map(n => (
+          <button key={n} onClick={() => setNbSemaines(n)} style={{
+            padding: '6px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+            fontSize: '12px', fontWeight: '700',
+            background: nbSemaines === n ? '#1A6FFF' : '#111',
+            color: nbSemaines === n ? '#FFF' : '#555',
+          }}>{n} sem.</button>
+        ))}
+        <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#333' }}>
+          {passees.length} séance{passees.length > 1 ? 's' : ''} complétée{passees.length > 1 ? 's' : ''}
+        </span>
+      </div>
+
+      {passees.length === 0 ? (
+        <div style={{ background: '#0F0F0F', border: '1px solid #1E1E1E', borderRadius: '16px', padding: '48px', textAlign: 'center', color: '#333', fontSize: '14px' }}>
+          Aucune séance complétée sur cette période.
+        </div>
+      ) : (
+        <>
+          {/* Charge hebdo */}
+          <div style={{ background: '#0F0F0F', border: '1px solid #1E1E1E', borderRadius: '16px', padding: '18px 16px' }}>
+            <div style={{ fontSize: '11px', fontWeight: '800', color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>
+              Charge par semaine (Σ RPE)
+            </div>
+            <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end', height: '80px' }}>
+              {semaines.map((s, i) => {
+                const barH = s.charge > 0 ? Math.max(6, (s.charge / maxCharge) * 68) : 0
+                return (
+                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', justifyContent: 'flex-end', height: '80px' }}>
+                    {s.nb > 0 && <span style={{ fontSize: '8px', color: '#555', fontWeight: '700' }}>{s.nb}</span>}
+                    <div style={{
+                      width: '100%', height: `${barH}px`, minHeight: s.charge > 0 ? '6px' : '2px',
+                      background: chargeColor(s.avgRpe, s.charge), borderRadius: '3px 3px 1px 1px',
+                      opacity: s.charge > 0 ? 1 : 0.15,
+                    }} />
+                    <span style={{ fontSize: '7px', color: '#2A2A2A', textAlign: 'center', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{s.label}</span>
+                  </div>
+                )
+              })}
+            </div>
+            <div style={{ display: 'flex', gap: '14px', marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #1A1A1A', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '11px', color: '#555' }}>Total : <strong style={{ color: '#FFF' }}>{passees.length} séances</strong></span>
+              <span style={{ fontSize: '11px', color: '#555' }}>Charge : <strong style={{ color: '#C9A84C' }}>{semaines.reduce((a, s) => a + s.charge, 0)}</strong></span>
+            </div>
+          </div>
+
+          {/* Liste séances */}
+          <div style={{ background: '#0F0F0F', border: '1px solid #1E1E1E', borderRadius: '16px', overflow: 'hidden' }}>
+            <div style={{ padding: '14px 16px', borderBottom: '1px solid #1A1A1A' }}>
+              <span style={{ fontSize: '11px', fontWeight: '800', color: '#555', textTransform: 'uppercase', letterSpacing: '1px' }}>Séances réalisées</span>
+            </div>
+            {/* Header */}
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '80px 1fr 36px 36px' : '100px 1fr 44px 44px 44px 44px', gap: '8px', padding: '8px 16px', borderBottom: '1px solid #1A1A1A' }}>
+              {(isMobile ? ['Date', 'Séance', 'RPE', 'Fat.'] : ['Date', 'Séance', 'RPE', 'Fat.', 'Cour.', 'Som.']).map(h => (
+                <span key={h} style={{ fontSize: '9px', color: '#2A2A2A', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</span>
+              ))}
+            </div>
+            {passees.map((r, i) => {
+              const d = new Date(r.date_realisation + 'T12:00:00')
+              const dateStr = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })
+              return (
+                <div key={r.id} style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '80px 1fr 36px 36px' : '100px 1fr 44px 44px 44px 44px',
+                  gap: '8px', padding: '10px 16px',
+                  borderBottom: i < passees.length - 1 ? '1px solid #111' : 'none',
+                  background: i % 2 === 1 ? '#0A0A0A' : 'transparent',
+                }}>
+                  <span style={{ fontSize: '11px', color: '#444' }}>{dateStr}</span>
+                  <span style={{ fontSize: '12px', color: '#CCC', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || '—'}</span>
+                  {cell(r.rpe)}
+                  {cell(r.fatigue)}
+                  {!isMobile && cell(r.courbatures)}
+                  {!isMobile && cell(r.qualite_sommeil, true)}
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function JoueurPage() {
   const router = useRouter()
   const today = new Date().toISOString().split('T')[0]
@@ -895,15 +1052,50 @@ export default function JoueurPage() {
   const [selected, setSelected] = useState<Realisation | null>(null)
   const [form, setForm] = useState<WellnessForm>({ completee: false, fatigue: null, courbatures: null, rpe: null, qualite_sommeil: null, notes_joueur: '' })
   const [saving, setSaving] = useState(false)
-  const [activeSection, setActiveSection] = useState<'seances' | 'messages'>('seances')
+  const [activeSection, setActiveSection] = useState<'seances' | 'historique' | 'messages'>('seances')
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
+  const [isOffline, setIsOffline] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
+  const [syncing, setSyncing] = useState(false)
+  const [cacheDate, setCacheDate] = useState<Date | null>(null)
+  const [cacheStale, setCacheStale] = useState(false)
+  const [initError, setInitError] = useState<string | null>(null)
+  const joueurRef = useRef<Joueur | null>(null)
+  const loadIdRef = useRef(0)
+
+  useEffect(() => { joueurRef.current = joueur }, [joueur])
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768)
     check()
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
+  }, [])
+
+  useEffect(() => {
+    setIsOffline(!navigator.onLine)
+    // Refresh pending count on mount
+    try {
+      const stored = localStorage.getItem('pagacoaching_pending')
+      setPendingCount(stored ? JSON.parse(stored).length : 0)
+    } catch {}
+
+    const goOffline = () => setIsOffline(true)
+    const goOnline = async () => {
+      setIsOffline(false)
+      const j = joueurRef.current
+      if (j) {
+        await flushPending(j.id)
+        await load(j.id)
+      }
+    }
+    window.addEventListener('offline', goOffline)
+    window.addEventListener('online', goOnline)
+    return () => {
+      window.removeEventListener('offline', goOffline)
+      window.removeEventListener('online', goOnline)
+    }
   }, [])
 
   const [lundiSemaine, setLundiSemaine] = useState(() => {
@@ -922,81 +1114,154 @@ export default function JoueurPage() {
     setLundiSemaine(d.toISOString().split('T')[0])
   }
 
-  useEffect(() => { init() }, [])
+  useEffect(() => {
+    init()
+    // Fix 7: détecter expiration token en cours de session
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+        if (event === 'SIGNED_OUT') router.push('/login')
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
   useEffect(() => {
     const authId = joueur?.auth_id
     const coachId = joueur?.coach_id
     if (!authId || !coachId) return
-    const checkUnread = async () => {
-      const { count } = await supabase.from('messages').select('*', { count: 'exact', head: true })
-        .eq('expediteur_id', coachId).eq('destinataire_id', authId).neq('lu', true)
-      if (activeSection !== 'messages') setUnreadMessages(count || 0)
+    const fetchUnread = async () => {
+      try {
+        const { count } = await supabase.from('messages').select('*', { count: 'exact', head: true })
+          .eq('expediteur_id', coachId).eq('destinataire_id', authId).neq('lu', true)
+        if (activeSection !== 'messages') setUnreadMessages(count || 0)
+      } catch {}
     }
-    checkUnread()
-    const interval = setInterval(checkUnread, 3000)
-    return () => clearInterval(interval)
+    fetchUnread()
+    const channel = supabase
+      .channel(`unread-joueur-${authId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `destinataire_id=eq.${authId}` },
+        () => { fetchUnread() })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [joueur?.auth_id, joueur?.coach_id, activeSection])
 
-  async function init() {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
-
-    // Requête de base — critique pour le login
-    const { data: j } = await supabase.from('joueurs')
-      .select('id, nom, prenom, email, poste, club')
-      .eq('email', user.email).single()
-    if (!j) { router.push('/login'); return }
-
-    setJoueur(j)
-    await load(j.id)
-    setLoading(false)
-
-    // Colonnes messaging — auto-remplissage si null, non-bloquant
+  function readCache(): { joueur: Joueur; reals: Realisation[]; ts?: number } | null {
     try {
-      const { data: jExt } = await supabase.from('joueurs')
-        .select('auth_id, coach_id')
-        .eq('id', j.id).single()
-
-      let authId = jExt?.auth_id ?? null
-      let coachId = jExt?.coach_id ?? null
-
-      // Auto-set auth_id si manquant
-      if (!authId) {
-        authId = user.id
-        await supabase.from('joueurs').update({ auth_id: authId }).eq('id', j.id)
-      }
-
-      // Auto-set coach_id si manquant
-      if (!coachId) {
-        const res = await fetch('/api/coach-id')
-        if (res.ok) {
-          const json = await res.json()
-          coachId = json.coach_id
-          if (coachId) await supabase.from('joueurs').update({ coach_id: coachId }).eq('id', j.id)
-        }
-      }
-
-      if (authId || coachId) {
-        setJoueur(prev => prev ? { ...prev, auth_id: authId ?? undefined, coach_id: coachId ?? undefined } : prev)
-      }
-
-      if (authId && coachId) {
-        const { count } = await supabase.from('messages').select('*', { count: 'exact', head: true })
-          .eq('expediteur_id', coachId).eq('destinataire_id', authId).eq('lu', false)
-        setUnreadMessages(count || 0)
-      }
+      const raw = localStorage.getItem('pagacoaching_joueur')
+      if (!raw) return null
+      const j = JSON.parse(raw)
+      if (!j?.id || !j?.email) return null // validation format
+      const realsRaw = localStorage.getItem(`pagacoaching_reals_${j.id}`)
+      if (!realsRaw) return { joueur: j, reals: [] }
+      const parsed = JSON.parse(realsRaw)
+      const reals: Realisation[] = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.data) ? parsed.data : [])
+      const ts: number | undefined = Array.isArray(parsed) ? undefined : parsed?.ts
+      return { joueur: j, reals, ts }
     } catch {
-      // colonnes ou table messages pas encore disponibles
+      return null
+    }
+  }
+
+  async function init() {
+    try {
+      // Offline fallback: restaurer depuis le cache localStorage
+      if (!navigator.onLine) {
+        const cache = readCache()
+        if (cache) {
+          setJoueur(cache.joueur)
+          setRealisations(cache.reals)
+          if (cache.ts) {
+            setCacheDate(new Date(cache.ts))
+            setCacheStale(Date.now() - cache.ts > 7 * 24 * 60 * 60 * 1000)
+          }
+          setIsOffline(true)
+          setLoading(false)
+          return
+        }
+        setInitError('Pas de connexion réseau et aucun cache disponible.')
+        setLoading(false)
+        return
+      }
+
+      // Fix 1: timeout 10s sur getUser
+      const userResult = await Promise.race([
+        supabase.auth.getUser(),
+        new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000)),
+      ]) as Awaited<ReturnType<typeof supabase.auth.getUser>>
+
+      const user = userResult.data?.user
+      if (!user) { router.push('/login'); return }
+
+      // Fix 1: timeout 10s sur la requête joueur
+      const joueurResult = await Promise.race([
+        supabase.from('joueurs').select('id, nom, prenom, email, poste, club').eq('email', user.email).single(),
+        new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000)),
+      ]) as { data: Joueur | null; error: unknown }
+
+      const j = joueurResult.data
+      if (!j) { router.push('/login'); return }
+
+      try { localStorage.setItem('pagacoaching_joueur', JSON.stringify(j)) } catch {}
+      setJoueur(j)
+      await load(j.id)
+      setLoading(false)
+
+      // Colonnes messaging — auto-remplissage si null, non-bloquant
+      try {
+        const { data: jExt } = await supabase.from('joueurs').select('auth_id, coach_id').eq('id', j.id).single()
+        let authId = jExt?.auth_id ?? null
+        let coachId = jExt?.coach_id ?? null
+        if (!authId) {
+          authId = user.id
+          await supabase.from('joueurs').update({ auth_id: authId }).eq('id', j.id)
+        }
+        if (!coachId) {
+          const res = await fetch('/api/coach-id')
+          if (res.ok) { const json = await res.json(); coachId = json.coach_id; if (coachId) await supabase.from('joueurs').update({ coach_id: coachId }).eq('id', j.id) }
+        }
+        if (authId || coachId) setJoueur(prev => prev ? { ...prev, auth_id: authId ?? undefined, coach_id: coachId ?? undefined } : prev)
+        if (authId && coachId) {
+          const { count } = await supabase.from('messages').select('*', { count: 'exact', head: true }).eq('expediteur_id', coachId).eq('destinataire_id', authId).eq('lu', false)
+          setUnreadMessages(count || 0)
+        }
+      } catch { /* messaging columns may not exist yet */ }
+
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      // Si timeout ou réseau → essayer le cache
+      const cache = readCache()
+      if (cache) {
+        setJoueur(cache.joueur)
+        setRealisations(cache.reals)
+        if (cache.ts) { setCacheDate(new Date(cache.ts)); setCacheStale(Date.now() - cache.ts > 7 * 24 * 60 * 60 * 1000) }
+        setIsOffline(true)
+        setLoading(false)
+      } else {
+        setInitError(msg === 'timeout' ? 'Serveur injoignable. Vérifie ta connexion.' : 'Erreur de chargement. Réessaie.')
+        setLoading(false)
+      }
     }
   }
 
   async function load(joueurId: string) {
-    const { data } = await supabase
-      .from('realisations')
-      .select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, recuperation_inter_sets, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur))))')
-      .eq('joueur_id', joueurId).order('date_realisation')
-    if (data) setRealisations(data as unknown as Realisation[])
+    // Fix 4: annuler les appels périmés
+    const thisId = ++loadIdRef.current
+    try {
+      const result = await Promise.race([
+        supabase.from('realisations')
+          .select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, recuperation_inter_sets, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur))))')
+          .eq('joueur_id', joueurId).order('date_realisation'),
+        new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), 12000)),
+      ]) as { data: Realisation[] | null }
+      if (loadIdRef.current !== thisId) return // résultat périmé, ignorer
+      if (result.data) {
+        setRealisations(result.data)
+        try { localStorage.setItem(`pagacoaching_reals_${joueurId}`, JSON.stringify({ data: result.data, ts: Date.now() })) } catch {}
+      }
+    } catch {
+      if (loadIdRef.current !== thisId) return
+      // En cas d'échec réseau, garder les données existantes en mémoire
+    }
   }
 
   function ouvrir(r: Realisation) {
@@ -1004,22 +1269,102 @@ export default function JoueurPage() {
     setForm({ completee: r.completee, fatigue: r.fatigue ?? null, courbatures: r.courbatures ?? null, rpe: r.rpe ?? null, qualite_sommeil: r.qualite_sommeil ?? null, notes_joueur: r.notes_joueur ?? '' })
   }
 
+  type PendingAction = { realisationId: string; patch: Record<string, unknown> }
+
+  function queueAction(realisationId: string, patch: Record<string, unknown>) {
+    try {
+      const stored = localStorage.getItem('pagacoaching_pending')
+      const queue: PendingAction[] = stored ? JSON.parse(stored) : []
+      // Merge with existing entry for same réalisation if present
+      const idx = queue.findIndex(a => a.realisationId === realisationId)
+      if (idx >= 0) queue[idx].patch = { ...queue[idx].patch, ...patch }
+      else queue.push({ realisationId, patch })
+      localStorage.setItem('pagacoaching_pending', JSON.stringify(queue))
+      setPendingCount(queue.length)
+    } catch {}
+  }
+
+  async function flushPending(joueurId: string) {
+    try {
+      const stored = localStorage.getItem('pagacoaching_pending')
+      if (!stored) return
+      const queue: PendingAction[] = JSON.parse(stored)
+      if (queue.length === 0) return
+      setSyncing(true)
+      for (const action of queue) {
+        await supabase.from('realisations').update(action.patch).eq('id', action.realisationId)
+      }
+      localStorage.removeItem('pagacoaching_pending')
+      setPendingCount(0)
+      setSyncing(false)
+    } catch {
+      setSyncing(false)
+    }
+  }
+
   async function completerSeance() {
     if (!selected || !joueur) return
+    if (isOffline) {
+      // Optimistic update in cache
+      const patch = { completee: true }
+      queueAction(selected.id, patch)
+      setRealisations(prev => prev.map(r => r.id === selected.id ? { ...r, ...patch } : r))
+      setSelected(prev => prev ? { ...prev, ...patch } : prev)
+      return
+    }
     setSaving(true)
-    await supabase.from('realisations').update({ completee: true }).eq('id', selected.id)
-    await load(joueur.id)
+    try {
+      const { error } = await supabase.from('realisations').update({ completee: true }).eq('id', selected.id)
+      if (error) throw error
+      await load(joueur.id)
+    } catch {
+      // Fallback offline si le réseau a coupé entre temps
+      const patch = { completee: true }
+      queueAction(selected.id, patch)
+      setRealisations(prev => prev.map(r => r.id === selected.id ? { ...r, ...patch } : r))
+      setSelected(prev => prev ? { ...prev, ...patch } : prev)
+      setIsOffline(true)
+    }
     setSaving(false)
     // On reste sur la vue pour que le joueur puisse remplir le wellness
   }
 
   async function sauvegarder() {
     if (!selected || !joueur) return
+    if (isOffline) {
+      const patch = { completee: form.completee, fatigue: form.fatigue, courbatures: form.courbatures, rpe: form.rpe, qualite_sommeil: form.qualite_sommeil, notes_joueur: form.notes_joueur || null }
+      queueAction(selected.id, patch)
+      setRealisations(prev => prev.map(r => r.id === selected.id ? { ...r, ...patch } : r))
+      try {
+        const key = `pagacoaching_reals_${joueur.id}`
+        const stored = localStorage.getItem(key)
+        if (stored) {
+          const cached = JSON.parse(stored)
+          const arr = Array.isArray(cached) ? cached : (cached?.data ?? [])
+          const updated = arr.map((r: Realisation) => r.id === selected.id ? { ...r, ...patch } : r)
+          localStorage.setItem(key, JSON.stringify({ data: updated, ts: cached?.ts ?? Date.now() }))
+        }
+      } catch {}
+      setSelected(null)
+      return
+    }
     setSaving(true)
-    await supabase.from('realisations').update({ completee: form.completee, fatigue: form.fatigue, courbatures: form.courbatures, rpe: form.rpe, qualite_sommeil: form.qualite_sommeil, notes_joueur: form.notes_joueur || null }).eq('id', selected.id)
-    await load(joueur.id)
+    try {
+      const { error } = await supabase.from('realisations').update({
+        completee: form.completee, fatigue: form.fatigue, courbatures: form.courbatures,
+        rpe: form.rpe, qualite_sommeil: form.qualite_sommeil, notes_joueur: form.notes_joueur || null,
+      }).eq('id', selected.id)
+      if (error) throw error
+      await load(joueur.id)
+      setSelected(null)
+    } catch {
+      // Réseau coupé pendant la sauvegarde → queue offline
+      const patch = { completee: form.completee, fatigue: form.fatigue, courbatures: form.courbatures, rpe: form.rpe, qualite_sommeil: form.qualite_sommeil, notes_joueur: form.notes_joueur || null }
+      queueAction(selected.id, patch)
+      setIsOffline(true)
+      setSelected(null)
+    }
     setSaving(false)
-    setSelected(null)
   }
 
   const realsParDate: Record<string, Realisation[]> = {}
@@ -1037,12 +1382,44 @@ export default function JoueurPage() {
       <div style={{ color: '#333', fontSize: '14px' }}>Chargement...</div>
     </div>
   )
+  if (initError) return (
+    <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '24px' }}>
+      <div style={{ fontSize: '32px' }}>⚠️</div>
+      <div style={{ color: '#FFF', fontSize: '16px', fontWeight: '700', textAlign: 'center' }}>{initError}</div>
+      <button onClick={() => { setInitError(null); setLoading(true); init() }} style={{
+        background: '#1A6FFF', color: '#FFF', border: 'none', borderRadius: '10px',
+        padding: '12px 28px', fontSize: '14px', fontWeight: '700', cursor: 'pointer',
+      }}>Réessayer</button>
+    </div>
+  )
   if (!joueur) return null
 
   const px = isMobile ? '16px' : '40px'
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080808', color: '#FFF', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#080808', color: '#FFF', fontFamily: 'system-ui, -apple-system, sans-serif', paddingTop: (isOffline || syncing || pendingCount > 0) ? '37px' : 0 }}>
+
+      {/* Offline / sync banner */}
+      {(isOffline || syncing || pendingCount > 0) && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999,
+          background: syncing ? '#2ECC71' : cacheStale ? '#FF4757' : isOffline ? '#C9A84C' : '#1A6FFF',
+          color: syncing ? '#000' : isOffline ? '#000' : '#FFF',
+          textAlign: 'center', padding: '8px 16px', fontSize: '13px', fontWeight: 600,
+          transition: 'background 0.3s',
+        }}>
+          {syncing
+            ? 'Synchronisation en cours...'
+            : isOffline && pendingCount > 0
+              ? `Hors ligne — ${pendingCount} action${pendingCount > 1 ? 's' : ''} en attente de sync`
+              : isOffline && cacheStale
+                ? `Données du ${cacheDate?.toLocaleDateString('fr-FR')} — reconnecte-toi pour mettre à jour`
+              : isOffline
+                ? `Hors ligne — données du ${cacheDate ? cacheDate.toLocaleDateString('fr-FR') : 'cache'}`
+                : `${pendingCount} action${pendingCount > 1 ? 's' : ''} synchronisée${pendingCount > 1 ? 's' : ''} ✓`
+          }
+        </div>
+      )}
 
       {/* SessionDetail overlay */}
       {selected && (
@@ -1105,7 +1482,7 @@ export default function JoueurPage() {
       {/* Tab nav */}
       <div style={{ background: '#0C0C0C', borderBottom: '1px solid #111', padding: `0 ${px}` }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', gap: '0' }}>
-          {(['seances', 'messages'] as const).map(s => (
+          {(['seances', 'historique', 'messages'] as const).map(s => (
             <button key={s} onClick={() => { setActiveSection(s); if (s === 'messages') setUnreadMessages(0) }} style={{
               padding: '14px 20px', background: 'none', border: 'none', cursor: 'pointer',
               fontSize: '14px', fontWeight: '700',
@@ -1114,7 +1491,7 @@ export default function JoueurPage() {
               transition: 'all 0.15s',
               display: 'flex', alignItems: 'center', gap: '8px',
             }}>
-              {s === 'seances' ? '📅 Séances' : '💬 Messages'}
+              {s === 'seances' ? '📅 Séances' : s === 'historique' ? '📊 Historique' : '💬 Messages'}
               {s === 'messages' && unreadMessages > 0 && (
                 <span style={{ background: '#FF4757', color: '#FFF', borderRadius: '10px', fontSize: '10px', fontWeight: '800', padding: '2px 7px' }}>{unreadMessages}</span>
               )}
@@ -1135,6 +1512,8 @@ export default function JoueurPage() {
             La messagerie sera disponible après connexion avec le coach.
           </div>
         )}
+
+        {activeSection === 'historique' && <HistoriqueJoueur realisations={realisations} isMobile={isMobile} />}
 
         {activeSection === 'seances' && (<>
 

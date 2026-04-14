@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth-server'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,6 +8,8 @@ const supabaseAdmin = createClient(
 )
 
 export async function GET() {
+  const auth = await requireAuth()
+  if ('error' in auth) return auth.error
   const coachEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
   if (!coachEmail) return NextResponse.json({ error: 'NEXT_PUBLIC_ADMIN_EMAIL not set' }, { status: 500 })
 

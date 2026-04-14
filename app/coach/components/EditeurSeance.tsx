@@ -6,6 +6,7 @@ import { SeanceExercice, Exercice, SetConfig, Seance, TYPES_SEANCE, LABELS_TYPE,
 import { SearchableSelect } from './shared/SearchableSelect'
 import { ExercicePicker } from './ExercicePicker'
 import { DuplicationModal } from './DuplicationModal'
+import { toast } from '../lib/toast'
 
 export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, dateAttribution, sauvegarderFavori }: {
   seance: Seance
@@ -79,7 +80,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
   }
 
   async function handleSave() {
-    if (!nom) { alert('Nom obligatoire'); return }
+    if (!nom) { toast('Nom obligatoire', 'info'); return }
     console.log('handleSave — lignes:', lignes.length, lignes.map(l => l.exercice_id))
     setSaving(true)
     let seanceId = seance.id
@@ -88,14 +89,14 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
       const estTemplate = joueurId ? (sauvegarderFavori ?? false) : true
       const { data, error } = await supabase.from('seances').insert({ nom, type, notes: notes || null, est_template: estTemplate, programme_id: null }).select().single()
       if (error || !data?.id) {
-        alert('Erreur création séance : ' + (error?.message || 'données manquantes'))
+        toast('Erreur création séance : ' + (error?.message || 'données manquantes'), 'error')
         setSaving(false)
         return
       }
       seanceId = data.id
     } else {
       const { error } = await supabase.from('seances').update({ nom, type, notes: notes || null }).eq('id', seanceId)
-      if (error) { alert('Erreur modification séance : ' + error.message); setSaving(false); return }
+      if (error) { toast('Erreur modification séance : ' + error.message, 'error'); setSaving(false); return }
       await supabase.from('seance_exercices').delete().eq('seance_id', seanceId)
     }
 
@@ -120,7 +121,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
         }))
       )
       if (exoError) {
-        alert('Séance créée mais erreur exercices : ' + exoError.message)
+        toast('Séance créée mais erreur exercices : ' + exoError.message, 'error')
         setSaving(false)
         if (seanceId) onSave(seanceId)
         return

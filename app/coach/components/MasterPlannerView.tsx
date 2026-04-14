@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Joueur, MPRealisation, MPSeanceExercice, Exercice, Seance, SetConfig, JOURS, JOURS_FULL, LABELS_TYPE, TYPE_COLORS } from '../lib/types'
 import { haptic } from '../lib/utils'
+import { toast } from '../lib/toast'
 import { EditeurSeance } from './EditeurSeance'
 import { ExercicePicker } from './ExercicePicker'
 import { SearchableSelect } from './shared/SearchableSelect'
@@ -74,9 +75,14 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
   }
 
   async function mpDeleteRealisation(id: string) {
-    await supabase.from('realisations').delete().eq('id', id)
-    setReals(prev => prev.filter(r => r.id !== id))
-    setMpSessionMenu(null)
+    try {
+      const { error } = await supabase.from('realisations').delete().eq('id', id)
+      if (error) throw error
+      setReals(prev => prev.filter(r => r.id !== id))
+      setMpSessionMenu(null)
+    } catch (e: unknown) {
+      toast('Erreur suppression : ' + (e instanceof Error ? e.message : String(e)), 'error')
+    }
   }
 
   async function mpMoveSession(toDate: string) {
@@ -636,7 +642,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                         return blocs.map((bloc, blocIdx) => {
                           const isGroup = bloc.length > 1
                           const groupLabel = bloc.length > 2 ? 'CIRCUIT' : 'SUPERSET'
-                          const renderExo = (exo: MPSeanceExercice, exoIdx: number, insideGroup: boolean) => {
+                          const renderExo = (exo: MPSeanceExercice, exoIdx: number, insideGroup: boolean, isLastInGroup = false) => {
                             const fam = exo.exercices?.familles
                             const couleur = fam?.couleur || '#555'
                             const hasSets = exo.sets_config && exo.sets_config.length > 0
@@ -662,9 +668,17 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                             return (
                               <div key={exo.id}>
                                 {insideGroup && exoIdx > 0 && (
-                                  <div style={{ display: 'flex', alignItems: 'center', padding: '2px 8px', gap: '6px', background: '#1A6FFF08' }}>
-                                    <div style={{ width: '2px', height: '12px', background: '#1A6FFF', marginLeft: '9px', borderRadius: '1px' }} />
-                                    {exo.recuperation_secondes ? <span style={{ color: '#2ECC71', fontSize: '9px', fontWeight: '700' }}>⏱ {exo.recuperation_secondes}s</span> : <span style={{ color: '#1A6FFF80', fontSize: '8px' }}>enchaîner</span>}
+                                  <div style={{ display: 'flex', alignItems: 'center', padding: '3px 8px 3px 18px', gap: '5px', background: '#1A6FFF08' }}>
+                                    <span style={{ color: '#1A6FFF50', fontSize: '8px', flexShrink: 0 }}>⏱</span>
+                                    <input
+                                      type="number"
+                                      placeholder="0"
+                                      value={exo.recuperation_secondes ?? ''}
+                                      onChange={e => patchSimple(r.id, exo.id, 'recuperation_secondes', e.target.value)}
+                                      onBlur={() => flushSimple(exo.id, r.id, 'recuperation_secondes')}
+                                      style={{ width: '42px', background: exo.recuperation_secondes ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.recuperation_secondes ? '#1A6FFF50' : '#1A6FFF25'}`, borderRadius: '4px', padding: '2px 4px', color: '#6AAEFF', fontSize: '10px', fontWeight: '700', outline: 'none', textAlign: 'center' }}
+                                    />
+                                    <span style={{ color: '#1A6FFF40', fontSize: '8px' }}>s avant cet exo</span>
                                   </div>
                                 )}
                                 <div style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !insideGroup ? '1px solid #1A1A1A' : 'none', background: 'transparent' }}>
@@ -692,8 +706,8 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                   </div>
                                   <div style={{ marginBottom: '4px' }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '1px 2px', marginBottom: '1px' }}>
-                                      {['', 'Reps', 'Dur', 'Dist', 'Kg', 'Réc', ''].map((h, hi) => (
-                                        <div key={hi} style={{ color: '#2C2C44', fontSize: '7px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
+                                      {['', 'Reps', 'Dur', 'Dist', 'Kg', isLastInGroup ? 'Réc↺' : 'Réc', ''].map((h, hi) => (
+                                        <div key={hi} style={{ color: hi === 5 && isLastInGroup ? '#2ECC7180' : '#2C2C44', fontSize: '7px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
                                       ))}
                                     </div>
                                     {hasSets ? (
@@ -709,8 +723,14 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                     ) : (
                                       <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', alignItems: 'center' }}>
                                         <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{exo.series || '—'}</div>
-                                        {[['repetitions', exo.repetitions], ['duree_secondes', exo.duree_secondes], ['distance_metres', exo.distance_metres], ['charge_kg', exo.charge_kg], ['recuperation_secondes', exo.recuperation_secondes]].map(([key, val]) => (
-                                          <input key={key as string} {...setInput()} placeholder="-" value={(val as number) ?? ''} onChange={e => patchSimple(r.id, exo.id, key as string, e.target.value)} onBlur={() => flushSimple(exo.id, r.id, key as string)} />
+                                        {[
+                                          ['repetitions', exo.repetitions],
+                                          ['duree_secondes', exo.duree_secondes],
+                                          ['distance_metres', exo.distance_metres],
+                                          ['charge_kg', exo.charge_kg],
+                                          [isLastInGroup ? 'recuperation_inter_sets' : 'recuperation_secondes', isLastInGroup ? exo.recuperation_inter_sets : exo.recuperation_secondes],
+                                        ].map(([key, val]) => (
+                                          <input key={key as string} {...setInput(isLastInGroup && key === 'recuperation_inter_sets' ? { border: '1px solid #2ECC7130' } : {})} placeholder="-" value={(val as number) ?? ''} onChange={e => patchSimple(r.id, exo.id, key as string, e.target.value)} onBlur={() => flushSimple(exo.id, r.id, key as string)} />
                                         ))}
                                         <div />
                                       </div>
@@ -755,7 +775,24 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                   <span style={{ color: '#6AAEFF', fontSize: '9px', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>⇌ {groupLabel}</span>
                                 </div>
                               )}
-                              {bloc.map((exo, ei) => renderExo(exo, ei, isGroup))}
+                              {bloc.map((exo, ei) => renderExo(exo, ei, isGroup, ei === bloc.length - 1))}
+                              {isGroup && (() => {
+                                const lastExo = bloc[bloc.length - 1]
+                                return (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 8px 6px', borderTop: '1px solid #1A6FFF20', background: '#1A6FFF08' }}>
+                                    <span style={{ color: '#2ECC7180', fontSize: '8px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>Récup après</span>
+                                    <input
+                                      type="number"
+                                      placeholder="0"
+                                      value={lastExo.recuperation_secondes ?? ''}
+                                      onChange={e => patchSimple(r.id, lastExo.id, 'recuperation_secondes', e.target.value)}
+                                      onBlur={() => flushSimple(lastExo.id, r.id, 'recuperation_secondes')}
+                                      style={{ width: '44px', background: lastExo.recuperation_secondes ? '#2ECC7115' : 'transparent', border: `1px solid ${lastExo.recuperation_secondes ? '#2ECC7150' : '#2C2C44'}`, borderRadius: '4px', padding: '3px 4px', color: '#2ECC71', fontSize: '11px', fontWeight: '700', outline: 'none', textAlign: 'center' }}
+                                    />
+                                    <span style={{ color: '#2ECC7150', fontSize: '8px' }}>s</span>
+                                  </div>
+                                )
+                              })()}
                             </div>
                           )
                         })
@@ -1080,7 +1117,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                     <span style={{ color: '#1A6FFF', fontSize: '13px' }}>▶</span>
                     <span style={{ color: '#888', fontSize: '11px', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices.video_url}</span>
                     <button
-                      onClick={() => navigator.clipboard.writeText(exo.exercices!.video_url!).then(() => alert('Lien copié !'))}
+                      onClick={() => navigator.clipboard.writeText(exo.exercices!.video_url!).then(() => toast('Lien copié !', 'success'))}
                       style={{ background: '#1A6FFF20', border: '1px solid #1A6FFF40', borderRadius: '7px', padding: '5px 10px', color: '#1A6FFF', cursor: 'pointer', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
                       Copier
                     </button>

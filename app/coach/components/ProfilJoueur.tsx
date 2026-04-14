@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { Joueur, Realisation, MPRealisation, Exercice, Seance, Groupe } from '../lib/types'
 import { SearchableSelect } from './shared/SearchableSelect'
 import { haptic } from '../lib/utils'
+import { toast } from '../lib/toast'
 import { WellnessGraphiques } from './WellnessGraphiques'
 import { CopierJoursModal } from './CopierJoursModal'
 import { MasterPlannerView } from './MasterPlannerView'
@@ -67,16 +68,16 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
   useEffect(() => { loadData() }, [joueur.id])
 
   async function loadData() {
-    const [{ data: reals }, { data: tmpl }, { data: exs }, { data: favs }] = await Promise.all([
+    const [realsRes, tmplRes, exsRes, favsRes] = await Promise.allSettled([
       supabase.from('realisations').select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, est_template, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur))))').eq('joueur_id', joueur.id).order('date_realisation'),
       supabase.from('seances').select('id, nom, type').eq('est_template', true).order('nom').limit(2000),
       supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom').limit(5000),
       supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('est_template', true).order('nom').limit(2000),
     ])
-    if (reals) setRealisations(reals as unknown as Realisation[])
-    if (tmpl) setTemplates([...tmpl].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
-    if (exs) setExercices([...exs].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
-    if (favs) setFavoris([...favs].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
+    if (realsRes.status === 'fulfilled' && realsRes.value.data) setRealisations(realsRes.value.data as unknown as Realisation[])
+    if (tmplRes.status === 'fulfilled' && tmplRes.value.data) setTemplates([...tmplRes.value.data].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
+    if (exsRes.status === 'fulfilled' && exsRes.value.data) setExercices([...exsRes.value.data].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
+    if (favsRes.status === 'fulfilled' && favsRes.value.data) setFavoris([...favsRes.value.data].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
   }
 
   async function attribuerTemplate() {
@@ -88,27 +89,37 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
   }
 
   async function supprimerRealisation(id: string) {
-    await supabase.from('realisations').delete().eq('id', id)
-    setSeanceDetail(null)
-    await loadData()
+    try {
+      const { error } = await supabase.from('realisations').delete().eq('id', id)
+      if (error) throw error
+      setSeanceDetail(null)
+      await loadData()
+    } catch (e: unknown) {
+      toast('Erreur suppression : ' + (e instanceof Error ? e.message : String(e)), 'error')
+    }
   }
 
   async function sauvegarderWellness() {
     if (!wellnessDate) return
-    await supabase.from('realisations').insert({
-      joueur_id: joueur.id,
-      seance_id: null,
-      date_realisation: wellnessDate,
-      completee: false,
-      fatigue: wellnessData.fatigue || null,
-      rpe: wellnessData.rpe || null,
-      courbatures: wellnessData.courbatures || null,
-      qualite_sommeil: wellnessData.qualite_sommeil || null,
-      notes_joueur: wellnessData.notes || null,
-    })
-    await loadData()
-    setWellnessDate(null)
-    setWellnessData({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' })
+    try {
+      const { error } = await supabase.from('realisations').insert({
+        joueur_id: joueur.id,
+        seance_id: null,
+        date_realisation: wellnessDate,
+        completee: false,
+        fatigue: wellnessData.fatigue || null,
+        rpe: wellnessData.rpe || null,
+        courbatures: wellnessData.courbatures || null,
+        qualite_sommeil: wellnessData.qualite_sommeil || null,
+        notes_joueur: wellnessData.notes || null,
+      })
+      if (error) throw error
+      await loadData()
+      setWellnessDate(null)
+      setWellnessData({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' })
+    } catch (e: unknown) {
+      toast('Erreur sauvegarde wellness : ' + (e instanceof Error ? e.message : String(e)), 'error')
+    }
   }
 
   async function toggleCompletee(r: Realisation) {

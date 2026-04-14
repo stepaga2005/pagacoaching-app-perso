@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import webpush from 'web-push'
 import { NextResponse } from 'next/server'
+import { requireCoach } from '@/lib/auth-server'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,6 +15,8 @@ webpush.setVapidDetails(
 )
 
 export async function POST(req: Request) {
+  const auth = await requireCoach()
+  if ('error' in auth) return auth.error
   const { to_user_id, title, body, url } = await req.json()
   if (!to_user_id) return NextResponse.json({ error: 'missing to_user_id' }, { status: 400 })
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Exercice, Famille } from '../lib/types'
 import { getYoutubeId, getVimeoId } from '../lib/utils'
+import { toast } from '../lib/toast'
 import { MultiCheck } from './shared/MultiCheck'
 
 export function Exercices() {
@@ -49,15 +50,15 @@ export function Exercices() {
   }
 
   async function handleSave() {
-    if (!form.nom || !form.famille_id) { alert('Nom et famille obligatoires'); return }
+    if (!form.nom || !form.famille_id) { toast('Nom et famille obligatoires', 'info'); return }
     setSaving(true)
     const payload = { ...form, famille_id: form.famille_id }
     if (editEx) {
       const { error } = await supabase.from('exercices').update(payload).eq('id', editEx.id)
-      if (error) { alert('Erreur modification : ' + error.message); setSaving(false); return }
+      if (error) { toast('Erreur modification : ' + error.message, 'error'); setSaving(false); return }
     } else {
       const { error } = await supabase.from('exercices').insert(payload).select()
-      if (error) { alert('Erreur création : ' + error.message); setSaving(false); return }
+      if (error) { toast('Erreur création : ' + error.message, 'error'); setSaving(false); return }
     }
     await loadData()
     setShowForm(false)
@@ -140,7 +141,7 @@ export function Exercices() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#0D1A2E', border: '1px solid #1A6FFF30', borderRadius: '10px', padding: '10px 14px', marginBottom: '20px' }}>
                 <span style={{ color: '#1A6FFF', fontSize: '13px' }}>▶</span>
                 <span style={{ color: '#888', fontSize: '12px', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{apercu.video_url}</span>
-                <button onClick={() => navigator.clipboard?.writeText(apercu.video_url!).then(() => alert('Lien copié !'))} style={{
+                <button onClick={() => navigator.clipboard?.writeText(apercu.video_url!).then(() => toast('Lien copié !', 'success'))} style={{
                   background: '#1A6FFF20', border: '1px solid #1A6FFF40', borderRadius: '6px', padding: '4px 10px', color: '#1A6FFF', cursor: 'pointer', fontSize: '11px', fontWeight: '600',
                 }}>Copier</button>
                 <button onClick={() => window.open(apercu.video_url!, '_blank')} style={{

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Seance, Joueur } from '../lib/types'
+import { toast } from '../lib/toast'
 
 export function AttributionModal({ seances, onClose }: {
   seances: Seance[]
@@ -46,7 +47,7 @@ export function AttributionModal({ seances, onClose }: {
     await supabase.from('realisations').insert(rows)
     setSaving(false)
     onClose()
-    alert(`✓ ${seances.length} séance${seances.length > 1 ? 's' : ''} attribuée${seances.length > 1 ? 's' : ''} à ${selectedJoueurs.size} joueur${selectedJoueurs.size > 1 ? 's' : ''}`)
+    toast(`✓ ${seances.length} séance${seances.length > 1 ? 's' : ''} attribuée${seances.length > 1 ? 's' : ''} à ${selectedJoueurs.size} joueur${selectedJoueurs.size > 1 ? 's' : ''}`, 'success')
   }
 
   const dates = datesPrevues()

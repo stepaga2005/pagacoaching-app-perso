@@ -120,6 +120,7 @@ export type MPSeanceExercice = {
   distance_metres?: number
   charge_kg?: number
   recuperation_secondes?: number
+  recuperation_inter_sets?: number
   lien_suivant?: boolean
   uni_podal?: boolean
   notes?: string
@@ -154,12 +155,13 @@ export type MsgType = {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 export const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', icon: '🏛️' },
-  { id: 'joueurs', label: 'Joueurs', icon: '👥' },
-  { id: 'exercices', label: 'Exercices', icon: '⚡' },
-  { id: 'modeles', label: 'Modèles', icon: '🗓️' },
-  { id: 'programmes', label: 'Séances', icon: '📋' },
-  { id: 'messages', label: 'Messages', icon: '💬' },
+  { id: 'dashboard',  label: 'Dashboard',    icon: '🏛️' },
+  { id: 'joueurs',    label: 'Joueurs',       icon: '👥' },
+  { id: 'exercices',  label: 'Exercices',     icon: '⚡' },
+  { id: 'modeles',    label: 'Modèles',       icon: '🗓️' },
+  { id: 'programmes', label: 'Séances',       icon: '📋' },
+  { id: 'generateur', label: 'Générateur',    icon: '🎯' },
+  { id: 'messages',   label: 'Messages',      icon: '💬' },
 ]
 
 export const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Seance, SemaineConfig, SetConfig, SeanceExercice } from '../lib/types'
 import { SearchableSelect } from './shared/SearchableSelect'
+import { toast } from '../lib/toast'
 
 export function DuplicationModal({ seance, onClose, onDuplique }: {
   seance: Seance
@@ -48,37 +49,44 @@ export function DuplicationModal({ seance, onClose, onDuplique }: {
 
   async function confirmer() {
     setSaving(true)
-    let currentLignes = [...lignes]
-    for (let s = 0; s < nbSemaines; s++) {
-      const { pct, remplacements } = semaines[s]
-      const newLignes = currentLignes.map(l => appliquer(l, pct))
-      const { data: ns } = await supabase.from('seances')
-        .insert({ nom: `${seance.nom} — S+${s + 1}`, type: seance.type, notes: seance.notes, est_template: true, programme_id: null })
-        .select().single()
-      if (ns) {
-        await supabase.from('seance_exercices').insert(
-          newLignes.map((l, i) => ({
-            seance_id: ns.id,
-            exercice_id: remplacements[i]?.id ?? l.exercice_id,
-            ordre: i + 1,
-            series: l.series ? Math.round(l.series) : null,
-            repetitions: l.repetitions ? Math.round(l.repetitions) : null,
-            duree_secondes: l.duree_secondes ?? null,
-            distance_metres: l.distance_metres ?? null,
-            charge_kg: l.charge_kg ?? null,
-            recuperation_secondes: l.recuperation_secondes ? Math.round(l.recuperation_secondes) : null,
-            recuperation_inter_sets: l.recuperation_inter_sets || null,
-            lien_suivant: l.lien_suivant || false,
-            uni_podal: l.uni_podal || false,
-            notes: l.notes ?? null,
-          }))
-        )
+    try {
+      let currentLignes = [...lignes]
+      for (let s = 0; s < nbSemaines; s++) {
+        const { pct, remplacements } = semaines[s]
+        const newLignes = currentLignes.map(l => appliquer(l, pct))
+        const { data: ns, error } = await supabase.from('seances')
+          .insert({ nom: `${seance.nom} — S+${s + 1}`, type: seance.type, notes: seance.notes, est_template: true, programme_id: null })
+          .select().single()
+        if (error) throw error
+        if (ns) {
+          const { error: exoErr } = await supabase.from('seance_exercices').insert(
+            newLignes.map((l, i) => ({
+              seance_id: ns.id,
+              exercice_id: remplacements[i]?.id ?? l.exercice_id,
+              ordre: i + 1,
+              series: l.series ? Math.round(l.series) : null,
+              repetitions: l.repetitions ? Math.round(l.repetitions) : null,
+              duree_secondes: l.duree_secondes ?? null,
+              distance_metres: l.distance_metres ?? null,
+              charge_kg: l.charge_kg ?? null,
+              recuperation_secondes: l.recuperation_secondes ? Math.round(l.recuperation_secondes) : null,
+              recuperation_inter_sets: l.recuperation_inter_sets || null,
+              lien_suivant: l.lien_suivant || false,
+              uni_podal: l.uni_podal || false,
+              notes: l.notes ?? null,
+            }))
+          )
+          if (exoErr) throw exoErr
+        }
+        currentLignes = newLignes
       }
-      currentLignes = newLignes
+      onDuplique()
+      onClose()
+    } catch (e: unknown) {
+      toast('Erreur duplication : ' + (e instanceof Error ? e.message : String(e)), 'error')
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
-    onDuplique()
-    onClose()
   }
 
   const exosFiltres = exercicesBanque.filter(ex => ex.nom.toLowerCase().includes(recherche.toLowerCase()))

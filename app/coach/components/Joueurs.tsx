@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Joueur, Groupe, GROUPE_COLORS } from '../lib/types'
 import { ProfilJoueur } from './ProfilJoueur'
+import { toast } from '../lib/toast'
 
 export function Joueurs() {
   const [joueurs, setJoueurs] = useState<Joueur[]>([])
@@ -95,13 +96,13 @@ export function Joueurs() {
       })
       if (!res.ok) {
         const err = await res.json()
-        alert('Erreur : ' + err.error)
+        toast('Erreur : ' + err.error, 'error')
         setSaving(false)
         return
       }
       const result = await res.json()
       if (result.reactivated) {
-        alert('Compte réactivé — les séances et données du joueur sont conservées.')
+        toast('Compte réactivé — les séances et données du joueur sont conservées.', 'success')
       }
     }
     await loadJoueurs()

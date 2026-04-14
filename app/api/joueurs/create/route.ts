@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { requireCoach } from '@/lib/auth-server'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,6 +8,8 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(req: Request) {
+  const auth = await requireCoach()
+  if ('error' in auth) return auth.error
   const { nom, prenom, email, password, poste, niveau, club, acces_debut, acces_fin, groupe_id, coach_id } = await req.json()
 
   const profil = {

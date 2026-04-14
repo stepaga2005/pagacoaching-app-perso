@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { requireCoach } from '@/lib/auth-server'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,6 +9,8 @@ const supabaseAdmin = createClient(
 
 // Retrouve et enregistre l'auth_id d'un joueur à partir de son email
 export async function GET(req: Request) {
+  const auth = await requireCoach()
+  if ('error' in auth) return auth.error
   const { searchParams } = new URL(req.url)
   const email = searchParams.get('email')
   if (!email) return NextResponse.json({ error: 'email requis' }, { status: 400 })

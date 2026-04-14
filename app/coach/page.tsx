@@ -12,6 +12,8 @@ import { Exercices } from './components/Exercices'
 import { Modeles } from './components/Modeles'
 import { Programmes } from './components/Programmes'
 import { Messages } from './components/Messages'
+import { GenerateurSeance } from './components/GenerateurSeance'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 export default function CoachPage() {
   const router = useRouter()
@@ -41,8 +43,27 @@ export default function CoachPage() {
   useEffect(() => {
     if (!coachId) return
     loadUnread(coachId)
-    const interval = setInterval(() => loadUnread(coachId), 3000)
-    return () => clearInterval(interval)
+    let channel = supabase
+      .channel(`unread-${coachId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'messages',
+        filter: `destinataire_id=eq.${coachId}`,
+      }, () => { loadUnread(coachId) })
+      .on('system' as never, {}, (status: { status: string }) => {
+        if (status?.status === 'CHANNEL_ERROR') {
+          supabase.removeChannel(channel)
+          setTimeout(() => {
+            channel = supabase
+              .channel(`unread-${coachId}-${Date.now()}`)
+              .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `destinataire_id=eq.${coachId}` }, () => { loadUnread(coachId) })
+              .subscribe()
+          }, 3000)
+        }
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [coachId])
 
   async function loadUnread(cId: string) {
@@ -74,6 +95,7 @@ export default function CoachPage() {
   }
 
   return (
+    <ErrorBoundary>
     <div className="app-shell">
 
       {showSplash && (
@@ -155,9 +177,11 @@ export default function CoachPage() {
           {displayTab === 'exercices' && <Exercices />}
           {displayTab === 'modeles' && <Modeles />}
           {displayTab === 'programmes' && <Programmes />}
+          {displayTab === 'generateur' && <GenerateurSeance />}
           {displayTab === 'messages' && <Messages coachId={coachId} onUnreadChange={setUnreadMessages} />}
         </div>
       </div>
     </div>
+    </ErrorBoundary>
   )
 }

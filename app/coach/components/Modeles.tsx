@@ -4,6 +4,7 @@ import { Fragment, useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Programme, SeanceProg, Seance, Joueur, Exercice, JOURS, JOURS_FULL, TYPES_SEANCE, LABELS_TYPE, TYPE_COLORS } from '../lib/types'
 import { SearchableSelect } from './shared/SearchableSelect'
+import { toast } from '../lib/toast'
 import { EditeurSeance } from './EditeurSeance'
 
 export function Modeles() {
@@ -19,6 +20,7 @@ export function Modeles() {
   const [showPicker, setShowPicker] = useState<{ semaine: number; jour: number } | null>(null)
   const [showAssign, setShowAssign] = useState(false)
   const [editingSeanceProg, setEditingSeanceProg] = useState<SeanceProg | null>(null)
+  const [creatingSlot, setCreatingSlot] = useState<{ semaine: number; jour: number } | null>(null)
   const [rechercheTemplate, setRechercheTemplate] = useState('')
 
   useEffect(() => { loadProgrammes() }, [])
@@ -65,7 +67,7 @@ export function Modeles() {
     setNewProgNom('')
     setNewProgObj('')
     if (error) {
-      alert(`Erreur création modèle : ${error.message}\n\nVérifie que la table "programmes" existe dans Supabase (voir DEBUG.md §5).`)
+      toast(`Erreur création modèle : ${error.message}`, 'error')
       return
     }
     if (data) {
@@ -76,10 +78,16 @@ export function Modeles() {
 
   async function supprimerProgramme(id: string) {
     if (!confirm('Supprimer ce modèle et toutes ses séances ?')) return
-    await supabase.from('seances').delete().eq('programme_id', id)
-    await supabase.from('programmes').delete().eq('id', id)
-    setSelectedProg(null)
-    loadProgrammes()
+    try {
+      const { error: e1 } = await supabase.from('seances').delete().eq('programme_id', id)
+      if (e1) throw e1
+      const { error: e2 } = await supabase.from('programmes').delete().eq('id', id)
+      if (e2) throw e2
+      setSelectedProg(null)
+      loadProgrammes()
+    } catch (e: unknown) {
+      toast('Erreur suppression : ' + (e instanceof Error ? e.message : String(e)), 'error')
+    }
   }
 
   async function ajouterSessionSlot(semaine: number, jour: number, template: Seance) {
@@ -114,8 +122,13 @@ export function Modeles() {
   }
 
   async function supprimerSessionSlot(seanceId: string) {
-    await supabase.from('seances').delete().eq('id', seanceId)
-    if (selectedProg) loadSeancesProg(selectedProg.id)
+    try {
+      const { error } = await supabase.from('seances').delete().eq('id', seanceId)
+      if (error) throw error
+      if (selectedProg) loadSeancesProg(selectedProg.id)
+    } catch (e: unknown) {
+      toast('Erreur suppression séance : ' + (e instanceof Error ? e.message : String(e)), 'error')
+    }
   }
 
   const templatesFiltres = templates.filter(t =>
@@ -134,6 +147,25 @@ export function Modeles() {
       if (!grid[s.semaine][s.jour_semaine]) grid[s.semaine][s.jour_semaine] = []
       grid[s.semaine][s.jour_semaine].push(s)
     }
+  }
+
+  if (creatingSlot && selectedProg) {
+    const nouvelleSeance: Seance = { id: '', nom: '', type: 'complete', est_template: false, seance_exercices: [] }
+    return <EditeurSeance
+      seance={nouvelleSeance}
+      exercices={exercices}
+      onSave={async (seanceId) => {
+        await supabase.from('seances').update({
+          programme_id: selectedProg.id,
+          jour_semaine: creatingSlot.jour,
+          semaine: creatingSlot.semaine,
+          est_template: false,
+        }).eq('id', seanceId)
+        setCreatingSlot(null)
+        loadSeancesProg(selectedProg.id)
+      }}
+      onCancel={() => setCreatingSlot(null)}
+    />
   }
 
   if (editingSeanceProg) {
@@ -285,6 +317,18 @@ export function Modeles() {
               </div>
               <button onClick={() => setShowPicker(null)} className="btn btn-ghost btn-sm" style={{ fontSize: '16px', padding: '6px 10px' }}>✕</button>
             </div>
+            <button
+              onClick={() => { setCreatingSlot(showPicker); setShowPicker(null) }}
+              className="btn btn-primary"
+              style={{ marginBottom: '12px', width: '100%', justifyContent: 'center' }}
+            >
+              + Créer une nouvelle séance
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <div style={{ flex: 1, height: '1px', background: '#22223A' }} />
+              <span style={{ color: '#444', fontSize: '11px', whiteSpace: 'nowrap' }}>ou importer un favori</span>
+              <div style={{ flex: 1, height: '1px', background: '#22223A' }} />
+            </div>
             <input value={rechercheTemplate} onChange={e => setRechercheTemplate(e.target.value)}
               className="input" placeholder="Rechercher une séance..."
               style={{ marginBottom: '12px' }} />
@@ -292,7 +336,7 @@ export function Modeles() {
               {templatesFiltres.length === 0 && (
                 <div className="empty-state">
                   <div className="empty-state-icon">📋</div>
-                  <div className="empty-state-text">Aucune séance template trouvée.<br />Crée-en une dans l'onglet <strong>Séances</strong>.</div>
+                  <div className="empty-state-text">Aucune séance template trouvée.</div>
                 </div>
               )}
               {templatesFiltres.map(t => {
@@ -375,7 +419,7 @@ export function AssignProgrammeModal({ programme, seances, onClose }: {
 
     setSaving(false)
     onClose()
-    alert(`✓ Modèle "${programme.nom}" attribué à ${selectedJoueurs.size} joueur${selectedJoueurs.size > 1 ? 's' : ''}`)
+    toast(`✓ Modèle "${programme.nom}" attribué à ${selectedJoueurs.size} joueur${selectedJoueurs.size > 1 ? 's' : ''}`, 'success')
   }
 
   return (
