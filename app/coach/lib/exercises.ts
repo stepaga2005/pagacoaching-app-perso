@@ -513,42 +513,44 @@ export function genererSeance(p: GenParams): SeanceGeneree {
 
   const phases: PhaseSeance[] = []
 
-  // 1 — Éveil
+  // 1 — Préparation neuromusculaire
   if (p.tps > 20) {
     phases.push({
-      nom: 'Mets-toi en marche',
-      desc: 'Tu prépares ton corps et ton cerveau pour l\'effort',
+      nom: 'Préparation neuromusculaire',
+      desc: 'Mobilisation articulaire, activation musculaire, éveil du SNC',
       duree: durPhases[0] + 'min',
       rpe: fat ? 3 : 4,
       exos: pick(eveilEx, 3),
     })
   }
 
-  // 2 — Construction
+  // 2 — Activation spécifique
   if (p.tps > 20 && durPhases[1] > 0) {
     const items = (objFinal === 'vitesse' || objFinal === 'cod') ? pick(techEx, 2) : pick(coreEx, 2)
     phases.push({
-      nom: 'Active ta machine',
-      desc: 'Montée en charge progressive — tu te prépares au cœur de séance',
+      nom: 'Activation spécifique',
+      desc: objFinal === 'vitesse' || objFinal === 'cod'
+        ? 'Mécanique de course et fréquence d\'appui — tu prépares le moteur'
+        : 'Gainage et stabilité — tu sécurises la base avant de charger',
       duree: durPhases[1] + 'min',
       rpe: fat ? 5 : 6,
       exos: items,
     })
   }
 
-  // 3 — Expression
+  // 3 — Renforcement spécifique
   const nomsObj: Record<Objectif, string> = {
-    vitesse:    'Tu deviens plus rapide',
-    force:      'Tu construis ta puissance',
-    prevention: 'Tu te protèges',
-    endurance:  'Tu construis ton endurance match',
-    cod:        'Tu affûtes ta vivacité',
-    technique:  'Tu améliores ta mécanique de course',
-    frappe:     'Tu développes ta frappe',
-    detente:    'Tu travailles ta détente',
+    vitesse:    'Travail de vitesse maximale et explosivité — l\'objectif du jour',
+    force:      'Renforcement bas du corps — construction de la puissance',
+    prevention: 'Renforcement préventif — protection des zones à risque',
+    endurance:  'Conditioning — endurance spécifique match',
+    cod:        'Changements de direction et vivacité — ton arme',
+    technique:  'Mécanique de course — efficience et économie d\'effort',
+    frappe:     'Puissance de frappe — adducteurs, hanche, gainage rotatif',
+    detente:    'Pliométrie verticale — ton saut de jeu de tête',
   }
   phases.push({
-    nom: 'Le cœur de ta séance',
+    nom: 'Renforcement spécifique',
     desc: nomsObj[objFinal],
     duree: durPhases[2] + 'min',
     rpe: fat ? 7 : (p.atr === 'REA' ? 9 : p.atr === 'TRA' ? 8 : 7),
@@ -570,18 +572,18 @@ export function genererSeance(p: GenParams): SeanceGeneree {
       if (extras.length > 0) transferItems = [...extras, ...transferItems].slice(0, 2)
     }
     phases.push({
-      nom: 'Sur le ballon',
-      desc: 'Tu ancres le travail physique dans le geste football',
+      nom: 'Transfert football',
+      desc: 'Le travail physique ancré dans le geste spécifique au poste',
       duree: durPhases[3] + 'min',
       rpe: fat ? 6 : 7,
       exos: transferItems,
     })
   }
 
-  // 5 — Protection
+  // 5 — Protection & récupération
   phases.push({
-    nom: 'Tu te protèges',
-    desc: 'Ischios, mobilité, stabilité — indispensable après l\'effort',
+    nom: 'Protection & récupération',
+    desc: 'Ischios excentriques, mobilité, stabilité — indispensable après l\'effort',
     duree: durPhases[4] + 'min',
     rpe: 3,
     exos: pick(prevEx, p.tps <= 20 ? 2 : 3),

@@ -293,19 +293,34 @@ export function GenerateurSeance() {
             <strong style={{ color: '#C9A84C', fontStyle: 'normal' }}>Stéphane : </strong>
             {result.msgFin} — {result.msgAtr}
           </div>
-          {/* Bouton copier */}
-          <button
-            onClick={copier}
-            style={{
-              display: 'block', width: 'calc(100% - 32px)', margin: '12px 16px',
-              background: copied ? '#2ECC71' : '#1A1A2A', border: `1px solid ${copied ? '#2ECC71' : '#2A2A3A'}`,
-              color: copied ? '#fff' : '#888', borderRadius: '8px', padding: '9px 16px',
-              fontSize: '11px', fontWeight: '700', letterSpacing: '1px', textTransform: 'uppercase',
-              cursor: 'pointer', transition: 'all 0.15s',
-            }}
-          >
-            {copied ? '✓ Copié !' : 'Copier pour Total Coaching'}
-          </button>
+          {/* Actions */}
+          <div style={{ display: 'flex', gap: '10px', margin: '12px 16px' }}>
+            <button
+              onClick={generer}
+              style={{
+                flex: 1, background: '#1A1A2A', border: '1px solid #1A6FFF50',
+                color: '#1A6FFF', borderRadius: '8px', padding: '10px 16px',
+                fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px',
+                cursor: 'pointer', transition: 'all 0.15s', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', gap: '6px',
+              }}
+            >
+              🔄 Autre séance
+            </button>
+            <button
+              onClick={copier}
+              style={{
+                flex: 1,
+                background: copied ? '#2ECC71' : '#1A1A2A',
+                border: `1px solid ${copied ? '#2ECC71' : '#2A2A3A'}`,
+                color: copied ? '#fff' : '#888', borderRadius: '8px', padding: '10px 16px',
+                fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px',
+                cursor: 'pointer', transition: 'all 0.15s',
+              }}
+            >
+              {copied ? '✓ Copié !' : '📋 Copier'}
+            </button>
+          </div>
         </div>
       )}
     </div>
