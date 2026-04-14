@@ -66,10 +66,10 @@ export function AttributionModal({ seances, onClose }: {
               className="input" style={{ width: 'auto' }} />
             {seances.length > 1 && (
               <>
-                <span style={{ color: '#555', fontSize: '13px' }}>tous les</span>
+                <span style={{ color: '#9898B8', fontSize: '13px' }}>tous les</span>
                 <input type="number" min={1} value={intervalJours} onChange={e => setIntervalJours(Number(e.target.value))}
                   className="input" style={{ width: '56px', textAlign: 'center' }} />
-                <span style={{ color: '#555', fontSize: '13px' }}>jours</span>
+                <span style={{ color: '#9898B8', fontSize: '13px' }}>jours</span>
               </>
             )}
           </div>
@@ -93,7 +93,7 @@ export function AttributionModal({ seances, onClose }: {
             Joueurs {selectedJoueurs.size > 0 && <span style={{ color: '#5599FF', textTransform: 'none', letterSpacing: 0 }}>— {selectedJoueurs.size} sélectionné{selectedJoueurs.size > 1 ? 's' : ''}</span>}
           </label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '220px', overflowY: 'auto' }}>
-            {joueurs.length === 0 && <span style={{ color: '#444', fontSize: '13px' }}>Aucun joueur actif</span>}
+            {joueurs.length === 0 && <span style={{ color: '#7878A8', fontSize: '13px' }}>Aucun joueur actif</span>}
             {joueurs.map(j => {
               const sel = selectedJoueurs.has(j.id)
               return (

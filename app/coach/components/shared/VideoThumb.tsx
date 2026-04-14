@@ -94,7 +94,7 @@ export function VideoThumb({ url, size = 72, famille }: { url?: string | null; s
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
           }}>
             <PlayBtn small={size < 60} />
-            <span style={{ fontSize: '8px', fontWeight: '800', color: '#1AB7EA', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Vimeo</span>
+            <span style={{ fontSize: '10px', fontWeight: '800', color: '#1AB7EA', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Vimeo</span>
           </div>
         ) : (
           <iframe

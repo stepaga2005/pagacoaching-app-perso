@@ -245,10 +245,10 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
             </div>
             {/* Ligne 2 : plage de dates */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ color: '#555', fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px' }}>DE</span>
+              <span style={{ color: '#9898B8', fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px' }}>DE</span>
               <input type="date" value={rangeDebut} onChange={e => setRangeDebut(e.target.value)}
                 style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', fontSize: '13px', fontWeight: '600', outline: 'none', cursor: 'pointer' }} />
-              <span style={{ color: '#555', fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px' }}>À</span>
+              <span style={{ color: '#9898B8', fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px' }}>À</span>
               <input type="date" value={rangeFin} onChange={e => setRangeFin(e.target.value)}
                 style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', fontSize: '13px', fontWeight: '600', outline: 'none', cursor: 'pointer' }} />
             </div>
@@ -257,7 +257,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
           {/* En-têtes jours fixes */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px', marginBottom: '4px' }}>
             {jourNoms.map(j => (
-              <div key={j} style={{ textAlign: 'center', color: '#555', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', padding: '4px 0' }}>{j}</div>
+              <div key={j} style={{ textAlign: 'center', color: '#9898B8', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', padding: '4px 0' }}>{j}</div>
             ))}
           </div>
 
@@ -286,7 +286,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                       <div style={{ padding: '7px 7px 5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #222238' }}>
                         <div style={{ fontSize: '18px', fontWeight: isToday ? '900' : '600', color: isToday ? '#007AFF' : isPast ? '#444' : '#CCC', lineHeight: 1 }}>{dateNum}</div>
                         <button onClick={() => setActionMenuDate(ds)}
-                          style={{ width: '26px', height: '26px', borderRadius: '6px', border: '1px solid #2C2C44', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, padding: 0 }}>+</button>
+                          style={{ width: '26px', height: '26px', borderRadius: '6px', border: '1px solid #2C2C44', background: 'transparent', color: '#9898B8', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, padding: 0 }}>+</button>
                       </div>
 
                       {/* Cartes séances */}
@@ -356,12 +356,12 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
           {coachId && joueurAuthId ? (
             <>
               <div style={{ padding: '14px 20px', borderBottom: '1px solid #1E1E30' }}>
-                <span style={{ color: '#555', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Conversation avec {joueur.prenom} {joueur.nom}</span>
+                <span style={{ color: '#9898B8', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px' }}>Conversation avec {joueur.prenom} {joueur.nom}</span>
               </div>
               <ChatView key={joueurAuthId} myId={coachId} otherId={joueurAuthId} height="calc(100vh - 325px)" />
             </>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#555', fontSize: '13px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9898B8', fontSize: '13px' }}>
               {joueurAuthId ? 'Chargement…' : 'Ce joueur n\'a pas encore de compte actif'}
             </div>
           )}
@@ -372,7 +372,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
         <div>
           <p style={{ color: '#888', fontSize: '13px', marginBottom: '16px' }}>Séances sauvegardées — clique sur "Planifier" pour les ajouter au calendrier.</p>
           {favoris.length === 0 ? (
-            <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '32px', textAlign: 'center', color: '#555', fontSize: '14px' }}>
+            <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '32px', textAlign: 'center', color: '#9898B8', fontSize: '14px' }}>
               Aucun favori. Coche "Sauvegarder en Favoris" lors de la création d'une séance.
             </div>
           ) : (
@@ -381,7 +381,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                 <div key={s.id} style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div>
                     <div style={{ fontWeight: '700', fontSize: '14px' }}>{s.nom}</div>
-                    <div style={{ color: '#666', fontSize: '12px', marginTop: '2px' }}>{s.seance_exercices?.length || 0} exercices</div>
+                    <div style={{ color: '#A8A8C4', fontSize: '12px', marginTop: '2px' }}>{s.seance_exercices?.length || 0} exercices</div>
                   </div>
                   <button onClick={() => { setOnglet('calendrier'); setCreateDate(today); setSeanceChoisie(s.id); setCreateMode('choisir') }} style={{
                     background: '#1A6FFF20', border: '1px solid #1A6FFF40', color: '#1A6FFF',
@@ -406,7 +406,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                   {new Date(seanceDetail.date_realisation + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </div>
               </div>
-              <button onClick={() => setSeanceDetail(null)} style={{ background: 'none', border: 'none', color: '#555', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+              <button onClick={() => setSeanceDetail(null)} style={{ background: 'none', border: 'none', color: '#9898B8', fontSize: '20px', cursor: 'pointer' }}>✕</button>
             </div>
 
             {/* Toggle complétée — seulement pour les vraies séances */}
@@ -423,7 +423,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
             {(() => {
               if (!seanceDetail.seances) return null
               const exos = [...(seanceDetail.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
-              if (exos.length === 0) return <div style={{ color: '#444', fontSize: '13px', marginBottom: '16px', fontStyle: 'italic' }}>Aucun exercice enregistré.</div>
+              if (exos.length === 0) return <div style={{ color: '#7878A8', fontSize: '13px', marginBottom: '16px', fontStyle: 'italic' }}>Aucun exercice enregistré.</div>
               const blocs: typeof exos[] = []
               let bi = 0
               while (bi < exos.length) {
@@ -474,7 +474,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                                     <span style={{ color: couleur, fontSize: '11px', fontWeight: '900' }}>{ex.ordre}</span>
                                   </div>
                                   <div style={{ flex: 1 }}>
-                                    {ex.exercices?.familles && <div style={{ fontSize: '9px', fontWeight: '800', color: couleur, textTransform: 'uppercase' as const, letterSpacing: '0.8px', marginBottom: '2px' }}>{ex.exercices.familles.nom}</div>}
+                                    {ex.exercices?.familles && <div style={{ fontSize: '11px', fontWeight: '800', color: couleur, textTransform: 'uppercase' as const, letterSpacing: '0.8px', marginBottom: '2px' }}>{ex.exercices.familles.nom}</div>}
                                     <div style={{ fontSize: '15px', fontWeight: '800', color: '#EEE', letterSpacing: '-0.2px', lineHeight: 1.2 }}>{ex.exercices?.nom}</div>
                                   </div>
                                   {ex.exercices?.video_url && (
@@ -489,7 +489,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                                 )}
                                 {ex.exercices?.consignes_execution && (
                                   <div style={{ background: '#C9A84C08', border: '1px solid #C9A84C18', borderLeft: '3px solid #C9A84C50', borderRadius: '0 8px 8px 0', padding: '8px 10px', marginBottom: '10px' }}>
-                                    <div style={{ fontSize: '8px', fontWeight: '900', color: '#C9A84C60', textTransform: 'uppercase' as const, letterSpacing: '1px', marginBottom: '4px' }}>Consignes</div>
+                                    <div style={{ fontSize: '10px', fontWeight: '900', color: '#C9A84C60', textTransform: 'uppercase' as const, letterSpacing: '1px', marginBottom: '4px' }}>Consignes</div>
                                     <div style={{ color: '#C9A84C90', fontSize: '12px', lineHeight: '1.6' }}>{ex.exercices.consignes_execution}</div>
                                   </div>
                                 )}
@@ -497,7 +497,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                                   <div style={{ marginBottom: '10px' }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr 1fr', gap: '2px', padding: '4px 8px', marginBottom: '2px' }}>
                                       {['N°', (firstSet?.reps ?? ex.repetitions) ? 'Reps' : (firstSet?.duree ?? ex.duree_secondes) ? 'Durée' : 'Reps', 'Charge', 'Récup'].map(h => (
-                                        <span key={h} style={{ fontSize: '9px', fontWeight: '800', color: '#252525', textTransform: 'uppercase' as const, letterSpacing: '0.5px' }}>{h}</span>
+                                        <span key={h} style={{ fontSize: '11px', fontWeight: '800', color: '#252525', textTransform: 'uppercase' as const, letterSpacing: '0.5px' }}>{h}</span>
                                       ))}
                                     </div>
                                     {Array.from({ length: nbSeries }, (_, si) => {
@@ -522,7 +522,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                                 {nbSeries === 0 && (ex.repetitions || ex.duree_secondes || ex.distance_metres || ex.charge_kg) && (
                                   <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' as const, marginBottom: '10px' }}>
                                     {[ex.repetitions && `${ex.repetitions} reps`, ex.duree_secondes && `${ex.duree_secondes}s`, ex.distance_metres && `${ex.distance_metres}m`, ex.charge_kg && `${ex.charge_kg}kg`].filter(Boolean).map((p, pi) => (
-                                      <span key={pi} style={{ background: '#1C1C2C', border: '1px solid #1E1E30', borderRadius: '6px', padding: '3px 8px', fontSize: '12px', fontWeight: '700', color: '#666' }}>{p}</span>
+                                      <span key={pi} style={{ background: '#1C1C2C', border: '1px solid #1E1E30', borderRadius: '6px', padding: '3px 8px', fontSize: '12px', fontWeight: '700', color: '#A8A8C4' }}>{p}</span>
                                     ))}
                                   </div>
                                 )}
@@ -568,7 +568,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
               ].filter(x => x.val != null)
               return (
                 <div style={{ background: '#0E0E18', borderRadius: '12px', padding: '14px', marginBottom: '16px' }}>
-                  <div style={{ color: '#555', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Ressenti joueur</div>
+                  <div style={{ color: '#9898B8', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Ressenti joueur</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: seanceDetail.notes_joueur ? '10px' : '0' }}>
                     {items.map(({ label, val, inv }) => {
                       const c = wc(val!, inv)
@@ -576,7 +576,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                         <div key={label} style={{ background: c + '20', border: `1px solid ${c}40`, borderRadius: '10px', padding: '8px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', minWidth: '64px' }}>
                           <span style={{ color: '#888', fontSize: '10px', fontWeight: '600', textTransform: 'uppercase' }}>{label}</span>
                           <span style={{ color: c, fontWeight: '900', fontSize: '22px', lineHeight: 1 }}>{val}</span>
-                          <span style={{ color: c + '80', fontSize: '9px' }}>/10</span>
+                          <span style={{ color: c + '80', fontSize: '11px' }}>/10</span>
                         </div>
                       )
                     })}
@@ -627,7 +627,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                 💚 Indices Wellness
               </button>
             </div>
-            <button onClick={() => setActionMenuDate(null)} style={{ width: '100%', padding: '12px', marginTop: '12px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+            <button onClick={() => setActionMenuDate(null)} style={{ width: '100%', padding: '12px', marginTop: '12px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#9898B8', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
           </div>
         </div>
       )}
@@ -653,7 +653,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <div>
                     <div style={{ fontWeight: '700', fontSize: '14px', color }}>{label}</div>
-                    <div style={{ color: '#555', fontSize: '11px' }}>{desc}</div>
+                    <div style={{ color: '#9898B8', fontSize: '11px' }}>{desc}</div>
                   </div>
                   <div style={{ color, fontWeight: '900', fontSize: '28px', minWidth: '40px', textAlign: 'center', lineHeight: 1 }}>
                     {key === 'notes' ? '' : wellnessData[key]}
@@ -662,7 +662,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                 <input type="range" min="1" max="10" value={wellnessData[key] as number}
                   onChange={e => setWellnessData(prev => ({ ...prev, [key]: Number(e.target.value) }))}
                   style={{ width: '100%', accentColor: color, height: '6px', cursor: 'pointer' }} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#333', fontSize: '10px', marginTop: '2px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#6A6A8A', fontSize: '10px', marginTop: '2px' }}>
                   <span>1</span><span>5</span><span>10</span>
                 </div>
               </div>

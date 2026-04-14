@@ -114,7 +114,7 @@ export function Messages({ coachId, onUnreadChange }: { coachId: string | null; 
                 <div style={{ fontWeight: '700', fontSize: '14px', color: isSelected ? '#5599FF' : '#DDD' }}>{j.prenom} {j.nom}</div>
                 {nbUnread > 0 && <span className="nav-badge">{nbUnread}</span>}
               </div>
-              <div style={{ fontSize: '12px', color: '#444', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ fontSize: '12px', color: '#7878A8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {!hasAccount ? 'Pas encore connecté' : last ? `${last.expediteur_id === coachId ? 'Vous : ' : ''}${fmtLast(last)}` : 'Démarrer la conversation'}
               </div>
             </div>
@@ -137,7 +137,7 @@ export function Messages({ coachId, onUnreadChange }: { coachId: string | null; 
       <ChatView key={selectedJoueur.auth_id!} myId={coachId!} otherId={selectedJoueur.auth_id!} height="calc(100svh - 220px)" />
     </div>
   ) : (
-    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px', color: '#333' }}>
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px', color: '#6A6A8A' }}>
       <div style={{ fontSize: '36px' }}>💬</div>
       <div style={{ fontSize: '13px' }}>Sélectionne un joueur</div>
     </div>

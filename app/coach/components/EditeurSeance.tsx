@@ -174,7 +174,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
         <div>
           <h2 style={{ fontSize: '14px', fontWeight: '700', letterSpacing: '-0.2px' }}>Exercices</h2>
-          {lignes.length > 0 && <p style={{ color: '#444', fontSize: '11px', marginTop: '2px' }}>Définissez le nombre de séries pour configurer chaque série individuellement</p>}
+          {lignes.length > 0 && <p style={{ color: '#7878A8', fontSize: '11px', marginTop: '2px' }}>Définissez le nombre de séries pour configurer chaque série individuellement</p>}
         </div>
         <button onClick={() => setShowPicker(true)} className="btn btn-ghost btn-sm" style={{ borderColor: '#1A6FFF30', color: '#5599FF' }}>+ Ajouter</button>
       </div>
@@ -265,15 +265,15 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                   {/* Ligne 1 : nom + note + supprimer */}
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '8px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
-                      <button onClick={() => moveLigne(idx, -1)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
-                      <button onClick={() => moveLigne(idx, 1)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
+                      <button onClick={() => moveLigne(idx, -1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
+                      <button onClick={() => moveLigne(idx, 1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: '600', fontSize: '13px' }}>{l.exercices?.nom}</div>
                       <div style={{ display: 'flex', gap: '5px', marginTop: '3px', flexWrap: 'wrap' }}>
                         {fam && <span style={{ fontSize: '10px', color: fam.couleur }}>{fam.nom}</span>}
                         <button onClick={() => setLignes(prev => prev.map((li, i) => i === idx ? { ...li, uni_podal: !li.uni_podal } : li))}
-                          style={{ background: l.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${l.uni_podal ? '#1A6FFF60' : '#2C2C44'}`, color: l.uni_podal ? '#1A6FFF' : '#444', fontSize: '9px', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer', fontWeight: '700' }}>↔ 2 côtés</button>
+                          style={{ background: l.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${l.uni_podal ? '#1A6FFF60' : '#2C2C44'}`, color: l.uni_podal ? '#1A6FFF' : '#444', fontSize: '11px', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer', fontWeight: '700' }}>↔ 2 côtés</button>
                       </div>
                     </div>
                     <input value={l.notes || ''} onChange={e => updateLigne(idx, 'notes', e.target.value)}
@@ -287,7 +287,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                   {/* Ligne 2 : Reps, Durée, Dist, Charge */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px' }}>
                     {['Reps', 'Durée(s)', 'Dist(m)', 'Charge(kg)'].map(h => (
-                      <div key={h} style={{ color: '#444', fontSize: '10px', textTransform: 'uppercase' as const, textAlign: 'center' as const }}>{h}</div>
+                      <div key={h} style={{ color: '#7878A8', fontSize: '10px', textTransform: 'uppercase' as const, textAlign: 'center' as const }}>{h}</div>
                     ))}
                     {paramInput(idx, 'repetitions', '-', '100%')}
                     {paramInput(idx, 'duree_secondes', '-', '100%')}
@@ -307,14 +307,14 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                     borderRight: '1px solid #1A6FFF50',
                     padding: '5px 14px',
                   }}>
-                    <span style={{ color: '#444', fontSize: '11px' }}>↓ Récup avant exo suivant :</span>
+                    <span style={{ color: '#7878A8', fontSize: '11px' }}>↓ Récup avant exo suivant :</span>
                     <input
                       type="number" placeholder="0"
                       value={l.recuperation_secondes ?? ''}
                       onChange={e => updateLigne(idx, 'recuperation_secondes', e.target.value)}
                       style={{ width: '50px', background: '#212135', border: '1px solid #333', borderRadius: '6px', padding: '4px 6px', color: '#FFF', fontSize: '12px', outline: 'none', textAlign: 'center' }}
                     />
-                    <span style={{ color: '#444', fontSize: '11px' }}>s</span>
+                    <span style={{ color: '#7878A8', fontSize: '11px' }}>s</span>
                   </div>
                 )}
 
@@ -373,21 +373,21 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <button onClick={() => moveLigne(idx, -1)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
-                      <button onClick={() => moveLigne(idx, 1)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
+                      <button onClick={() => moveLigne(idx, -1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
+                      <button onClick={() => moveLigne(idx, 1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
                     </div>
                     <div>
                       <div style={{ fontWeight: '600', fontSize: '13px' }}>{l.exercices?.nom}</div>
                       <div style={{ display: 'flex', gap: '5px', marginTop: '3px', flexWrap: 'wrap' }}>
                         {fam && <span style={{ fontSize: '10px', color: fam.couleur }}>{fam.nom}</span>}
                         <button onClick={() => setLignes(prev => prev.map((li, i) => i === idx ? { ...li, uni_podal: !li.uni_podal } : li))}
-                          style={{ background: l.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${l.uni_podal ? '#1A6FFF60' : '#2C2C44'}`, color: l.uni_podal ? '#1A6FFF' : '#444', fontSize: '9px', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer', fontWeight: '700' }}>↔ 2 côtés</button>
+                          style={{ background: l.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${l.uni_podal ? '#1A6FFF60' : '#2C2C44'}`, color: l.uni_podal ? '#1A6FFF' : '#444', fontSize: '11px', padding: '1px 6px', borderRadius: '4px', cursor: 'pointer', fontWeight: '700' }}>↔ 2 côtés</button>
                       </div>
                     </div>
                   </div>
                   {/* Séries */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ color: '#555', fontSize: '11px', whiteSpace: 'nowrap' }}>Séries</span>
+                    <span style={{ color: '#9898B8', fontSize: '11px', whiteSpace: 'nowrap' }}>Séries</span>
                     <input
                       type="number" placeholder="-"
                       value={l.series ?? ''}
@@ -411,7 +411,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                     {/* Sous-header */}
                     <div style={{ display: 'grid', gridTemplateColumns: '60px 65px 65px 65px 65px 65px', gap: '6px', padding: '5px 12px', background: '#0B0B14' }}>
                       {['Série', 'Reps', 'Durée(s)', 'Dist(m)', 'Charge(kg)', 'Récup(s)'].map(h => (
-                        <div key={h} style={{ color: '#444', fontSize: '10px', letterSpacing: '0.3px', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
+                        <div key={h} style={{ color: '#7878A8', fontSize: '10px', letterSpacing: '0.3px', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
                       ))}
                     </div>
                     {l.sets_config!.map((s, si) => (
@@ -441,7 +441,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                   <div style={{ borderTop: '1px solid #1E1E30' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '65px 65px 65px 65px 65px', gap: '6px', padding: '5px 12px', background: '#0B0B14' }}>
                       {['Reps', 'Durée(s)', 'Dist(m)', 'Charge(kg)', 'Récup(s)'].map(h => (
-                        <div key={h} style={{ color: '#444', fontSize: '10px', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
+                        <div key={h} style={{ color: '#7878A8', fontSize: '10px', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
                       ))}
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '65px 65px 65px 65px 65px', gap: '6px', padding: '8px 12px' }}>
@@ -462,7 +462,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                     style={{
                       background: '#212135', border: '1px solid #2C2C44',
                       borderRadius: '20px', padding: '3px 14px', cursor: 'pointer',
-                      fontSize: '12px', color: '#555', display: 'flex', alignItems: 'center', gap: '6px',
+                      fontSize: '12px', color: '#9898B8', display: 'flex', alignItems: 'center', gap: '6px',
                     }}>
                     🔗 <span>Lier en superset</span>
                   </button>
@@ -474,7 +474,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
       </div>
 
       {lignes.length === 0 && (
-        <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '32px', textAlign: 'center', color: '#555', fontSize: '14px' }}>
+        <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '32px', textAlign: 'center', color: '#9898B8', fontSize: '14px' }}>
           Aucun exercice. Clique sur "+ Ajouter un exercice".
         </div>
       )}

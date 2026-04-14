@@ -86,7 +86,7 @@ export function ChatView({ myId, otherId, height = 'calc(100vh - 220px)' }: { my
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
         {msgs.length === 0 && (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333', fontSize: '13px' }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6A6A8A', fontSize: '13px' }}>
             Aucun message — commencez la conversation
           </div>
         )}
@@ -98,7 +98,7 @@ export function ChatView({ myId, otherId, height = 'calc(100vh - 220px)' }: { my
           return (
             <div key={m.id}>
               {showDate && (
-                <div style={{ textAlign: 'center', margin: '12px 0 8px', color: '#333', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <div style={{ textAlign: 'center', margin: '12px 0 8px', color: '#6A6A8A', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   {fmtDate(m.created_at)}
                 </div>
               )}

@@ -160,14 +160,14 @@ export function Joueurs() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
               {groupes.length === 0 && (
-                <div style={{ color: '#555', fontSize: '13px', textAlign: 'center', padding: '16px' }}>Aucun groupe créé</div>
+                <div style={{ color: '#9898B8', fontSize: '13px', textAlign: 'center', padding: '16px' }}>Aucun groupe créé</div>
               )}
               {groupes.map(g => (
                 <div key={g.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#212135', borderRadius: '10px', padding: '12px 16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: g.couleur, flexShrink: 0 }} />
                     <span style={{ fontWeight: '600', fontSize: '14px' }}>{g.nom}</span>
-                    <span style={{ color: '#555', fontSize: '12px' }}>{joueurs.filter(j => j.groupe_id === g.id).length} joueur(s)</span>
+                    <span style={{ color: '#9898B8', fontSize: '12px' }}>{joueurs.filter(j => j.groupe_id === g.id).length} joueur(s)</span>
                   </div>
                   <button onClick={() => deleteGroupe(g.id)} style={{ background: '#FF475710', border: '1px solid #FF475730', color: '#FF4757', borderRadius: '6px', padding: '4px 10px', fontSize: '12px', cursor: 'pointer' }}>
                     Supprimer
@@ -286,7 +286,7 @@ export function Joueurs() {
 
       {/* Liste joueurs */}
       {joueursFiltres.length === 0 ? (
-        <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '24px', color: '#555', fontSize: '14px' }}>
+        <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '24px', color: '#9898B8', fontSize: '14px' }}>
           Aucun joueur pour l'instant.
         </div>
       ) : (
@@ -336,7 +336,7 @@ export function Joueurs() {
                       padding: '5px 12px', borderRadius: '8px', border: '1px solid #2C2C44',
                       background: 'transparent', color: '#888', fontSize: '11px', cursor: 'pointer',
                     }}>Modifier</button>
-                    <span style={{ color: '#444', fontSize: '12px' }}>→</span>
+                    <span style={{ color: '#7878A8', fontSize: '12px' }}>→</span>
                   </div>
                 </div>
               </div>

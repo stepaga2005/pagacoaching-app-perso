@@ -110,7 +110,7 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
     <div className="page-section">
       <div style={{ marginBottom: '28px' }}>
         <h1 style={{ fontSize: '26px', fontWeight: '900', letterSpacing: '-0.5px', marginBottom: '4px' }}>Situation</h1>
-        <p style={{ color: '#444', fontSize: '13px' }}>
+        <p style={{ color: '#7878A8', fontSize: '13px' }}>
           {new Date(today + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         </p>
       </div>
@@ -130,9 +130,9 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
             <div style={{ fontSize: '18px', marginBottom: '10px' }}>{s.icon}</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
               <span style={{ fontSize: '32px', fontWeight: '900', color: s.color, lineHeight: 1 }}>{s.value}</span>
-              {s.sub && <span style={{ fontSize: '14px', color: '#333', fontWeight: '600' }}>{s.sub}</span>}
+              {s.sub && <span style={{ fontSize: '14px', color: '#6A6A8A', fontWeight: '600' }}>{s.sub}</span>}
             </div>
-            <div style={{ fontSize: '11px', color: '#444', fontWeight: '600', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{s.label}</div>
+            <div style={{ fontSize: '11px', color: '#7878A8', fontWeight: '600', marginTop: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -144,7 +144,7 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
           <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#1A6FFF', letterSpacing: '1px', textTransform: 'uppercase' }}>Séances du jour</h2>
         </div>
         {seancesJour.length === 0 ? (
-          <div style={{ background: '#141420', border: '1px solid #222238', borderRadius: '14px', padding: '28px', textAlign: 'center', color: '#333', fontSize: '14px' }}>
+          <div style={{ background: '#141420', border: '1px solid #222238', borderRadius: '14px', padding: '28px', textAlign: 'center', color: '#6A6A8A', fontSize: '14px' }}>
             Aucune séance prévue aujourd'hui
           </div>
         ) : (
@@ -163,14 +163,14 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: '800', fontSize: '15px', color: '#F0F0F0' }}>{j.prenom} {j.nom}</div>
-                      <div style={{ fontSize: '12px', color: '#555', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={{ fontSize: '12px', color: '#9898B8', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {(r.seances as { nom: string; type: string } | null)?.nom || 'Séance'}
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                       {r.completee && fatigueColor && (
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', background: fatigueColor + '18', border: `1px solid ${fatigueColor}35`, borderRadius: '10px', padding: '4px 10px' }}>
-                          <span style={{ fontSize: '8px', color: fatigueColor + '90', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fatigue</span>
+                          <span style={{ fontSize: '10px', color: fatigueColor + '90', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fatigue</span>
                           <span style={{ fontSize: '18px', fontWeight: '900', color: fatigueColor, lineHeight: 1 }}>{r.fatigue}</span>
                         </div>
                       )}
@@ -253,7 +253,7 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
                 <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#1A6FFF', letterSpacing: '1px', textTransform: 'uppercase' }}>Charge semaine</h2>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '11px', color: '#444', fontWeight: '700' }}>{totalWeek}/{totalPlanned} séances</span>
+                <span style={{ fontSize: '11px', color: '#7878A8', fontWeight: '700' }}>{totalWeek}/{totalPlanned} séances</span>
                 <span style={{
                   fontSize: '12px', fontWeight: '800', padding: '3px 10px', borderRadius: '20px',
                   background: pct >= 80 ? '#2ECC7120' : pct >= 50 ? '#F39C1220' : '#FF475720',
@@ -283,15 +283,15 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
               <div style={{ display: 'flex', gap: '16px', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #1C1C2C' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#2ECC71' }} />
-                  <span style={{ fontSize: '10px', color: '#444', fontWeight: '600' }}>Réalisé</span>
+                  <span style={{ fontSize: '10px', color: '#7878A8', fontWeight: '600' }}>Réalisé</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#212135', border: '1px solid #333' }} />
-                  <span style={{ fontSize: '10px', color: '#444', fontWeight: '600' }}>Planifié</span>
+                  <span style={{ fontSize: '10px', color: '#7878A8', fontWeight: '600' }}>Planifié</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: '#1A6FFF' }} />
-                  <span style={{ fontSize: '10px', color: '#444', fontWeight: '600' }}>Aujourd'hui</span>
+                  <span style={{ fontSize: '10px', color: '#7878A8', fontWeight: '600' }}>Aujourd'hui</span>
                 </div>
               </div>
             </div>
@@ -315,7 +315,7 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
               const completedWeek = (byPlayer[j.id] || []).filter(r => r.completee && r.seance_id).length
               const plannedWeek   = (byPlayer[j.id] || []).filter(r => r.seance_id).length
               const { label, color, bg } = lastFatigue === null
-                ? { label: 'Aucune donnée', color: '#444', bg: '#212135' }
+                ? { label: 'Aucune donnée', color: '#7878A8', bg: '#212135' }
                 : lastFatigue <= 3 ? { label: '🟢 Frais', color: '#2ECC71', bg: '#2ECC7110' }
                 : lastFatigue <= 5 ? { label: '🟡 Normal', color: '#F39C12', bg: '#F39C1210' }
                 : lastFatigue <= 7 ? { label: '🟠 Fatigué', color: '#FF6B35', bg: '#FF6B3510' }
@@ -331,14 +331,14 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: '700', fontSize: '14px' }}>{j.prenom} {j.nom}</div>
-                    <div style={{ fontSize: '11px', color: '#444', marginTop: '2px' }}>
+                    <div style={{ fontSize: '11px', color: '#7878A8', marginTop: '2px' }}>
                       {plannedWeek > 0 ? `${completedWeek}/${plannedWeek} séances cette semaine` : 'Aucune séance planifiée'}
                     </div>
                   </div>
                   {/* ACWR badge */}
                   {acwrZone && acwr.ratio !== null && (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4px 10px', borderRadius: '10px', background: acwrZone.bg, border: `1px solid ${acwrZone.color}30`, flexShrink: 0 }}>
-                      <span style={{ fontSize: '8px', color: acwrZone.color + '90', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>ACWR</span>
+                      <span style={{ fontSize: '10px', color: acwrZone.color + '90', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px' }}>ACWR</span>
                       <span style={{ fontSize: '15px', fontWeight: '900', color: acwrZone.color, lineHeight: 1.1 }}>{acwr.ratio.toFixed(2)}</span>
                     </div>
                   )}
@@ -368,7 +368,7 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
               <div />
               {weekDays.map((ds, i) => (
                 <div key={ds} style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '9px', fontWeight: '800', color: ds === today ? '#1A6FFF' : '#333', textTransform: 'uppercase' }}>{dayLetters[i]}</div>
+                  <div style={{ fontSize: '11px', fontWeight: '800', color: ds === today ? '#1A6FFF' : '#333', textTransform: 'uppercase' }}>{dayLetters[i]}</div>
                   <div style={{ fontSize: '12px', fontWeight: '700', color: ds === today ? '#1A6FFF' : '#444' }}>{new Date(ds + 'T12:00:00').getDate()}</div>
                 </div>
               ))}

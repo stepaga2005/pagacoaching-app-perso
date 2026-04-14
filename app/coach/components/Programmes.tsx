@@ -173,7 +173,7 @@ export function Programmes() {
         <div style={{ background: '#2ECC7110', border: '1px solid #2ECC7125', borderRadius: '10px', padding: '10px 16px', marginBottom: '12px', fontSize: '13px', color: '#3DD68C', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#2ECC71', boxShadow: '0 0 6px #2ECC71' }} />
           <span style={{ flex: 1 }}>{selection.size} séance{selection.size > 1 ? 's' : ''} sélectionnée{selection.size > 1 ? 's' : ''}</span>
-          <button onClick={() => setSelection(new Set())} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '11px' }}>Tout désélectionner</button>
+          <button onClick={() => setSelection(new Set())} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '11px' }}>Tout désélectionner</button>
         </div>
       )}
 
@@ -218,8 +218,8 @@ export function Programmes() {
                   <div style={{ fontWeight: '700', fontSize: '14px', marginBottom: '2px' }} className="truncate">{s.nom}</div>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <span style={{ fontSize: '10px', fontWeight: '700', color: tc.text }}>{LABELS_TYPE[s.type] || s.type}</span>
-                    <span style={{ color: '#444', fontSize: '11px' }}>{exoCount} exo{exoCount > 1 ? 's' : ''}</span>
-                    {s.notes && <span style={{ color: '#333', fontSize: '11px' }} className="truncate">· {s.notes.substring(0, 50)}</span>}
+                    <span style={{ color: '#7878A8', fontSize: '11px' }}>{exoCount} exo{exoCount > 1 ? 's' : ''}</span>
+                    {s.notes && <span style={{ color: '#6A6A8A', fontSize: '11px' }} className="truncate">· {s.notes.substring(0, 50)}</span>}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
@@ -262,11 +262,11 @@ export function Programmes() {
                     {(() => { const tc = TYPE_COLORS[apercu.type] || TYPE_COLORS.complete; return (
                       <span style={{ fontSize: '11px', fontWeight: '700', color: tc.text, background: tc.bg, border: `1px solid ${tc.border}`, padding: '3px 10px', borderRadius: '99px' }}>{LABELS_TYPE[apercu.type] || apercu.type}</span>
                     )})()}
-                    <span style={{ color: '#444', fontSize: '12px' }}>
+                    <span style={{ color: '#7878A8', fontSize: '12px' }}>
                       {loadingApercu ? '...' : `${apercu.seance_exercices?.length || 0} exercice${(apercu.seance_exercices?.length || 0) > 1 ? 's' : ''}`}
                     </span>
                   </div>
-                  {apercu.notes && <div style={{ color: '#555', fontSize: '12px', marginTop: '8px', fontStyle: 'italic' }}>{apercu.notes}</div>}
+                  {apercu.notes && <div style={{ color: '#9898B8', fontSize: '12px', marginTop: '8px', fontStyle: 'italic' }}>{apercu.notes}</div>}
                 </div>
               </div>
             </div>
@@ -276,7 +276,7 @@ export function Programmes() {
               {loadingApercu ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', color: '#1A6FFF', fontSize: '13px', letterSpacing: '2px' }}>CHARGEMENT...</div>
               ) : !apercu.seance_exercices || apercu.seance_exercices.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '40px', color: '#444', fontSize: '13px' }}>Aucun exercice dans cette séance</div>
+                <div style={{ textAlign: 'center', padding: '40px', color: '#7878A8', fontSize: '13px' }}>Aucun exercice dans cette séance</div>
               ) : (() => {
                 // Grouper en blocs superset
                 const exos = [...apercu.seance_exercices].sort((a, b) => (a.ordre || 0) - (b.ordre || 0))
@@ -322,7 +322,7 @@ export function Programmes() {
                                   <div style={{ fontWeight: '600', fontSize: '13px', marginBottom: '2px' }} className="truncate">{fam?.nom || '—'}</div>
                                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                                     {fam?.familles && <span style={{ fontSize: '10px', fontWeight: '700', color: couleur }}>{fam.familles.nom}</span>}
-                                    {params.length > 0 && <span style={{ fontSize: '11px', color: '#555' }}>{params.join(' · ')}</span>}
+                                    {params.length > 0 && <span style={{ fontSize: '11px', color: '#9898B8' }}>{params.join(' · ')}</span>}
                                     {(exo as SeanceExercice).notes && <span style={{ fontSize: '10px', color: '#3A3A50', fontStyle: 'italic' }} className="truncate">{(exo as SeanceExercice).notes}</span>}
                                   </div>
                                 </div>

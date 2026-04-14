@@ -191,7 +191,7 @@ export function Modeles() {
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: '160px' }}>
           {programmes.length === 0 ? (
-            <div style={{ color: '#444', fontSize: '13px' }}>Aucun modèle — crée-en un !</div>
+            <div style={{ color: '#7878A8', fontSize: '13px' }}>Aucun modèle — crée-en un !</div>
           ) : (
             <SearchableSelect
               value={selectedProg?.id || ''}
@@ -256,7 +256,7 @@ export function Modeles() {
                                     onClick={() => setEditingSeanceProg(s)}>
                                     {s.nom}
                                     {s.seance_exercices && s.seance_exercices.length > 0 && (
-                                      <div style={{ color: '#555', fontSize: '10px', fontWeight: '400', marginTop: '2px' }}>
+                                      <div style={{ color: '#9898B8', fontSize: '10px', fontWeight: '400', marginTop: '2px' }}>
                                         {s.seance_exercices.length} exo{s.seance_exercices.length > 1 ? 's' : ''}
                                       </div>
                                     )}
@@ -326,7 +326,7 @@ export function Modeles() {
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
               <div style={{ flex: 1, height: '1px', background: '#22223A' }} />
-              <span style={{ color: '#444', fontSize: '11px', whiteSpace: 'nowrap' }}>ou importer un favori</span>
+              <span style={{ color: '#7878A8', fontSize: '11px', whiteSpace: 'nowrap' }}>ou importer un favori</span>
               <div style={{ flex: 1, height: '1px', background: '#22223A' }} />
             </div>
             <input value={rechercheTemplate} onChange={e => setRechercheTemplate(e.target.value)}
@@ -347,7 +347,7 @@ export function Modeles() {
                     <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: tc.text, flexShrink: 0, boxShadow: `0 0 6px ${tc.text}60` }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ color: '#F0F0F8', fontSize: '13px', fontWeight: '700' }}>{t.nom}</div>
-                      <div style={{ color: '#555', fontSize: '11px', marginTop: '2px' }}>
+                      <div style={{ color: '#9898B8', fontSize: '11px', marginTop: '2px' }}>
                         {LABELS_TYPE[t.type]} · {t.seance_exercices?.length || 0} exercice{(t.seance_exercices?.length || 0) > 1 ? 's' : ''}
                       </div>
                     </div>
@@ -432,7 +432,7 @@ export function AssignProgrammeModal({ programme, seances, onClose }: {
         <div style={{ marginBottom: '20px' }}>
           <label style={{ color: '#9494A0', fontWeight: '600', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Date de début</label>
           <input type="date" value={dateDebut} onChange={e => setDateDebut(e.target.value)} className="input" style={{ width: 'auto' }} />
-          <div style={{ color: '#444', fontSize: '12px', marginTop: '8px' }}>
+          <div style={{ color: '#7878A8', fontSize: '12px', marginTop: '8px' }}>
             Les séances seront placées selon leur position (semaine × jour) dans le modèle.
           </div>
         </div>
@@ -445,7 +445,7 @@ export function AssignProgrammeModal({ programme, seances, onClose }: {
             Joueurs {selectedJoueurs.size > 0 && <span style={{ color: '#5599FF' }}>— {selectedJoueurs.size} sélectionné{selectedJoueurs.size > 1 ? 's' : ''}</span>}
           </label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '260px', overflowY: 'auto' }}>
-            {joueurs.length === 0 && <div style={{ color: '#444', fontSize: '13px' }}>Aucun joueur actif</div>}
+            {joueurs.length === 0 && <div style={{ color: '#7878A8', fontSize: '13px' }}>Aucun joueur actif</div>}
             {joueurs.map(j => {
               const sel = selectedJoueurs.has(j.id)
               return (

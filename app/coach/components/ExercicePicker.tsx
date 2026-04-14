@@ -59,7 +59,7 @@ export function ExercicePicker({ exercices, onConfirm, onClose }: {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px 10px' }}>
           <div className="modal-title" style={{ flex: 1, marginBottom: 0, fontSize: '17px' }}>Ajouter des exercices</div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '20px', lineHeight: 1, padding: '4px' }}>✕</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#A8A8C4', cursor: 'pointer', fontSize: '20px', lineHeight: 1, padding: '4px' }}>✕</button>
         </div>
 
         {/* Recherche */}

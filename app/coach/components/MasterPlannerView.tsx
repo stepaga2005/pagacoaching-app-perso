@@ -364,7 +364,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
           <div style={{ fontWeight: '900', fontSize: '13px', letterSpacing: '-0.5px', whiteSpace: 'nowrap', flex: 1 }}>
             <span style={{ color: '#1A6FFF' }}>▦</span> <span style={{ color: '#FFF' }}>MASTER PLANNER</span>
           </div>
-          {!isMobile && <span style={{ color: '#444', fontSize: '11px' }}>{joueur.prenom} {joueur.nom}</span>}
+          {!isMobile && <span style={{ color: '#7878A8', fontSize: '11px' }}>{joueur.prenom} {joueur.nom}</span>}
           <button
             onClick={() => { setModeSelection(v => !v); setJoursSelectionnes(new Set()) }}
             style={{
@@ -382,7 +382,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 12px 10px' }}>
           <button onClick={prevWeek} style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 14px', color: '#888', cursor: 'pointer', fontSize: '16px', minHeight: '36px', minWidth: '36px' }}>‹</button>
           <button onClick={nextWeek} style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 14px', color: '#888', cursor: 'pointer', fontSize: '16px', minHeight: '36px', minWidth: '36px' }}>›</button>
-          <span style={{ color: '#666', fontSize: '12px', whiteSpace: 'nowrap', flex: 1, fontWeight: '600' }}>{weekLabel}</span>
+          <span style={{ color: '#A8A8C4', fontSize: '12px', whiteSpace: 'nowrap', flex: 1, fontWeight: '600' }}>{weekLabel}</span>
           <input type="date" onChange={e => e.target.value && jumpToDate(e.target.value)}
             style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#007AFF', fontSize: '12px', outline: 'none', cursor: 'pointer', minHeight: '36px' }} />
         </div>
@@ -421,7 +421,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
               const letters = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
               return (
                 <div key={ds} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                  <span style={{ fontSize: '9px', fontWeight: '700', color: isToday ? '#1A6FFF' : '#333' }}>{letters[i]}</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: isToday ? '#1A6FFF' : '#333' }}>{letters[i]}</span>
                   <div style={{
                     width: '100%', aspectRatio: '1', borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -459,7 +459,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                       </button>
                     ) : !modeSelection ? (
                       <button onClick={() => { setMpActionDate(ds); setMpSeanceChoisie('') }}
-                        style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', width: '32px', height: '32px', color: '#555', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                        style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', width: '32px', height: '32px', color: '#9898B8', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                     ) : (
                       <button onClick={() => toggleJour(ds)} style={{
                         background: estSel ? 'rgba(46,204,113,0.2)' : '#161620',
@@ -493,11 +493,11 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                   <div style={{ fontWeight: '800', fontSize: '15px', color: '#F0F0F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
-                                  <div style={{ fontSize: '12px', color: '#444', marginTop: '2px' }}>
+                                  <div style={{ fontSize: '12px', color: '#7878A8', marginTop: '2px' }}>
                                     {exos.length} exercice{exos.length > 1 ? 's' : ''}{typeLabel ? ` · ${typeLabel}` : ''}
                                   </div>
                                 </div>
-                                <span style={{ color: '#333', fontSize: '14px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }}>▼</span>
+                                <span style={{ color: '#6A6A8A', fontSize: '14px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }}>▼</span>
                               </button>
                               {/* Bouton ⋮ → bottom sheet actions session */}
                               <button onClick={e => { e.stopPropagation(); setMpSessionMenu({ id: r.id, seanceId: r.seance_id, date: ds, nom: r.seances?.nom || '' }) }}
@@ -532,7 +532,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                           <span style={{ color: '#CCC', fontSize: '13px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{exo.exercices?.nom}</span>
                                           {exo.lien_suivant && <span style={{ fontSize: '10px', color: '#1A6FFF60' }}>⇌ superset</span>}
                                         </div>
-                                        <span style={{ color: '#555', fontSize: '11px', fontWeight: '600', flexShrink: 0 }}>{seriesSummary}</span>
+                                        <span style={{ color: '#9898B8', fontSize: '11px', fontWeight: '600', flexShrink: 0 }}>{seriesSummary}</span>
                                         <span style={{ color: '#2C2C44', fontSize: '14px', flexShrink: 0 }}>›</span>
                                       </button>
                                     </div>
@@ -540,7 +540,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                 })}
                                 <div style={{ padding: '6px 14px 10px' }}>
                                   <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }}
-                                    style={{ width: '100%', background: 'transparent', border: '1px dashed #2C2C44', borderRadius: '10px', padding: '10px', color: '#444', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}>
+                                    style={{ width: '100%', background: 'transparent', border: '1px dashed #2C2C44', borderRadius: '10px', padding: '10px', color: '#7878A8', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}>
                                     + Ajouter un exercice
                                   </button>
                                 </div>
@@ -584,11 +584,11 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                 <div style={{ textAlign: 'center', marginBottom: '4px' }}>
                   <div style={{ color: estSelectionne ? '#2ECC71' : (isToday ? '#5AABFF' : '#555'), fontSize: '10px', fontWeight: '800', letterSpacing: '0.8px', textTransform: 'uppercase' }}>{JOUR_NOMS[di]}</div>
                   <div style={{ color: estSelectionne ? '#2ECC71' : (isToday ? '#007AFF' : '#888'), fontSize: '22px', fontWeight: '900', lineHeight: 1, marginTop: '1px' }}>{dateNum}</div>
-                  <div style={{ color: '#444', fontSize: '10px', marginTop: '1px' }}>{mois}</div>
+                  <div style={{ color: '#7878A8', fontSize: '10px', marginTop: '1px' }}>{mois}</div>
                 </div>
                 {!modeSelection && !mpMovingSession && (
                   <button onClick={() => { setMpActionDate(ds); setMpSeanceChoisie('') }}
-                    style={{ width: '100%', minHeight: '28px', borderRadius: '6px', border: '1px solid #2C2C44', background: 'transparent', color: '#444', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 0' }}>+</button>
+                    style={{ width: '100%', minHeight: '28px', borderRadius: '6px', border: '1px solid #2C2C44', background: 'transparent', color: '#7878A8', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px 0' }}>+</button>
                 )}
                 {mpMovingSession && (
                   <button onClick={() => mpMoveSession(ds)}
@@ -616,7 +616,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                     <div key={r.id} style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '8px', overflow: 'hidden' }}>
                       <div style={{ padding: '7px 8px', borderBottom: '1px solid #1E1E30', display: 'flex', alignItems: 'center', gap: '5px', background: '#18182A', position: 'relative' }}>
                         <div style={{ flex: 1, fontWeight: '700', fontSize: '12px', color: '#DDD', lineHeight: 1.3, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
-                        <span style={{ fontSize: '9px', fontWeight: '800', color: '#555', background: '#18182A', border: '1px solid #282840', borderRadius: '4px', padding: '2px 5px', whiteSpace: 'nowrap', flexShrink: 0 }}>{typeLabel}</span>
+                        <span style={{ fontSize: '11px', fontWeight: '800', color: '#9898B8', background: '#18182A', border: '1px solid #282840', borderRadius: '4px', padding: '2px 5px', whiteSpace: 'nowrap', flexShrink: 0 }}>{typeLabel}</span>
                         <button onClick={e => { e.stopPropagation(); setMpSessionMenu(mpSessionMenu?.id === r.id ? null : { id: r.id, seanceId: r.seance_id, date: ds, nom: r.seances?.nom || '' }) }}
                           style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '5px', color: '#2ECC71', cursor: 'pointer', fontSize: '13px', padding: '2px 6px', lineHeight: 1, flexShrink: 0 }}>⋮</button>
                         {mpSessionMenu?.id === r.id && (
@@ -669,7 +669,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                               <div key={exo.id}>
                                 {insideGroup && exoIdx > 0 && (
                                   <div style={{ display: 'flex', alignItems: 'center', padding: '3px 8px 3px 18px', gap: '5px', background: '#1A6FFF08' }}>
-                                    <span style={{ color: '#1A6FFF50', fontSize: '8px', flexShrink: 0 }}>⏱</span>
+                                    <span style={{ color: '#1A6FFF50', fontSize: '10px', flexShrink: 0 }}>⏱</span>
                                     <input
                                       type="number"
                                       placeholder="0"
@@ -678,51 +678,51 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                       onBlur={() => flushSimple(exo.id, r.id, 'recuperation_secondes')}
                                       style={{ width: '42px', background: exo.recuperation_secondes ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.recuperation_secondes ? '#1A6FFF50' : '#1A6FFF25'}`, borderRadius: '4px', padding: '2px 4px', color: '#6AAEFF', fontSize: '10px', fontWeight: '700', outline: 'none', textAlign: 'center' }}
                                     />
-                                    <span style={{ color: '#1A6FFF40', fontSize: '8px' }}>s avant cet exo</span>
+                                    <span style={{ color: '#1A6FFF40', fontSize: '10px' }}>s avant cet exo</span>
                                   </div>
                                 )}
                                 <div style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !insideGroup ? '1px solid #1A1A1A' : 'none', background: 'transparent' }}>
                                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginBottom: '5px' }}>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0', flexShrink: 0, marginTop: '2px' }}>
-                                      <button onClick={() => moveExo(r.id, exo.id, -1)} style={{ background: 'none', border: 'none', color: '#2C2C44', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▲</button>
-                                      <button onClick={() => moveExo(r.id, exo.id, 1)} style={{ background: 'none', border: 'none', color: '#2C2C44', cursor: 'pointer', fontSize: '8px', lineHeight: 1, padding: '1px 2px' }}>▼</button>
+                                      <button onClick={() => moveExo(r.id, exo.id, -1)} style={{ background: 'none', border: 'none', color: '#2C2C44', cursor: 'pointer', fontSize: '10px', lineHeight: 1, padding: '1px 2px' }}>▲</button>
+                                      <button onClick={() => moveExo(r.id, exo.id, 1)} style={{ background: 'none', border: 'none', color: '#2C2C44', cursor: 'pointer', fontSize: '10px', lineHeight: 1, padding: '1px 2px' }}>▼</button>
                                     </div>
                                     {hasVideo ? (
                                       <button onClick={() => window.open(exo.exercices!.video_url!.replace('vimeo.com/', 'player.vimeo.com/video/'), '_blank')}
-                                        style={{ width: '24px', height: '24px', background: '#212135', border: '1px solid #2C2C44', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '9px', color: '#1A6FFF' }}>▶</button>
+                                        style={{ width: '24px', height: '24px', background: '#212135', border: '1px solid #2C2C44', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '11px', color: '#1A6FFF' }}>▶</button>
                                     ) : (
                                       <div style={{ width: '24px', height: '24px', background: couleur + '18', border: `1px solid ${couleur}30`, borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                        <span style={{ color: couleur, fontSize: '8px', fontWeight: '900' }}>{exo.ordre}</span>
+                                        <span style={{ color: couleur, fontSize: '10px', fontWeight: '900' }}>{exo.ordre}</span>
                                       </div>
                                     )}
                                     <div style={{ flex: 1, minWidth: 0 }}>
-                                      {fam && <div style={{ color: couleur, fontSize: '7px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1 }}>{fam.nom}</div>}
+                                      {fam && <div style={{ color: couleur, fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', lineHeight: 1 }}>{fam.nom}</div>}
                                       <div style={{ color: '#DDD', fontWeight: '700', fontSize: '10px', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
                                     </div>
                                     <div style={{ display: 'flex', gap: '2px', flexShrink: 0 }}>
-                                      <button onClick={() => toggleUniPodal(r.id, exo)} style={{ background: exo.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.uni_podal ? '#1A6FFF60' : '#252525'}`, color: exo.uni_podal ? '#1A6FFF' : '#333', fontSize: '7px', padding: '2px 4px', borderRadius: '3px', cursor: 'pointer', fontWeight: '700' }}>↔</button>
-                                      <button onClick={() => removeExo(r.id, exo.id)} style={{ background: 'transparent', border: '1px solid #FF475718', color: '#FF475760', borderRadius: '3px', padding: '2px 4px', cursor: 'pointer', fontSize: '9px' }}>✕</button>
+                                      <button onClick={() => toggleUniPodal(r.id, exo)} style={{ background: exo.uni_podal ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.uni_podal ? '#1A6FFF60' : '#252525'}`, color: exo.uni_podal ? '#1A6FFF' : '#333', fontSize: '10px', padding: '2px 4px', borderRadius: '3px', cursor: 'pointer', fontWeight: '700' }}>↔</button>
+                                      <button onClick={() => removeExo(r.id, exo.id)} style={{ background: 'transparent', border: '1px solid #FF475718', color: '#FF475760', borderRadius: '3px', padding: '2px 4px', cursor: 'pointer', fontSize: '11px' }}>✕</button>
                                     </div>
                                   </div>
                                   <div style={{ marginBottom: '4px' }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '1px 2px', marginBottom: '1px' }}>
                                       {['', 'Reps', 'Dur', 'Dist', 'Kg', isLastInGroup ? 'Réc↺' : 'Réc', ''].map((h, hi) => (
-                                        <div key={hi} style={{ color: hi === 5 && isLastInGroup ? '#2ECC7180' : '#2C2C44', fontSize: '7px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
+                                        <div key={hi} style={{ color: hi === 5 && isLastInGroup ? '#2ECC7180' : '#2C2C44', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
                                       ))}
                                     </div>
                                     {hasSets ? (
                                       exo.sets_config!.map((s, si) => (
                                         <div key={si} style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '3px', alignItems: 'center', marginBottom: '1px' }}>
-                                          <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{si + 1}</div>
+                                          <div style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '700', textAlign: 'center' }}>{si + 1}</div>
                                           {(['reps', 'duree', 'dist', 'charge', 'recup'] as (keyof SetConfig)[]).map(key => (
                                             <input key={key} {...setInput()} placeholder="-" value={s[key] ?? ''} onChange={e => patchSet(r.id, exo.id, exo, si, key, e.target.value)} onBlur={() => flushSets(exo.id, r.id)} />
                                           ))}
-                                          <button onClick={() => removeSet(r.id, exo.id, exo, si)} style={{ background: 'transparent', border: 'none', color: '#FF475740', cursor: 'pointer', fontSize: '8px', padding: '0', lineHeight: 1 }}>✕</button>
+                                          <button onClick={() => removeSet(r.id, exo.id, exo, si)} style={{ background: 'transparent', border: 'none', color: '#FF475740', cursor: 'pointer', fontSize: '10px', padding: '0', lineHeight: 1 }}>✕</button>
                                         </div>
                                       ))
                                     ) : (
                                       <div style={{ display: 'grid', gridTemplateColumns: '14px 36px 36px 36px 36px 36px 14px', gap: '2px', padding: '2px', alignItems: 'center' }}>
-                                        <div style={{ color: '#C9A84C', fontSize: '9px', fontWeight: '700', textAlign: 'center' }}>{exo.series || '—'}</div>
+                                        <div style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '700', textAlign: 'center' }}>{exo.series || '—'}</div>
                                         {[
                                           ['repetitions', exo.repetitions],
                                           ['duree_secondes', exo.duree_secondes],
@@ -737,7 +737,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                     )}
                                   </div>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <button onClick={() => addSet(r.id, exo.id, exo)} style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '4px', padding: '2px 7px', color: '#666', cursor: 'pointer', fontSize: '8px', fontWeight: '600', whiteSpace: 'nowrap' }}>+ Série</button>
+                                    <button onClick={() => addSet(r.id, exo.id, exo)} style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '4px', padding: '2px 7px', color: '#A8A8C4', cursor: 'pointer', fontSize: '10px', fontWeight: '600', whiteSpace: 'nowrap' }}>+ Série</button>
                                     <input type="number" placeholder="×" value={exo.series ?? ''} onChange={async e => {
                                       const val = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value))
                                       if (!val) return
@@ -757,10 +757,10 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                         patchExoLocal(r.id, exo.id, { series: val })
                                         await saveExoField(exo.id, { series: val })
                                       }
-                                    }} style={{ width: '28px', background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '4px', padding: '2px 3px', color: '#888', fontSize: '9px', outline: 'none', textAlign: 'center' }} />
+                                    }} style={{ width: '28px', background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '4px', padding: '2px 3px', color: '#888', fontSize: '11px', outline: 'none', textAlign: 'center' }} />
                                     <div style={{ flex: 1 }} />
                                     {exos.length > 1 && (
-                                      <button onClick={() => { setMpCopyExoModal({ fromExo: exo, realisationId: r.id }); setMpCopyExoTargets(new Set()) }} title="Dupliquer les données vers d'autres exercices" style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '4px', padding: '2px 7px', color: '#2ECC71', cursor: 'pointer', fontSize: '8px', fontWeight: '700', whiteSpace: 'nowrap' }}>⊕ copier</button>
+                                      <button onClick={() => { setMpCopyExoModal({ fromExo: exo, realisationId: r.id }); setMpCopyExoTargets(new Set()) }} title="Dupliquer les données vers d'autres exercices" style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '4px', padding: '2px 7px', color: '#2ECC71', cursor: 'pointer', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>⊕ copier</button>
                                     )}
                                     <button onClick={() => toggleLienSuivant(r.id, exo)} title={exo.lien_suivant ? 'Délier' : 'Lier en superset'} style={{ background: exo.lien_suivant ? '#1A6FFF20' : 'transparent', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#2C2C44'}`, borderRadius: '4px', padding: '2px 6px', color: exo.lien_suivant ? '#1A6FFF' : '#333', cursor: 'pointer', fontSize: '10px' }}>⇌</button>
                                   </div>
@@ -772,7 +772,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                             <div key={`bloc-${blocIdx}`} style={isGroup ? { borderLeft: '4px solid #1A6FFF', background: '#1A6FFF12', margin: '4px 0', borderRadius: '0 6px 6px 0' } : { marginTop: blocIdx > 0 ? '1px' : '0' }}>
                               {isGroup && (
                                 <div style={{ padding: '4px 8px', background: '#1A6FFF30', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                  <span style={{ color: '#6AAEFF', fontSize: '9px', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>⇌ {groupLabel}</span>
+                                  <span style={{ color: '#6AAEFF', fontSize: '11px', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>⇌ {groupLabel}</span>
                                 </div>
                               )}
                               {bloc.map((exo, ei) => renderExo(exo, ei, isGroup, ei === bloc.length - 1))}
@@ -780,7 +780,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                 const lastExo = bloc[bloc.length - 1]
                                 return (
                                   <div style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '5px 8px 6px', borderTop: '1px solid #1A6FFF20', background: '#1A6FFF08' }}>
-                                    <span style={{ color: '#2ECC7180', fontSize: '8px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>Récup après</span>
+                                    <span style={{ color: '#2ECC7180', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>Récup après</span>
                                     <input
                                       type="number"
                                       placeholder="0"
@@ -789,7 +789,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                       onBlur={() => flushSimple(lastExo.id, r.id, 'recuperation_secondes')}
                                       style={{ width: '44px', background: lastExo.recuperation_secondes ? '#2ECC7115' : 'transparent', border: `1px solid ${lastExo.recuperation_secondes ? '#2ECC7150' : '#2C2C44'}`, borderRadius: '4px', padding: '3px 4px', color: '#2ECC71', fontSize: '11px', fontWeight: '700', outline: 'none', textAlign: 'center' }}
                                     />
-                                    <span style={{ color: '#2ECC7150', fontSize: '8px' }}>s</span>
+                                    <span style={{ color: '#2ECC7150', fontSize: '10px' }}>s</span>
                                   </div>
                                 )
                               })()}
@@ -798,7 +798,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                         })
                       })()}
                       <div style={{ padding: '5px' }}>
-                        <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }} style={{ width: '100%', background: '#0B0B14', border: '1px dashed #2C2C44', borderRadius: '6px', padding: '8px 4px', color: '#444', cursor: 'pointer', fontSize: '11px', fontWeight: '600', minHeight: '36px' }}>+ exercice</button>
+                        <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }} style={{ width: '100%', background: '#0B0B14', border: '1px dashed #2C2C44', borderRadius: '6px', padding: '8px 4px', color: '#7878A8', cursor: 'pointer', fontSize: '11px', fontWeight: '600', minHeight: '36px' }}>+ exercice</button>
                       </div>
                     </div>
                   )
@@ -846,9 +846,9 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                         <span style={{ color: couleur, fontSize: '11px', fontWeight: '900' }}>{exo.ordre}</span>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        {fam && <div style={{ color: couleur, fontSize: '9px', fontWeight: '800', textTransform: 'uppercase' }}>{fam.nom}</div>}
+                        {fam && <div style={{ color: couleur, fontSize: '11px', fontWeight: '800', textTransform: 'uppercase' }}>{fam.nom}</div>}
                         <div style={{ color: isSelected ? '#FFF' : '#CCC', fontWeight: '700', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
-                        <div style={{ color: '#555', fontSize: '11px' }}>{summary}</div>
+                        <div style={{ color: '#9898B8', fontSize: '11px' }}>{summary}</div>
                       </div>
                       <div style={{ width: '22px', height: '22px', borderRadius: '50%', border: `2px solid ${isSelected ? '#1A6FFF' : '#333'}`, background: isSelected ? '#1A6FFF' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {isSelected && <span style={{ color: '#FFF', fontSize: '12px', fontWeight: '900' }}>✓</span>}
@@ -859,7 +859,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
               </div>
               <div style={{ padding: '12px 16px 32px', borderTop: '1px solid #1E1E30', display: 'flex', gap: '10px' }}>
                 <button onClick={() => { setMpCopyExoModal(null); setMpCopyExoTargets(new Set()) }}
-                  style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+                  style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#9898B8', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
                 <button onClick={mpCopyExoToTargets} disabled={mpCopyExoTargets.size === 0}
                   style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: mpCopyExoTargets.size > 0 ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpCopyExoTargets.size > 0 ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>
                   Copier vers {mpCopyExoTargets.size > 0 ? `${mpCopyExoTargets.size} exercice${mpCopyExoTargets.size > 1 ? 's' : ''}` : '…'}
@@ -890,7 +890,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                 <span style={{ fontSize: '20px' }}>↔</span> Déplacer la séance
               </button>
               <button onClick={() => setMpSessionMenu(null)}
-                style={{ width: '100%', background: 'transparent', border: '1px solid #2C2C44', borderRadius: '12px', padding: '14px', color: '#555', cursor: 'pointer', fontSize: '15px', marginTop: '4px' }}>Annuler</button>
+                style={{ width: '100%', background: 'transparent', border: '1px solid #2C2C44', borderRadius: '12px', padding: '14px', color: '#9898B8', cursor: 'pointer', fontSize: '15px', marginTop: '4px' }}>Annuler</button>
             </div>
           </div>
         </>
@@ -909,12 +909,12 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
             <div style={{ color: '#888', fontSize: '13px', marginBottom: '20px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{mpDupModal.nom}</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
               <div>
-                <div style={{ color: '#555', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px' }}>Date cible</div>
+                <div style={{ color: '#9898B8', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px' }}>Date cible</div>
                 <input type="date" value={mpDupDate} onChange={e => setMpDupDate(e.target.value)}
                   style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '10px', padding: '10px 12px', color: '#FFF', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }} />
               </div>
               <div>
-                <div style={{ color: '#555', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px' }}>Joueur (optionnel)</div>
+                <div style={{ color: '#9898B8', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '6px' }}>Joueur (optionnel)</div>
                 <select value={mpDupJoueurId} onChange={e => setMpDupJoueurId(e.target.value)}
                   style={{ width: '100%', background: '#212135', border: '1px solid #2C2C44', borderRadius: '10px', padding: '10px 12px', color: mpDupJoueurId ? '#FFF' : '#555', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }}>
                   <option value="">— Même joueur ({joueur.prenom} {joueur.nom}) —</option>
@@ -926,7 +926,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
             </div>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button onClick={() => { setMpDupModal(null); setMpDupDate(''); setMpDupJoueurId('') }}
-                style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+                style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#9898B8', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
               <button onClick={mpDupSession} disabled={!mpDupDate}
                 style={{ flex: 1, padding: '14px', borderRadius: '12px', border: 'none', background: mpDupDate ? '#1A6FFF' : '#333', color: '#FFF', cursor: mpDupDate ? 'pointer' : 'not-allowed', fontWeight: '700', fontSize: '14px' }}>Dupliquer</button>
             </div>
@@ -973,7 +973,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                 💚 Indices Wellness
               </button>
             </div>
-            <button onClick={() => setMpActionDate(null)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#555', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+            <button onClick={() => setMpActionDate(null)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#9898B8', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
           </div>
         </div>
       )}
@@ -999,7 +999,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <div>
                     <div style={{ fontWeight: '700', fontSize: '14px', color }}>{label}</div>
-                    <div style={{ color: '#555', fontSize: '11px' }}>{desc}</div>
+                    <div style={{ color: '#9898B8', fontSize: '11px' }}>{desc}</div>
                   </div>
                   <div style={{ color, fontWeight: '900', fontSize: '28px', minWidth: '40px', textAlign: 'center', lineHeight: 1 }}>
                     {key !== 'notes' && mpWellnessData[key]}
@@ -1008,7 +1008,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                 <input type="range" min="1" max="10" value={mpWellnessData[key] as number}
                   onChange={e => setMpWellnessData(prev => ({ ...prev, [key]: Number(e.target.value) }))}
                   style={{ width: '100%', accentColor: color, height: '6px', cursor: 'pointer' }} />
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#333', fontSize: '10px', marginTop: '2px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#6A6A8A', fontSize: '10px', marginTop: '2px' }}>
                   <span>1</span><span>5</span><span>10</span>
                 </div>
               </div>
@@ -1133,7 +1133,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
               <div style={{ overflowY: 'auto', flex: 1, padding: '16px' }}>
                 {/* Nb séries */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <span style={{ color: '#555', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase' }}>Séries</span>
+                  <span style={{ color: '#9898B8', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase' }}>Séries</span>
                   <input type="number" placeholder="—" value={exo.series ?? ''}
                     onChange={async e => {
                       const val = e.target.value === '' ? undefined : Math.max(1, Number(e.target.value))
@@ -1154,7 +1154,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                     {/* Headers */}
                     <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr 1fr 1fr 28px', gap: '6px', padding: '0 2px' }}>
                       {['', 'Reps', 'Dur', 'Dist', 'Kg', 'Réc', ''].map((h, hi) => (
-                        <div key={hi} style={{ color: '#555', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
+                        <div key={hi} style={{ color: '#9898B8', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
                       ))}
                     </div>
                     {exo.sets_config!.map((s, si) => (
@@ -1182,7 +1182,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                       ['Réc (s)', 'recuperation_secondes', exo.recuperation_secondes],
                     ].map(([label, key, val]) => (
                       <div key={key as string} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <div style={{ color: '#555', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{label as string}</div>
+                        <div style={{ color: '#9898B8', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{label as string}</div>
                         <input type="number" placeholder="-" min="0"
                           value={(val as number) ?? ''}
                           onChange={e => patchSimple(r.id, exo.id, key as string, e.target.value)}
@@ -1222,11 +1222,11 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
             <div style={{ color: '#2ECC71', fontWeight: '800', fontSize: '14px' }}>
               {joursSelectionnes.size} jour{joursSelectionnes.size > 1 ? 's' : ''} sélectionné{joursSelectionnes.size > 1 ? 's' : ''}
             </div>
-            <div style={{ color: '#555', fontSize: '11px' }}>
+            <div style={{ color: '#9898B8', fontSize: '11px' }}>
               {[...joursSelectionnes].reduce((n, d) => n + ((byDate[d] || []).filter(r => r.seance_id).length), 0)} séance(s)
             </div>
           </div>
-          <button onClick={() => setJoursSelectionnes(new Set())} style={{ background: 'none', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#555', cursor: 'pointer', fontSize: '11px' }}>Effacer</button>
+          <button onClick={() => setJoursSelectionnes(new Set())} style={{ background: 'none', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#9898B8', cursor: 'pointer', fontSize: '11px' }}>Effacer</button>
           <button onClick={() => setShowCopierModal(true)} style={{
             background: '#2ECC71', border: 'none', borderRadius: '10px',
             padding: '10px 20px', color: '#000', cursor: 'pointer',

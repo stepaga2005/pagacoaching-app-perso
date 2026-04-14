@@ -70,7 +70,7 @@ export function MultiCheck({ label, options, selected, onChange }: {
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: '8px' }}>
           {selected.length ? selected.join(', ') : label}
         </span>
-        <span style={{ color: '#555', fontSize: '12px', flexShrink: 0 }}>{open ? '▲' : '▼'}</span>
+        <span style={{ color: '#9898B8', fontSize: '12px', flexShrink: 0 }}>{open ? '▲' : '▼'}</span>
       </button>
 
       {open && rect && (

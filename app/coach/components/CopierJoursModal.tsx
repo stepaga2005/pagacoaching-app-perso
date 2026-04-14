@@ -88,7 +88,7 @@ export function CopierJoursModal({ joursSelectionnes, byDate, joueurCourant, all
     <div className="modal-overlay" style={{ zIndex: 600 }}>
       <div className="modal-box" style={{ maxWidth: '440px', width: '100%' }}>
         <div className="modal-title">Copier {datesTriees.length} jour{datesTriees.length > 1 ? 's' : ''}</div>
-        <div style={{ color: '#555', fontSize: '12px', marginBottom: '20px' }}>{totalSessions} séance{totalSessions > 1 ? 's' : ''} sélectionnée{totalSessions > 1 ? 's' : ''}</div>
+        <div style={{ color: '#9898B8', fontSize: '12px', marginBottom: '20px' }}>{totalSessions} séance{totalSessions > 1 ? 's' : ''} sélectionnée{totalSessions > 1 ? 's' : ''}</div>
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
@@ -131,7 +131,7 @@ export function CopierJoursModal({ joursSelectionnes, byDate, joueurCourant, all
               <input value={nomModele} onChange={e => setNomModele(e.target.value)} placeholder="Ex : Semaine type pré-saison" className="input" style={{ width: '100%' }} />
             </div>
             <div style={{ background: '#0E0E18', border: '1px solid #1E1E30', borderRadius: '10px', padding: '12px' }}>
-              <div style={{ color: '#444', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '8px' }}>Aperçu</div>
+              <div style={{ color: '#7878A8', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', marginBottom: '8px' }}>Aperçu</div>
               {datesTriees.filter(d => (byDate[d] || []).some(r => r.seance_id)).map(d => {
                 const offset = daysBetween(datesTriees[0], d)
                 const wk = Math.floor(offset / 7) + 1
@@ -139,7 +139,7 @@ export function CopierJoursModal({ joursSelectionnes, byDate, joueurCourant, all
                 return (
                   <div key={d} style={{ display: 'flex', gap: '10px', alignItems: 'baseline', marginBottom: '4px' }}>
                     <span style={{ color: '#C9A84C', fontSize: '10px', fontWeight: '800', width: '48px', flexShrink: 0 }}>S{wk} {jourNom}</span>
-                    <span style={{ color: '#666', fontSize: '11px' }}>{(byDate[d] || []).filter(r => r.seance_id).map(r => r.seances?.nom || 'Séance').join(', ')}</span>
+                    <span style={{ color: '#A8A8C4', fontSize: '11px' }}>{(byDate[d] || []).filter(r => r.seance_id).map(r => r.seances?.nom || 'Séance').join(', ')}</span>
                   </div>
                 )
               })}

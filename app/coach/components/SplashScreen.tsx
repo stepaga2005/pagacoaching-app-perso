@@ -39,7 +39,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
         }} />
 
         <div style={{
-          color: '#444',
+          color: '#7878A8',
           fontSize: '10px',
           textTransform: 'uppercase',
           marginTop: '14px',

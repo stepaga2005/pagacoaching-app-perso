@@ -32,8 +32,8 @@
 
   /* Texte hiérarchique */
   --texte:           #FFFFFF;
-  --texte-dim:       #5A5A80;
-  --texte-secondaire:#9898B8;
+  --texte-dim:       #8080A8;
+  --texte-secondaire:#AAAACC;
 
   /* Bordures */
   --bordure:         #22223A;

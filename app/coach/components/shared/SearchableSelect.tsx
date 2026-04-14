@@ -29,7 +29,7 @@ export function SearchableSelect({ value, items, onChange, placeholder, triggerS
         <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {selected?.nom || placeholder || 'Sélectionner...'}
         </span>
-        <span style={{ color: '#444', fontSize: '10px', flexShrink: 0 }}>▼</span>
+        <span style={{ color: '#7878A8', fontSize: '10px', flexShrink: 0 }}>▼</span>
       </button>
 
       {open && (
@@ -52,7 +52,7 @@ export function SearchableSelect({ value, items, onChange, placeholder, triggerS
                 style={{ fontSize: '14px' }}
               />
             </div>
-            <div style={{ padding: '4px 20px 6px', color: '#444', fontSize: '11px', fontWeight: '600' }}>
+            <div style={{ padding: '4px 20px 6px', color: '#7878A8', fontSize: '11px', fontWeight: '600' }}>
               {filtered.length} résultat{filtered.length !== 1 ? 's' : ''}
             </div>
             <div style={{ overflowY: 'auto', flex: 1 }}>
@@ -76,7 +76,7 @@ export function SearchableSelect({ value, items, onChange, placeholder, triggerS
                 )
               })}
               {filtered.length === 0 && (
-                <div style={{ padding: '32px', textAlign: 'center', color: '#444', fontSize: '13px' }}>Aucun résultat</div>
+                <div style={{ padding: '32px', textAlign: 'center', color: '#7878A8', fontSize: '13px' }}>Aucun résultat</div>
               )}
             </div>
             <div style={{ padding: '12px 16px', borderTop: '1px solid #22223A' }}>

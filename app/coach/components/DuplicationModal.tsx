@@ -126,14 +126,14 @@ export function DuplicationModal({ seance, onClose, onDuplique }: {
             <input type="number" value={deltaReps} onChange={e => setDeltaReps(Number(e.target.value))}
               style={{ width: '44px', background: '#18182A', border: '1px solid #2C2C44', borderRadius: '6px', padding: '5px 6px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }} />
           </div>
-          <span style={{ color: '#444', fontSize: '11px' }}>(négatif = réduction)</span>
+          <span style={{ color: '#7878A8', fontSize: '11px' }}>(négatif = réduction)</span>
         </div>
 
         {/* 3 — Tableau : exercices × semaines */}
         <div style={{ background: '#0B0B14', borderRadius: '10px', overflow: 'hidden', marginBottom: '20px' }}>
           {/* Header */}
           <div style={{ display: 'grid', gridTemplateColumns: `1fr ${Array(nbSemaines).fill('80px').join(' ')}`, background: '#212135', padding: '8px 12px', gap: '8px' }}>
-            <span style={{ color: '#555', fontSize: '11px', textTransform: 'uppercase' }}>Exercice</span>
+            <span style={{ color: '#9898B8', fontSize: '11px', textTransform: 'uppercase' }}>Exercice</span>
             {semaines.map((s, i) => (
               <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
                 <span style={{ color: '#C9A84C', fontSize: '11px', fontWeight: '700' }}>S+{i + 1}</span>
@@ -141,7 +141,7 @@ export function DuplicationModal({ seance, onClose, onDuplique }: {
                   <input type="number" min={0} max={50} value={s.pct}
                     onChange={e => setSemaines(prev => prev.map((x, j) => j === i ? { ...x, pct: Number(e.target.value) } : x))}
                     style={{ width: '40px', background: '#18182A', border: '1px solid #C9A84C50', borderRadius: '4px', padding: '3px 4px', color: '#C9A84C', fontSize: '12px', fontWeight: '700', outline: 'none', textAlign: 'center' }} />
-                  <span style={{ color: '#555', fontSize: '10px' }}>%</span>
+                  <span style={{ color: '#9898B8', fontSize: '10px' }}>%</span>
                 </div>
               </div>
             ))}
@@ -168,7 +168,7 @@ export function DuplicationModal({ seance, onClose, onDuplique }: {
                       <button onClick={() => setSemaines(prev => prev.map((x, j) => {
                         if (j !== semIdx) return x
                         const r = { ...x.remplacements }; delete r[exoIdx]; return { ...x, remplacements: r }
-                      }))} style={{ background: 'none', border: 'none', color: '#555', fontSize: '10px', cursor: 'pointer' }}>annuler</button>
+                      }))} style={{ background: 'none', border: 'none', color: '#9898B8', fontSize: '10px', cursor: 'pointer' }}>annuler</button>
                     )}
                   </div>
                 )

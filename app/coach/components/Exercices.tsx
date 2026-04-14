@@ -256,7 +256,7 @@ export function Exercices() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: '800' }}>
-          Exercices <span style={{ color: '#555', fontSize: '16px', fontWeight: '400' }}>({affichés.length})</span>
+          Exercices <span style={{ color: '#9898B8', fontSize: '16px', fontWeight: '400' }}>({affichés.length})</span>
         </h1>
         <button onClick={openAdd} style={{
           background: '#1A6FFF', color: '#FFF', padding: '12px 20px',
@@ -299,7 +299,7 @@ export function Exercices() {
       </div>
 
       {affichés.length === 0 ? (
-        <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '24px', color: '#555', fontSize: '14px' }}>
+        <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '24px', color: '#9898B8', fontSize: '14px' }}>
           Aucun exercice.
         </div>
       ) : (
@@ -323,7 +323,7 @@ export function Exercices() {
                   )}
                 </div>
                 {ex.description && (
-                  <p style={{ color: '#666', fontSize: '12px', lineHeight: '1.5',
+                  <p style={{ color: '#A8A8C4', fontSize: '12px', lineHeight: '1.5',
                     display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
                   }}>{ex.description}</p>
                 )}

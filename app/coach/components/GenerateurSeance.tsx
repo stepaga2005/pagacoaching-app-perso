@@ -20,7 +20,7 @@ function ChipGroup<T extends string>({
 }) {
   return (
     <div style={{ marginBottom: '12px' }}>
-      <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#555', marginBottom: '8px' }}>{label}</div>
+      <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#9898B8', marginBottom: '8px' }}>{label}</div>
       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
         {options.map(o => {
           const active = value === o.v
@@ -52,7 +52,7 @@ function SelectField({ label, value, onChange, options }: {
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-      <label style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#555' }}>{label}</label>
+      <label style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#9898B8' }}>{label}</label>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -81,10 +81,10 @@ function PhaseBlock({ phase, index, defaultOpen }: { phase: PhaseSeance; index: 
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: '#E0E0E0' }}>{phase.nom}</div>
-          <div style={{ fontSize: '11px', color: '#555', marginTop: '1px' }}>{phase.desc}</div>
+          <div style={{ fontSize: '11px', color: '#9898B8', marginTop: '1px' }}>{phase.desc}</div>
         </div>
-        <div style={{ fontSize: '11px', color: '#444', marginRight: '6px', whiteSpace: 'nowrap' }}>{phase.duree} · RPE {phase.rpe}</div>
-        <span style={{ color: '#444', fontSize: '14px', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
+        <div style={{ fontSize: '11px', color: '#7878A8', marginRight: '6px', whiteSpace: 'nowrap' }}>{phase.duree} · RPE {phase.rpe}</div>
+        <span style={{ color: '#7878A8', fontSize: '14px', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
       </div>
       {open && (
         <div style={{ padding: '4px 16px 12px 50px' }}>
@@ -93,7 +93,7 @@ function PhaseBlock({ phase, index, defaultOpen }: { phase: PhaseSeance; index: 
               <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#C9A84C', marginTop: '8px', flexShrink: 0 }} />
               <div>
                 <div style={{ fontSize: '13px', fontWeight: '600', color: '#E0E0E0' }}>{ex.n}</div>
-                <div style={{ fontSize: '11px', color: '#555', marginTop: '2px', lineHeight: '1.4' }}>{ex.d}</div>
+                <div style={{ fontSize: '11px', color: '#9898B8', marginTop: '2px', lineHeight: '1.4' }}>{ex.d}</div>
                 {ex.c && <div style={{ fontSize: '11px', color: '#C9A84C', marginTop: '3px', fontStyle: 'italic' }}>"{ex.c}"</div>}
               </div>
             </div>
@@ -148,7 +148,7 @@ export function GenerateurSeance() {
     <div className="page-section">
       <div style={{ marginBottom: '28px' }}>
         <h1 style={{ fontSize: '26px', fontWeight: '900', letterSpacing: '-0.5px', marginBottom: '4px' }}>Générateur de séance</h1>
-        <p style={{ color: '#444', fontSize: '13px' }}>Compose une séance personnalisée depuis ta bibliothèque d'exercices</p>
+        <p style={{ color: '#7878A8', fontSize: '13px' }}>Compose une séance personnalisée depuis ta bibliothèque d'exercices</p>
       </div>
 
       {/* ── Profil joueur ── */}
@@ -242,7 +242,7 @@ export function GenerateurSeance() {
           colors={douleurColors}
         />
         <div>
-          <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#555', marginBottom: '6px' }}>Demande spécifique (optionnel)</div>
+          <div style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#9898B8', marginBottom: '6px' }}>Demande spécifique (optionnel)</div>
           <textarea
             value={demande}
             onChange={e => setDemande(e.target.value)}
