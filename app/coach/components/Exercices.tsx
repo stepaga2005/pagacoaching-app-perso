@@ -261,7 +261,12 @@ export function Exercices() {
   // === Vue liste ===
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 10,
+        background: 'linear-gradient(to bottom, #0A0A14 85%, transparent)',
+        paddingBottom: '12px', marginBottom: '12px',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
         <h1 style={{ fontSize: '24px', fontWeight: '800' }}>
           Exercices <span style={{ color: '#9898B8', fontSize: '16px', fontWeight: '400' }}>({affichés.length})</span>
         </h1>
