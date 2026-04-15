@@ -11,6 +11,7 @@ export function MultiCheck({ label, options, selected, onChange }: {
   const [open, setOpen] = useState(false)
   const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
+  const dropRef = useRef<HTMLDivElement>(null)
 
   function toggle(val: string) {
     if (selected.includes(val)) {
@@ -32,7 +33,11 @@ export function MultiCheck({ label, options, selected, onChange }: {
   useEffect(() => {
     if (!open) return
     function onDown(e: MouseEvent) {
-      if (btnRef.current && !btnRef.current.contains(e.target as Node)) {
+      const t = e.target as Node
+      if (
+        btnRef.current && !btnRef.current.contains(t) &&
+        dropRef.current && !dropRef.current.contains(t)
+      ) {
         setOpen(false)
       }
     }
@@ -74,7 +79,7 @@ export function MultiCheck({ label, options, selected, onChange }: {
       </button>
 
       {open && rect && (
-        <div style={{
+        <div ref={dropRef} style={{
           position: 'fixed',
           top: rect.top,
           left: rect.left,
@@ -93,7 +98,6 @@ export function MultiCheck({ label, options, selected, onChange }: {
               padding: '10px 14px', cursor: 'pointer',
               background: selected.includes(opt) ? '#1A6FFF15' : 'transparent',
             }}
-              onMouseDown={e => e.preventDefault()}
             >
               <input type="checkbox" checked={selected.includes(opt)} onChange={() => toggle(opt)}
                 style={{ accentColor: '#1A6FFF', width: '14px', height: '14px', flexShrink: 0 }} />
