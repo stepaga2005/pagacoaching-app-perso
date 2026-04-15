@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Exercice, Famille } from '../lib/types'
 import { getYoutubeId, getVimeoId } from '../lib/utils'
@@ -16,6 +16,7 @@ export function Exercices() {
   const [search, setSearch] = useState('')
   const [apercu, setApercu] = useState<Exercice | null>(null)
   const [saving, setSaving] = useState(false)
+  const scrollRef = useRef(0)
   const [form, setForm] = useState({
     nom: '', famille_id: '', description: '', consignes_execution: '',
     video_url: '', materiel: [] as string[], zone_musculaire: [] as string[], type_effort: '', position: '',
@@ -33,6 +34,7 @@ export function Exercices() {
   }
 
   function openAdd() {
+    scrollRef.current = window.scrollY
     setEditEx(null)
     setForm({ nom: '', famille_id: '', description: '', consignes_execution: '', video_url: '', materiel: [], zone_musculaire: [], type_effort: '', position: '' })
     setShowForm(true)
@@ -49,6 +51,11 @@ export function Exercices() {
     setShowForm(true)
   }
 
+  function closeForm() {
+    setShowForm(false)
+    requestAnimationFrame(() => window.scrollTo({ top: scrollRef.current, behavior: 'instant' }))
+  }
+
   async function handleSave() {
     if (!form.nom || !form.famille_id) { toast('Nom et famille obligatoires', 'info'); return }
     setSaving(true)
@@ -61,7 +68,7 @@ export function Exercices() {
       if (error) { toast('Erreur création : ' + error.message, 'error'); setSaving(false); return }
     }
     await loadData()
-    setShowForm(false)
+    closeForm()
     setSaving(false)
   }
 
@@ -97,7 +104,7 @@ export function Exercices() {
   if (apercu) {
     return (
       <div>
-        <button onClick={() => setApercu(null)} style={{
+        <button onClick={() => { setApercu(null); requestAnimationFrame(() => window.scrollTo({ top: scrollRef.current, behavior: 'instant' })) }} style={{
           display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none',
           color: '#1A6FFF', fontSize: '14px', fontWeight: '600', cursor: 'pointer', padding: '0', marginBottom: '20px',
         }}>← Retour aux exercices</button>
@@ -190,7 +197,7 @@ export function Exercices() {
   if (showForm) {
     return (
       <div>
-        <button onClick={() => setShowForm(false)} style={{
+        <button onClick={closeForm} style={{
           display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none',
           color: '#1A6FFF', fontSize: '14px', fontWeight: '600', cursor: 'pointer', padding: '0', marginBottom: '20px',
         }}>← Retour aux exercices</button>
@@ -236,7 +243,7 @@ export function Exercices() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-            <button onClick={() => setShowForm(false)} style={{
+            <button onClick={closeForm} style={{
               flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #2C2C44',
               background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px',
             }}>Annuler</button>
@@ -311,7 +318,7 @@ export function Exercices() {
                 background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px',
                 padding: '16px', cursor: 'pointer', transition: 'border-color 0.15s',
               }}
-                onClick={() => setApercu(ex)}
+                onClick={() => { scrollRef.current = window.scrollY; setApercu(ex) }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                   <div style={{ fontWeight: '700', fontSize: '14px', flex: 1 }}>{ex.nom}</div>
