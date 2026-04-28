@@ -6,7 +6,7 @@ import { computeAcwr, ACWR_ZONES } from '../lib/acwr'
 
 type DJoueur = { id: string; nom: string; prenom: string; poste?: string }
 type DReal  = { id: string; joueur_id: string; date_realisation: string; completee: boolean; fatigue?: number | null; rpe?: number | null; seance_id?: string | null; seances?: { nom: string; type: string } | null }
-type DReal35 = { joueur_id: string; date_realisation: string; completee: boolean; rpe?: number | null }
+type DReal35 = { joueur_id: string; date_realisation: string; completee: boolean; rpe?: number | null; seance_id?: string | null }
 type Alerte  = { joueur: DJoueur; type: 'fatigue' | 'manques' | 'acwr'; val: number; acwrZone?: 'high' | 'danger' }
 
 export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavTo: (tab: string) => void }) {
@@ -25,6 +25,14 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
     const d = new Date(); d.setDate(d.getDate() - 34)
     return d.toISOString().split('T')[0]
   })()
+  const lundiS1 = (() => {
+    const d = new Date(lundi + 'T12:00:00'); d.setDate(d.getDate() - 7)
+    return d.toISOString().split('T')[0]
+  })()
+  const dimancheS1 = (() => {
+    const d = new Date(dimanche + 'T12:00:00'); d.setDate(d.getDate() - 7)
+    return d.toISOString().split('T')[0]
+  })()
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(lundi + 'T12:00:00'); d.setDate(d.getDate() + i)
     return d.toISOString().split('T')[0]
@@ -38,7 +46,11 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
   const [unread, setUnread]        = useState(0)
   const [loading, setLoading]      = useState(true)
 
-  useEffect(() => { loadData() }, [])
+  useEffect(() => {
+    loadData()
+    const interval = setInterval(loadData, 30_000)
+    return () => clearInterval(interval)
+  }, [])
 
   async function loadData() {
     const [
@@ -50,7 +62,7 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
       supabase.from('joueurs').select('id, nom, prenom, poste').eq('actif', true).order('nom'),
       supabase.from('realisations').select('id, joueur_id, completee, fatigue, rpe, seance_id, seances(nom, type)').eq('date_realisation', today),
       supabase.from('realisations').select('id, joueur_id, date_realisation, completee, fatigue, rpe, seance_id').gte('date_realisation', lundi).lte('date_realisation', dimanche),
-      supabase.from('realisations').select('joueur_id, date_realisation, completee, rpe').gte('date_realisation', debut35).lte('date_realisation', today),
+      supabase.from('realisations').select('joueur_id, date_realisation, completee, rpe, seance_id').gte('date_realisation', debut35).lte('date_realisation', today),
     ])
     if (jData)     setJoueurs(jData)
     if (todayData) setRealsToday(todayData as unknown as DReal[])
@@ -227,12 +239,66 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
                       <span style={{ fontSize: '12px', fontWeight: '900', color: acwrColor }}>{a.val.toFixed(2)}</span>
                     </div>
                   )}
+                  <button
+                    onClick={() => onNavTo('messages')}
+                    title="Envoyer un message"
+                    style={{
+                      flexShrink: 0, background: '#1A1A2A', border: '1px solid #2A2A3A',
+                      color: '#9898B8', borderRadius: '8px', padding: '6px 10px',
+                      fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: '4px',
+                    }}
+                  >
+                    💬 Message
+                  </button>
                 </div>
               )
             })}
           </div>
         )}
       </div>
+
+      {/* ── Joueurs sans séance cette semaine ── */}
+      {(() => {
+        const sansPlan = joueurs.filter(j => !(byPlayer[j.id] || []).some(r => r.seance_id))
+        if (sansPlan.length === 0) return null
+        return (
+          <div style={{ marginBottom: '28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+              <div style={{ width: '3px', height: '18px', background: '#F39C12', borderRadius: '2px' }} />
+              <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#F39C12', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                Sans séance cette semaine
+              </h2>
+              <span style={{ fontSize: '12px', fontWeight: '800', background: '#F39C1220', color: '#F39C12', borderRadius: '20px', padding: '2px 10px' }}>
+                {sansPlan.length}
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {sansPlan.map(j => (
+                <div key={j.id} style={{ background: '#141420', border: '1px solid #F39C1220', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#F39C1215', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ fontSize: '12px', fontWeight: '900', color: '#F39C12' }}>{j.prenom[0]}{j.nom[0]}</span>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: '700', fontSize: '14px', color: '#F0F0F0' }}>{j.prenom} {j.nom}</div>
+                    {j.poste && <div style={{ fontSize: '11px', color: '#7878A8', marginTop: '1px' }}>{j.poste}</div>}
+                  </div>
+                  <button
+                    onClick={() => onNavTo('programmes')}
+                    style={{
+                      background: '#F39C1215', border: '1px solid #F39C1240',
+                      color: '#F39C12', borderRadius: '8px', padding: '6px 12px',
+                      fontSize: '11px', fontWeight: '700', cursor: 'pointer',
+                    }}
+                  >
+                    + Attribuer
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* ── Charge hebdomadaire ── */}
       {(() => {
@@ -245,6 +311,15 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
         const totalWeek = loadByDay.reduce((s, d) => s + d.count, 0)
         const totalPlanned = loadByDay.reduce((s, d) => s + d.planned, 0)
         const pct = totalPlanned > 0 ? Math.round((totalWeek / totalPlanned) * 100) : 0
+
+        const lastWeekReals = reals35.filter(r => r.seance_id && r.date_realisation >= lundiS1 && r.date_realisation <= dimancheS1)
+        const lastWeekDone = lastWeekReals.filter(r => r.completee).length
+        const lastWeekPlanned = lastWeekReals.length
+        const lastWeekPct = lastWeekPlanned > 0 ? Math.round((lastWeekDone / lastWeekPlanned) * 100) : null
+        const delta = lastWeekPct !== null ? pct - lastWeekPct : null
+        const trendIcon = delta === null ? null : delta > 0 ? '↑' : delta < 0 ? '↓' : '→'
+        const trendColor = delta === null ? '#7878A8' : delta > 0 ? '#2ECC71' : delta < 0 ? '#FF4757' : '#7878A8'
+
         return (
           <div style={{ marginBottom: '28px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
@@ -253,6 +328,11 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
                 <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#1A6FFF', letterSpacing: '1px', textTransform: 'uppercase' }}>Charge semaine</h2>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {trendIcon && (
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: trendColor }}>
+                    {trendIcon} {delta !== 0 ? `${Math.abs(delta!)}%` : '='} vs S-1
+                  </span>
+                )}
                 <span style={{ fontSize: '11px', color: '#7878A8', fontWeight: '700' }}>{totalWeek}/{totalPlanned} séances</span>
                 <span style={{
                   fontSize: '12px', fontWeight: '800', padding: '3px 10px', borderRadius: '20px',
