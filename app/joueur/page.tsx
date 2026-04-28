@@ -166,18 +166,18 @@ function RatingChips({ label, value, couleur, onChange }: {
   return (
     <div style={{ marginBottom: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '10px' }}>
-        <span style={{ color: '#999', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>{label}</span>
-        <span style={{ color: value !== null ? couleur : '#333', fontWeight: '900', fontSize: '22px', lineHeight: 1 }}>
-          {value !== null ? value : '–'}<span style={{ color: '#6A6A8A', fontSize: '12px', fontWeight: '400' }}>/10</span>
+        <span style={{ color: '#C0C0C0', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.8px' }}>{label}</span>
+        <span style={{ color: value !== null ? couleur : '#777', fontWeight: '900', fontSize: '22px', lineHeight: 1 }}>
+          {value !== null ? value : '–'}<span style={{ color: '#9898B8', fontSize: '12px', fontWeight: '400' }}>/10</span>
         </span>
       </div>
       <div style={{ display: 'flex', gap: '4px', height: '40px' }}>
         {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
           <button key={n} onClick={() => onChange(value === n ? null : n)} style={{
-            flex: 1, height: '100%', borderRadius: '8px', border: 'none', cursor: 'pointer',
+            flex: 1, height: '100%', borderRadius: '8px', border: '1px solid #2A2A3A', cursor: 'pointer',
             fontSize: '12px', fontWeight: '800',
-            background: value !== null && n <= value ? (n === value ? couleur : couleur + '55') : '#161616',
-            color: value !== null && n <= value ? '#FFF' : '#333',
+            background: value !== null && n <= value ? (n === value ? couleur : couleur + '55') : '#1A1A2A',
+            color: value !== null && n <= value ? '#FFF' : '#8888AA',
             transition: 'all 0.1s',
           }}>{n}</button>
         ))}
@@ -699,14 +699,14 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
             </button>
           )}
 
-          <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#6868A0', marginBottom: '24px' }}>Ton état de forme</div>
+          <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#9898B8', marginBottom: '24px' }}>Ton état de forme</div>
           <RatingChips label="Fatigue" value={form.fatigue} couleur="#FF4757" onChange={v => setForm(f => ({ ...f, fatigue: v }))} />
           <RatingChips label="Courbatures" value={form.courbatures} couleur="#FF6B35" onChange={v => setForm(f => ({ ...f, courbatures: v }))} />
           <RatingChips label="Effort perçu (RPE)" value={form.rpe} couleur="#1A6FFF" onChange={v => setForm(f => ({ ...f, rpe: v }))} />
           <RatingChips label="Qualité du sommeil" value={form.qualite_sommeil} couleur="#2ECC71" onChange={v => setForm(f => ({ ...f, qualite_sommeil: v }))} />
 
           <div style={{ marginBottom: '32px' }}>
-            <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#6868A0', marginBottom: '12px' }}>Sensations / Notes</div>
+            <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#9898B8', marginBottom: '12px' }}>Sensations / Notes</div>
             <textarea value={form.notes_joueur} onChange={e => setForm(f => ({ ...f, notes_joueur: e.target.value }))}
               placeholder="Comment tu t'es senti pendant la séance..." rows={4}
               style={{ width: '100%', background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '14px', padding: '16px', color: '#CCC', fontSize: '14px', outline: 'none', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', lineHeight: '1.6' }} />
