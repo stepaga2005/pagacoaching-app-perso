@@ -199,7 +199,7 @@ export function WellnessGraphiques({ realisations }: { realisations: Realisation
       <div style={{ background: '#18182A', border: `1px solid ${acwrZone.color}30`, borderRadius: '16px', padding: '18px 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <div style={{ fontSize: '10px', fontWeight: '800', color: '#6A6A8A', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>
+            <div style={{ fontSize: '10px', fontWeight: '800', color: '#9898B8', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>
               ACWR — Ratio Charge Aiguë / Chronique
             </div>
             <div style={{ fontSize: '11px', color: '#7878A8' }}>
@@ -255,7 +255,7 @@ export function WellnessGraphiques({ realisations }: { realisations: Realisation
         {/* Historique ACWR hebdo */}
         {acwrHistory.filter(w => w.ratio != null).length >= 2 && (
           <div style={{ marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #1E1E30' }}>
-            <div style={{ fontSize: '10px', color: '#6A6A8A', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Évolution hebdomadaire</div>
+            <div style={{ fontSize: '10px', color: '#9898B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>Évolution hebdomadaire</div>
             <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end', height: '60px' }}>
               {acwrHistory.map((w, i) => {
                 const z = ACWR_ZONES[w.zone]
@@ -264,7 +264,7 @@ export function WellnessGraphiques({ realisations }: { realisations: Realisation
                   <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '60px', gap: '3px' }}>
                     {w.ratio != null && <span style={{ fontSize: '10px', color: z.color, fontWeight: '800' }}>{w.ratio}</span>}
                     <div style={{ width: '100%', height: `${barH}px`, background: z.color, borderRadius: '3px 3px 1px 1px', opacity: w.ratio != null ? 1 : 0.15 }} />
-                    <span style={{ fontSize: '10px', color: '#6868A0', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: '10px', color: '#9898B8' }}>
                       {new Date(w.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                     </span>
                   </div>
@@ -272,7 +272,7 @@ export function WellnessGraphiques({ realisations }: { realisations: Realisation
               })}
             </div>
             {/* Ligne de référence 1.3 */}
-            <div style={{ fontSize: '11px', color: '#6A6A8A', marginTop: '4px', textAlign: 'right' }}>
+            <div style={{ fontSize: '11px', color: '#9898B8', marginTop: '4px', textAlign: 'right' }}>
               Zone optimale : 0.8 – 1.3
             </div>
           </div>
@@ -286,7 +286,7 @@ export function WellnessGraphiques({ realisations }: { realisations: Realisation
             <button key={n} onClick={() => { setNbJours(n); setFin(todayStr) }} style={{
               padding: '5px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: '700',
               background: nbJours === n && fin === todayStr ? '#1A6FFF' : '#212135',
-              color: nbJours === n && fin === todayStr ? '#FFF' : '#555',
+              color: nbJours === n && fin === todayStr ? '#FFF' : '#888',
             }}>{n === 14 ? '2 sem.' : n === 28 ? '4 sem.' : '8 sem.'}</button>
           ))}
         </div>
@@ -325,7 +325,7 @@ export function WellnessGraphiques({ realisations }: { realisations: Realisation
                 const barH = s.chargeTotal > 0 ? Math.max(8, (s.chargeTotal / maxCharge) * 84) : 0
                 const color = chargeColor(s.avgRpe, s.chargeTotal)
                 return (
-                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', justifyContent: 'flex-end', height: '100px' }}>
+                  <div key={i} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', justifyContent: 'flex-end', height: '100px' }}>
                     {s.nbSessions > 0 && (
                       <span style={{ fontSize: '11px', color: '#9898B8', fontWeight: '700' }}>{s.nbSessions}</span>
                     )}
@@ -337,7 +337,7 @@ export function WellnessGraphiques({ realisations }: { realisations: Realisation
                       minHeight: s.chargeTotal > 0 ? '8px' : '2px',
                       opacity: s.chargeTotal > 0 ? 1 : 0.2,
                     }} />
-                    <span style={{ fontSize: '10px', color: '#6A6A8A', textAlign: 'center', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{s.label}</span>
+                    <span style={{ fontSize: '10px', color: '#9898B8', textAlign: 'center', lineHeight: 1.2, width: '100%', overflow: 'hidden' }}>{s.label}</span>
                   </div>
                 )
               })}
@@ -353,7 +353,7 @@ export function WellnessGraphiques({ realisations }: { realisations: Realisation
 
           {/* ─── Résumé de la période ──────────────────────────────────────── */}
           <div style={{ background: '#18182A', border: '1px solid #222238', borderRadius: '16px', padding: '18px 20px' }}>
-            <div style={{ fontSize: '10px', fontWeight: '800', color: '#6A6A8A', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '14px' }}>
+            <div style={{ fontSize: '10px', fontWeight: '800', color: '#9898B8', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '14px' }}>
               Wellness moyen · {moyennes[0].nb} entrée{moyennes[0].nb > 1 ? 's' : ''} renseignée{moyennes[0].nb > 1 ? 's' : ''}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
@@ -366,7 +366,7 @@ export function WellnessGraphiques({ realisations }: { realisations: Realisation
                         <span style={{ fontSize: '26px', fontWeight: '900', color: m.color, lineHeight: 1 }}>{m.moy}</span>
                         {trendIcon(m.trend, m.key)}
                       </div>
-                      <span style={{ fontSize: '11px', color: '#6A6A8A', marginTop: '2px' }}>/10</span>
+                      <span style={{ fontSize: '11px', color: '#9898B8', marginTop: '2px' }}>/10</span>
                       <div style={{ width: '100%', height: '3px', background: '#212135', borderRadius: '2px', marginTop: '8px', overflow: 'hidden' }}>
                         <div style={{ width: `${m.moy * 10}%`, height: '100%', background: m.color, borderRadius: '2px' }} />
                       </div>
@@ -391,13 +391,13 @@ export function WellnessGraphiques({ realisations }: { realisations: Realisation
               </div>
               <div style={{ display: 'flex', gap: '0' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingRight: '8px', height: '120px', flexShrink: 0 }}>
-                  {[10, 8, 6, 4, 2].map(v => <span key={v} style={{ fontSize: '11px', color: '#2C2C44', lineHeight: 1 }}>{v}</span>)}
+                  {[10, 8, 6, 4, 2].map(v => <span key={v} style={{ fontSize: '11px', color: '#6A6A8A', lineHeight: 1 }}>{v}</span>)}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <Chart metricKey={m.key} color={m.color} />
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
                     {xLabels.map(i => (
-                      <span key={i} style={{ fontSize: '11px', color: '#6A6A8A' }}>
+                      <span key={i} style={{ fontSize: '11px', color: '#9898B8' }}>
                         {new Date(days[i] + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                       </span>
                     ))}
@@ -410,21 +410,21 @@ export function WellnessGraphiques({ realisations }: { realisations: Realisation
           {/* ─── Historique des séances complétées ─────────────────────────── */}
           {seancesPassees.length > 0 && (
             <div style={{ background: '#18182A', border: '1px solid #222238', borderRadius: '16px', padding: '18px 20px' }}>
-              <div style={{ fontSize: '10px', fontWeight: '800', color: '#6A6A8A', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '14px' }}>
+              <div style={{ fontSize: '10px', fontWeight: '800', color: '#9898B8', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '14px' }}>
                 Séances complétées sur la période ({seancesPassees.length})
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
                 {/* Header */}
                 <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 48px 48px 48px 48px', gap: '8px', padding: '6px 10px', borderBottom: '1px solid #1E1E30' }}>
                   {['Date', 'Séance', 'RPE', 'Fat.', 'Cour.', 'Som.'].map(h => (
-                    <span key={h} style={{ fontSize: '11px', color: '#6A6A8A', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</span>
+                    <span key={h} style={{ fontSize: '11px', color: '#9898B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</span>
                   ))}
                 </div>
                 {seancesPassees.map((r, i) => {
                   const d = new Date(r.date_realisation + 'T12:00:00')
                   const dateStr = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })
                   function cell(val: number | null | undefined, inverted = false) {
-                    if (val == null) return <span style={{ color: '#6A6A8A', fontSize: '12px' }}>—</span>
+                    if (val == null) return <span style={{ color: '#9898B8', fontSize: '12px' }}>—</span>
                     const n = inverted ? 11 - val : val
                     const color = n <= 3 ? '#2ECC71' : n <= 5 ? '#C9A84C' : n <= 7 ? '#FF6B35' : '#FF4757'
                     return <span style={{ color, fontSize: '12px', fontWeight: '700' }}>{val}</span>

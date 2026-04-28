@@ -133,7 +133,7 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
           { label: 'Joueurs actifs', value: joueurs.length, color: '#1A6FFF', icon: '👥' },
           { label: 'Séances aujourd\'hui', value: seancesJour.length, color: '#1A6FFF', icon: '📅' },
           { label: 'Réalisées', value: nbTerminees, color: '#2ECC71', icon: '✓', sub: seancesJour.length > 0 ? `/ ${seancesJour.length}` : undefined },
-          { label: 'Messages', value: unread, color: unread > 0 ? '#FF4757' : '#333', icon: '💬', onClick: () => onNavTo('messages') },
+          { label: 'Messages', value: unread, color: unread > 0 ? '#FF4757' : '#777', icon: '💬', onClick: () => onNavTo('messages') },
         ].map(s => (
           <div key={s.label} onClick={s.onClick} style={{
             background: '#141420', border: `1px solid ${s.value > 0 && s.label === 'Messages' ? '#FF475730' : '#212135'}`,
@@ -355,7 +355,7 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
                         {d.planned > 0 && <div style={{ position: 'absolute', bottom: 0, left: '10%', right: '10%', height: `${bgH}px`, borderRadius: '4px 4px 0 0', background: '#212135' }} />}
                         {d.count > 0 && <div style={{ position: 'relative', left: '10%', right: '10%', width: '80%', height: `${fillH}px`, borderRadius: '4px 4px 0 0', background: col, transition: 'height 0.4s cubic-bezier(0.22,1,0.36,1)' }} />}
                       </div>
-                      <span style={{ fontSize: '10px', fontWeight: '800', color: isToday ? '#1A6FFF' : '#444', textTransform: 'uppercase' }}>{d.letter}</span>
+                      <span style={{ fontSize: '10px', fontWeight: '800', color: isToday ? '#1A6FFF' : '#888', textTransform: 'uppercase' }}>{d.letter}</span>
                     </div>
                   )
                 })}
@@ -448,8 +448,8 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
               <div />
               {weekDays.map((ds, i) => (
                 <div key={ds} style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '11px', fontWeight: '800', color: ds === today ? '#1A6FFF' : '#333', textTransform: 'uppercase' }}>{dayLetters[i]}</div>
-                  <div style={{ fontSize: '12px', fontWeight: '700', color: ds === today ? '#1A6FFF' : '#444' }}>{new Date(ds + 'T12:00:00').getDate()}</div>
+                  <div style={{ fontSize: '11px', fontWeight: '800', color: ds === today ? '#1A6FFF' : '#888', textTransform: 'uppercase' }}>{dayLetters[i]}</div>
+                  <div style={{ fontSize: '12px', fontWeight: '700', color: ds === today ? '#1A6FFF' : '#888' }}>{new Date(ds + 'T12:00:00').getDate()}</div>
                 </div>
               ))}
             </div>

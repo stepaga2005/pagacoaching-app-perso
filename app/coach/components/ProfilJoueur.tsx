@@ -284,7 +284,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                     }}>
                       {/* Header jour */}
                       <div style={{ padding: '7px 7px 5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #222238' }}>
-                        <div style={{ fontSize: '18px', fontWeight: isToday ? '900' : '600', color: isToday ? '#007AFF' : isPast ? '#444' : '#CCC', lineHeight: 1 }}>{dateNum}</div>
+                        <div style={{ fontSize: '18px', fontWeight: isToday ? '900' : '600', color: isToday ? '#007AFF' : isPast ? '#888' : '#CCC', lineHeight: 1 }}>{dateNum}</div>
                         <button onClick={() => setActionMenuDate(ds)}
                           style={{ width: '26px', height: '26px', borderRadius: '6px', border: '1px solid #2C2C44', background: 'transparent', color: '#9898B8', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, padding: 0 }}>+</button>
                       </div>
@@ -497,7 +497,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                                   <div style={{ marginBottom: '10px' }}>
                                     <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr 1fr', gap: '2px', padding: '4px 8px', marginBottom: '2px' }}>
                                       {['N°', (firstSet?.reps ?? ex.repetitions) ? 'Reps' : (firstSet?.duree ?? ex.duree_secondes) ? 'Durée' : 'Reps', 'Charge', 'Récup'].map(h => (
-                                        <span key={h} style={{ fontSize: '11px', fontWeight: '800', color: '#252525', textTransform: 'uppercase' as const, letterSpacing: '0.5px' }}>{h}</span>
+                                        <span key={h} style={{ fontSize: '11px', fontWeight: '800', color: '#8888AA', textTransform: 'uppercase' as const, letterSpacing: '0.5px' }}>{h}</span>
                                       ))}
                                     </div>
                                     {Array.from({ length: nbSeries }, (_, si) => {
@@ -512,8 +512,8 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                                         <div key={si} style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr 1fr', gap: '2px', padding: '7px 8px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '6px' }}>
                                           <span style={{ fontSize: '12px', fontWeight: '700', color: couleur }}>{si + 1}</span>
                                           <span style={{ fontSize: '13px', fontWeight: '800', color: '#CCC' }}>{rowMetr}</span>
-                                          <span style={{ fontSize: '13px', fontWeight: '700', color: rowCharge ? '#777' : '#252525' }}>{rowCharge ? `${rowCharge}kg` : '—'}</span>
-                                          <span style={{ fontSize: '12px', fontWeight: '700', color: rowRecup !== '—' ? '#2ECC7170' : '#252525' }}>{rowRecup}</span>
+                                          <span style={{ fontSize: '13px', fontWeight: '700', color: rowCharge ? '#C0C0D8' : '#4A4A6A' }}>{rowCharge ? `${rowCharge}kg` : '—'}</span>
+                                          <span style={{ fontSize: '12px', fontWeight: '700', color: rowRecup !== '—' ? '#2ECC71' : '#4A4A6A' }}>{rowRecup}</span>
                                         </div>
                                       )
                                     })}

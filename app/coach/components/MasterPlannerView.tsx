@@ -421,7 +421,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
               const letters = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
               return (
                 <div key={ds} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: '700', color: isToday ? '#1A6FFF' : '#333' }}>{letters[i]}</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: isToday ? '#1A6FFF' : '#888' }}>{letters[i]}</span>
                   <div style={{
                     width: '100%', aspectRatio: '1', borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -429,7 +429,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                     border: `2px solid ${estSel ? '#2ECC71' : isToday ? '#1A6FFF' : allDone ? '#2ECC7160' : someMissed ? '#FF475760' : hasSessions ? '#1A6FFF50' : '#212135'}`,
                     cursor: hasSessions ? 'pointer' : 'default',
                   }}>
-                    <span style={{ fontSize: '12px', fontWeight: '800', color: estSel || isToday || allDone ? '#FFF' : hasSessions ? (isPast ? '#FF4757' : '#1A6FFF') : '#2C2C44' }}>
+                    <span style={{ fontSize: '12px', fontWeight: '800', color: estSel || isToday || allDone ? '#FFF' : hasSessions ? (isPast ? '#FF4757' : '#1A6FFF') : '#666' }}>
                       {allDone && !estSel ? '✓' : new Date(ds + 'T12:00:00').getDate()}
                     </span>
                   </div>
@@ -451,7 +451,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                 <div key={ds} style={{ marginBottom: '20px' }}>
                   {/* En-tête de jour */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '1px', color: isToday ? '#1A6FFF' : estSel ? '#2ECC71' : '#333' }}>{dateLabel}</span>
+                    <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '1px', color: isToday ? '#1A6FFF' : estSel ? '#2ECC71' : '#AAAACC' }}>{dateLabel}</span>
                     {mpMovingSession ? (
                       <button onClick={() => mpMoveSession(ds)}
                         style={{ background: ds === mpMovingSession.fromDate ? '#FF475710' : '#1A6FFF15', border: `1px solid ${ds === mpMovingSession.fromDate ? '#FF475740' : '#1A6FFF60'}`, borderRadius: '8px', padding: '6px 12px', color: ds === mpMovingSession.fromDate ? '#FF4757' : '#1A6FFF', cursor: 'pointer', fontSize: '12px', fontWeight: '700' }}>
