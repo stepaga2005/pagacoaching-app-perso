@@ -99,7 +99,7 @@ function RecupTimer({ initialSec, onClose }: { initialSec: number; onClose: () =
         <div style={{ width: '36px', height: '4px', background: '#2A2A2A', borderRadius: '2px', margin: '0 auto 20px' }} />
 
         <div style={{ textAlign: 'center', marginBottom: '4px' }}>
-          <span style={{ fontSize: '10px', fontWeight: '900', letterSpacing: '2.5px', textTransform: 'uppercase', color: '#6A6A8A' }}>Récupération</span>
+          <span style={{ fontSize: '10px', fontWeight: '900', letterSpacing: '2.5px', textTransform: 'uppercase', color: '#9898B8' }}>Récupération</span>
         </div>
 
         {/* Cercle SVG */}
@@ -123,7 +123,7 @@ function RecupTimer({ initialSec, onClose }: { initialSec: number; onClose: () =
                   <div style={{ fontSize: mins > 0 ? '48px' : '62px', fontWeight: '900', color: '#FFF', letterSpacing: '-3px', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
                     {mins > 0 ? `${mins}:${String(secs).padStart(2, '0')}` : String(secs)}
                   </div>
-                  {mins === 0 && <div style={{ fontSize: '11px', color: '#6A6A8A', fontWeight: '700', marginTop: '2px' }}>sec</div>}
+                  {mins === 0 && <div style={{ fontSize: '11px', color: '#9898B8', fontWeight: '700', marginTop: '2px' }}>sec</div>}
                 </>
               )}
             </div>
@@ -148,7 +148,7 @@ function RecupTimer({ initialSec, onClose }: { initialSec: number; onClose: () =
               padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', fontWeight: '700',
               border: `1px solid ${total === s && !done ? '#1A6FFF' : '#1F1F2A'}`,
               background: total === s && !done ? '#1A6FFF18' : '#13131A',
-              color: total === s && !done ? '#1A6FFF' : '#444',
+              color: total === s && !done ? '#1A6FFF' : '#888',
               transition: 'all 0.15s',
             }}>
               {s >= 60 ? `${s / 60}min` : `${s}s`}
@@ -320,7 +320,7 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
           {/* Liste des exercices */}
           {blocs.length > 0 && (
             <div style={{ marginBottom: '48px' }}>
-              <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#6868A0', marginBottom: '16px' }}>Programme</div>
+              <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#9898B8', marginBottom: '16px' }}>Programme</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {blocs.map((bloc, bi) => {
                   const isSuperset = bloc.length > 1
@@ -670,7 +670,7 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
           {/* Séparateur */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
             <div style={{ flex: 1, height: '1px', background: '#161616' }} />
-            <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '1.5px', color: '#6868A0', textTransform: 'uppercase' }}>Mon bilan</span>
+            <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '1.5px', color: '#9898B8', textTransform: 'uppercase' }}>Mon bilan</span>
             <div style={{ flex: 1, height: '1px', background: '#161616' }} />
           </div>
 
@@ -715,7 +715,7 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
           <button onClick={onSave} disabled={saving || !form.completee} style={{
             width: '100%', padding: isMobile ? '18px' : '20px', borderRadius: '18px', border: 'none',
             background: saving ? '#111' : !form.completee ? '#111' : '#1A6FFF',
-            color: saving || !form.completee ? '#333' : '#FFF',
+            color: saving || !form.completee ? '#555' : '#FFF',
             fontWeight: '900', fontSize: '17px', cursor: saving || !form.completee ? 'not-allowed' : 'pointer',
           }}>
             {saving ? 'Enregistrement...' : form.completee ? 'Enregistrer mon état de forme' : 'Marque d\'abord la séance comme réalisée'}
@@ -816,7 +816,7 @@ function JoueurMessages({ myId, coachId, isMobile }: { myId: string; coachId: st
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: isMobile ? '12px' : '16px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
         {msgs.length === 0 && (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6868A0', fontSize: '13px' }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9898B8', fontSize: '13px' }}>
             Aucun message — le coach peut te contacter ici
           </div>
         )}
@@ -828,7 +828,7 @@ function JoueurMessages({ myId, coachId, isMobile }: { myId: string; coachId: st
           return (
             <div key={m.id}>
               {showDate && (
-                <div style={{ textAlign: 'center', margin: '12px 0 8px', color: '#6A6A8A', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                <div style={{ textAlign: 'center', margin: '12px 0 8px', color: '#AAAACC', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                   {fmtDate(m.created_at)}
                 </div>
               )}
@@ -848,7 +848,7 @@ function JoueurMessages({ myId, coachId, isMobile }: { myId: string; coachId: st
                   {m.contenu && (
                     <div style={{ fontSize: isMobile ? '15px' : '14px', color: '#FFF', lineHeight: 1.5, wordBreak: 'break-word' }}>{m.contenu}</div>
                   )}
-                  <div style={{ fontSize: '10px', color: isMe ? '#FFFFFF70' : '#444', marginTop: m.media_url ? '4px' : '3px', textAlign: isMe ? 'right' : 'left' }}>
+                  <div style={{ fontSize: '10px', color: isMe ? '#FFFFFFAA' : '#888', marginTop: m.media_url ? '4px' : '3px', textAlign: isMe ? 'right' : 'left' }}>
                     {fmtTime(m.created_at)}{isMe && (m.lu ? ' ✓✓' : ' ✓')}
                   </div>
                 </div>
@@ -883,7 +883,7 @@ function JoueurMessages({ myId, coachId, isMobile }: { myId: string; coachId: st
         <button onClick={send} disabled={sending || !text.trim()} style={{
           flexShrink: 0, width: '44px', height: '44px', borderRadius: '14px',
           background: text.trim() ? '#1A6FFF' : '#161616', border: 'none',
-          color: text.trim() ? '#FFF' : '#2A2A2A', cursor: text.trim() ? 'pointer' : 'default',
+          color: text.trim() ? '#FFF' : '#555', cursor: text.trim() ? 'pointer' : 'default',
           fontSize: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s',
         }}>
           ↑
@@ -959,7 +959,7 @@ function HistoriqueJoueur({ realisations, isMobile }: { realisations: Realisatio
   }
 
   function cell(val: number | null | undefined, inverted = false) {
-    if (val == null) return <span style={{ color: '#6A6A8A', fontSize: '12px' }}>—</span>
+    if (val == null) return <span style={{ color: '#9898B8', fontSize: '12px' }}>—</span>
     const n = inverted ? 11 - val : val
     const color = n <= 3 ? '#2ECC71' : n <= 5 ? '#C9A84C' : n <= 7 ? '#FF6B35' : '#FF4757'
     return <span style={{ color, fontSize: '13px', fontWeight: '800' }}>{val}</span>
@@ -976,16 +976,16 @@ function HistoriqueJoueur({ realisations, isMobile }: { realisations: Realisatio
             padding: '6px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer',
             fontSize: '12px', fontWeight: '700',
             background: nbSemaines === n ? '#1A6FFF' : '#111',
-            color: nbSemaines === n ? '#FFF' : '#555',
+            color: nbSemaines === n ? '#FFF' : '#888',
           }}>{n} sem.</button>
         ))}
-        <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#6A6A8A' }}>
+        <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#9898B8' }}>
           {passees.length} séance{passees.length > 1 ? 's' : ''} complétée{passees.length > 1 ? 's' : ''}
         </span>
       </div>
 
       {passees.length === 0 ? (
-        <div style={{ background: '#0F0F0F', border: '1px solid #1E1E1E', borderRadius: '16px', padding: '48px', textAlign: 'center', color: '#6A6A8A', fontSize: '14px' }}>
+        <div style={{ background: '#0F0F0F', border: '1px solid #1E1E1E', borderRadius: '16px', padding: '48px', textAlign: 'center', color: '#9898B8', fontSize: '14px' }}>
           Aucune séance complétée sur cette période.
         </div>
       ) : (
@@ -1006,7 +1006,7 @@ function HistoriqueJoueur({ realisations, isMobile }: { realisations: Realisatio
                       background: chargeColor(s.avgRpe, s.charge), borderRadius: '3px 3px 1px 1px',
                       opacity: s.charge > 0 ? 1 : 0.15,
                     }} />
-                    <span style={{ fontSize: '9px', color: '#6868A0', textAlign: 'center', lineHeight: 1.2, width: '100%', overflow: 'hidden' }}>{s.label}</span>
+                    <span style={{ fontSize: '9px', color: '#9898B8', textAlign: 'center', lineHeight: 1.2, width: '100%', overflow: 'hidden' }}>{s.label}</span>
                   </div>
                 )
               })}
@@ -1036,7 +1036,7 @@ function HistoriqueJoueur({ realisations, isMobile }: { realisations: Realisatio
                         background: col, borderRadius: '3px 3px 1px 1px',
                         opacity: f !== null ? 1 : 0.1,
                       }} />
-                      <span style={{ fontSize: '9px', color: '#6868A0', textAlign: 'center', lineHeight: 1.2, width: '100%', overflow: 'hidden' }}>{s.label}</span>
+                      <span style={{ fontSize: '9px', color: '#9898B8', textAlign: 'center', lineHeight: 1.2, width: '100%', overflow: 'hidden' }}>{s.label}</span>
                     </div>
                   )
                 })}
@@ -1060,7 +1060,7 @@ function HistoriqueJoueur({ realisations, isMobile }: { realisations: Realisatio
             {/* Header */}
             <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '80px 1fr 36px 36px' : '100px 1fr 44px 44px 44px 44px', gap: '8px', padding: '8px 16px', borderBottom: '1px solid #1A1A1A' }}>
               {(isMobile ? ['Date', 'Séance', 'RPE', 'Fat.'] : ['Date', 'Séance', 'RPE', 'Fat.', 'Cour.', 'Som.']).map(h => (
-                <span key={h} style={{ fontSize: '11px', color: '#6868A0', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</span>
+                <span key={h} style={{ fontSize: '11px', color: '#9898B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</span>
               ))}
             </div>
             {passees.map((r, i) => {
@@ -1453,7 +1453,7 @@ export default function JoueurPage() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: '#6A6A8A', fontSize: '14px' }}>Chargement...</div>
+      <div style={{ color: '#9898B8', fontSize: '14px' }}>Chargement...</div>
     </div>
   )
   if (initError) return (
@@ -1513,7 +1513,7 @@ export default function JoueurPage() {
       <div style={{ padding: `28px ${px} 20px`, background: '#0C0C0C', borderBottom: '1px solid #111' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-            <div style={{ fontSize: '11px', color: '#6868A0', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase' }}>PAGACOACHING</div>
+            <div style={{ fontSize: '11px', color: '#9898B8', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase' }}>PAGACOACHING</div>
             <button onClick={async () => { await supabase.auth.signOut(); router.push('/login') }}
               style={{ background: 'none', border: '1px solid #1E1E1E', borderRadius: '8px', padding: '7px 14px', color: '#7878A8', cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}>
               Déconnexion
@@ -1582,7 +1582,7 @@ export default function JoueurPage() {
           <JoueurMessages myId={joueur.auth_id} coachId={joueur.coach_id} isMobile={isMobile} />
         )}
         {activeSection === 'messages' && !(joueur?.auth_id && joueur?.coach_id) && (
-          <div style={{ background: '#0F0F0F', border: '1px solid #1E1E1E', borderRadius: '16px', padding: '48px', textAlign: 'center', color: '#6A6A8A', fontSize: '14px' }}>
+          <div style={{ background: '#0F0F0F', border: '1px solid #1E1E1E', borderRadius: '16px', padding: '48px', textAlign: 'center', color: '#9898B8', fontSize: '14px' }}>
             La messagerie sera disponible après connexion avec le coach.
           </div>
         )}
@@ -1694,7 +1694,7 @@ export default function JoueurPage() {
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '12px', fontWeight: '700', color: statusColor }}>{statusLabel}</span>
-                              <span style={{ color: '#6868A0', fontSize: '12px' }}>·</span>
+                              <span style={{ color: '#9898B8', fontSize: '12px' }}>·</span>
                               <span style={{ color: '#9898B8', fontSize: '12px' }}>{exCount} exercice{exCount > 1 ? 's' : ''}</span>
                             </div>
                           </div>
@@ -1704,10 +1704,10 @@ export default function JoueurPage() {
                             <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', background: `${wellnessItems[0]?.color || '#2ECC71'}18`, border: `1px solid ${wellnessItems[0]?.color || '#2ECC71'}35`, borderRadius: '12px', padding: '5px 10px', minWidth: '46px' }}>
                               <span style={{ fontSize: '10px', fontWeight: '900', color: `${wellnessItems[0]?.color || '#2ECC71'}90`, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Fatigue</span>
                               <span style={{ fontSize: '20px', fontWeight: '900', color: wellnessItems[0]?.color || '#2ECC71', lineHeight: 1 }}>{r.fatigue}</span>
-                              <span style={{ fontSize: '10px', color: '#6A6A8A' }}>/10</span>
+                              <span style={{ fontSize: '10px', color: '#9898B8' }}>/10</span>
                             </div>
                           ) : (
-                            <div style={{ flexShrink: 0, color: '#6868A0', fontSize: '18px' }}>›</div>
+                            <div style={{ flexShrink: 0, color: '#9898B8', fontSize: '18px' }}>›</div>
                           )}
                         </div>
 
@@ -1716,13 +1716,13 @@ export default function JoueurPage() {
                           <div style={{ display: 'grid', gridTemplateColumns: `repeat(${wellnessItems.length}, 1fr)`, gap: '10px', paddingTop: '12px', borderTop: '1px solid #161616' }}>
                             {wellnessItems.map(item => (
                               <div key={item.label} style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                <span style={{ fontSize: '11px', fontWeight: '800', color: '#6A6A8A', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
+                                <span style={{ fontSize: '11px', fontWeight: '800', color: '#9898B8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
                                 <div style={{ display: 'flex', gap: '2px' }}>
                                   {Array.from({ length: 10 }, (_, i) => (
                                     <div key={i} style={{ flex: 1, height: '3px', borderRadius: '2px', background: i < item.val ? item.color : '#1A1A1A' }} />
                                   ))}
                                 </div>
-                                <span style={{ fontSize: '11px', fontWeight: '900', color: item.color }}>{item.val}<span style={{ color: '#6868A0', fontWeight: '400' }}>/10</span></span>
+                                <span style={{ fontSize: '11px', fontWeight: '900', color: item.color }}>{item.val}<span style={{ color: '#9898B8', fontWeight: '400' }}>/10</span></span>
                               </div>
                             ))}
                           </div>
@@ -1747,7 +1747,7 @@ export default function JoueurPage() {
         {jours.every(ds => (realsParDate[ds] || []).length === 0) && (
           <div style={{ background: '#0F0F0F', border: '1px solid #161616', borderRadius: '20px', padding: '60px 24px', textAlign: 'center' }}>
             <div style={{ fontSize: '40px', marginBottom: '16px' }}>😴</div>
-            <div style={{ color: '#6A6A8A', fontSize: isMobile ? '14px' : '16px', fontWeight: '600' }}>Aucune séance prévue cette semaine</div>
+            <div style={{ color: '#9898B8', fontSize: isMobile ? '14px' : '16px', fontWeight: '600' }}>Aucune séance prévue cette semaine</div>
             <div style={{ color: '#1E1E1E', fontSize: '13px', marginTop: '8px' }}>Profite du repos !</div>
           </div>
         )}
@@ -1803,7 +1803,7 @@ export default function JoueurPage() {
                   </div>
                   <div style={{ display: 'flex', gap: '10px' }}>
                     {wellnessId && (
-                      <button onClick={() => setWellnessEditing(false)} style={{ flex: '0 0 auto', padding: '16px 20px', borderRadius: '16px', border: '1px solid #1A1A1A', background: '#0F0F0F', color: '#6A6A8A', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>
+                      <button onClick={() => setWellnessEditing(false)} style={{ flex: '0 0 auto', padding: '16px 20px', borderRadius: '16px', border: '1px solid #1A1A1A', background: '#0F0F0F', color: '#9898B8', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>
                         Annuler
                       </button>
                     )}
