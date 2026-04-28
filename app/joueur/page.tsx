@@ -384,7 +384,7 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                                   return !isLastSet && recuperInterSets ? `${recuperInterSets}s` : '—'
                                 }
                               }
-                              const recupColor = (val: string) => val === '—' ? '#252525' : !isLastInBloc ? '#1A6FFF80' : '#2ECC7170'
+                              const recupColor = (val: string) => val === '—' ? '#4A4A6A' : !isLastInBloc ? '#6BAAFF' : '#2ECC71'
 
                               // Bordures entre cellules du grid
                               const isRightCol = ei % 2 === 0 && ei < bloc.length - 1
@@ -452,21 +452,21 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                                     )}
                                     {ex.exercices?.consignes_execution && (
                                       <button onClick={() => toggleConsignes(ex.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 10px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                        <span style={{ color: '#C9A84C60', fontSize: '11px', fontWeight: '700' }}>{showConsignes ? '▲' : '▼'} Consignes</span>
+                                        <span style={{ color: '#C9A84CAA', fontSize: '11px', fontWeight: '700' }}>{showConsignes ? '▲' : '▼'} Consignes</span>
                                       </button>
                                     )}
                                     {showConsignes && ex.exercices?.consignes_execution && (
                                       <div style={{ background: '#C9A84C08', borderLeft: '3px solid #C9A84C40', padding: '10px 12px', borderRadius: '0 8px 8px 0', marginBottom: '12px' }}>
-                                        <div style={{ color: '#C9A84CAA', fontSize: '12px', lineHeight: '1.65' }}>{ex.exercices.consignes_execution}</div>
+                                        <div style={{ color: '#C9A84CDD', fontSize: '12px', lineHeight: '1.65' }}>{ex.exercices.consignes_execution}</div>
                                       </div>
                                     )}
                                   </div>
 
                                   {/* Tableau séries — toujours affiché */}
                                   <div style={{ padding: '0 10px 14px', flex: 1 }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr', padding: '4px 6px', borderBottom: '1px solid #161616', marginBottom: '2px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr', padding: '4px 6px', borderBottom: '1px solid #2A2A3A', marginBottom: '2px' }}>
                                       {['N°', metrLabel, 'Charge', recupHeader].map(h => (
-                                        <span key={h} style={{ fontSize: '11px', fontWeight: '900', color: h === recupHeader && !isLastInBloc ? '#1A6FFF50' : '#333', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</span>
+                                        <span key={h} style={{ fontSize: '11px', fontWeight: '900', color: h === recupHeader && !isLastInBloc ? '#6BAAFF' : '#8888AA', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</span>
                                       ))}
                                     </div>
                                     {Array.from({ length: nbSeries }, (_, si) => {
@@ -477,12 +477,12 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                                         : metrVal
                                       const rowCharge = setData?.charge ?? ex.charge_kg
                                       return (
-                                        <div key={si} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr', padding: '7px 6px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '6px' }}>
+                                        <div key={si} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr', padding: '7px 6px', background: si % 2 === 0 ? '#111828' : 'transparent', borderRadius: '6px' }}>
                                           <span style={{ fontSize: '12px', fontWeight: '800', color: couleur }}>{si + 1}</span>
-                                          <span style={{ fontSize: '13px', fontWeight: '900', color: '#DDD' }}>{rowMetr}</span>
-                                          <span style={{ fontSize: '13px', fontWeight: '700', color: rowCharge ? '#777' : '#252525' }}>{rowCharge ? `${rowCharge}kg` : '—'}</span>
+                                          <span style={{ fontSize: '13px', fontWeight: '900', color: '#FFFFFF' }}>{rowMetr}</span>
+                                          <span style={{ fontSize: '13px', fontWeight: '700', color: rowCharge ? '#C0C0D8' : '#4A4A6A' }}>{rowCharge ? `${rowCharge}kg` : '—'}</span>
                                           {rv !== '—' && rv !== 'Direct' ? (
-                                            <span onClick={() => { hapticJ('tap'); setTimerSec(parseInt(rv)) }} style={{ fontSize: '13px', fontWeight: '700', color: recupColor(rv), cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', textDecorationColor: recupColor(rv) + '60' }}>⏱ {rv}</span>
+                                            <span onClick={() => { hapticJ('tap'); setTimerSec(parseInt(rv)) }} style={{ fontSize: '13px', fontWeight: '700', color: recupColor(rv), cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', textDecorationColor: recupColor(rv) + '80' }}>⏱ {rv}</span>
                                           ) : (
                                             <span style={{ fontSize: '13px', fontWeight: '700', color: recupColor(rv) }}>{rv}</span>
                                           )}
@@ -495,7 +495,7 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                                   {isMobile && !isLastInBloc && (
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px', gap: '8px' }}>
                                       <div style={{ flex: 1, height: '1px', background: '#1A6FFF20' }} />
-                                      <span style={{ color: '#1A6FFF60', fontSize: '12px', fontWeight: '700' }}>
+                                      <span style={{ color: '#6BAAFF', fontSize: '12px', fontWeight: '700' }}>
                                         {ex.recuperation_secondes ? `⏱ ${ex.recuperation_secondes}s puis →` : '→ Enchaîner'}
                                       </span>
                                       <div style={{ flex: 1, height: '1px', background: '#1A6FFF20' }} />
@@ -600,12 +600,12 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                                   )}
                                   {ex.exercices?.consignes_execution && (
                                     <button onClick={() => toggleConsignes(ex.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 10px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                      <span style={{ color: '#C9A84C60', fontSize: '11px', fontWeight: '700' }}>{showConsignes ? '▲' : '▼'} Consignes</span>
+                                      <span style={{ color: '#C9A84CAA', fontSize: '11px', fontWeight: '700' }}>{showConsignes ? '▲' : '▼'} Consignes</span>
                                     </button>
                                   )}
                                   {showConsignes && ex.exercices?.consignes_execution && (
                                     <div style={{ background: '#C9A84C08', borderLeft: '3px solid #C9A84C40', padding: '10px 12px', borderRadius: '0 8px 8px 0', marginBottom: '12px' }}>
-                                      <div style={{ color: '#C9A84CAA', fontSize: '12px', lineHeight: '1.65' }}>{ex.exercices.consignes_execution}</div>
+                                      <div style={{ color: '#C9A84CDD', fontSize: '12px', lineHeight: '1.65' }}>{ex.exercices.consignes_execution}</div>
                                     </div>
                                   )}
                                 </div>
@@ -613,9 +613,9 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                                 {/* Tableau séries */}
                                 {nbSeries > 0 && (
                                   <div style={{ padding: '0 10px 14px', flex: 1 }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr', padding: '4px 6px', borderBottom: '1px solid #161616', marginBottom: '2px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr', padding: '4px 6px', borderBottom: '1px solid #2A2A3A', marginBottom: '2px' }}>
                                       {['N°', metrLabel, 'Charge', 'Récup'].map(h => (
-                                        <span key={h} style={{ fontSize: '11px', fontWeight: '900', color: '#6A6A8A', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</span>
+                                        <span key={h} style={{ fontSize: '11px', fontWeight: '900', color: '#8888AA', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</span>
                                       ))}
                                     </div>
                                     {Array.from({ length: nbSeries }, (_, si) => {
@@ -629,14 +629,14 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                                         ? (!isLast && setData.recup ? `${setData.recup}s` : '—')
                                         : (!isLast && ex.recuperation_secondes ? `${ex.recuperation_secondes}s` : '—')
                                       return (
-                                        <div key={si} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr', padding: '7px 6px', background: si % 2 === 0 ? '#0A0A0A' : 'transparent', borderRadius: '6px' }}>
+                                        <div key={si} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr', padding: '7px 6px', background: si % 2 === 0 ? '#111828' : 'transparent', borderRadius: '6px' }}>
                                           <span style={{ fontSize: '12px', fontWeight: '800', color: couleur }}>{si + 1}</span>
-                                          <span style={{ fontSize: '13px', fontWeight: '900', color: '#DDD' }}>{rowMetr}</span>
-                                          <span style={{ fontSize: '13px', fontWeight: '700', color: rowCharge ? '#777' : '#252525' }}>{rowCharge ? `${rowCharge}kg` : '—'}</span>
+                                          <span style={{ fontSize: '13px', fontWeight: '900', color: '#FFFFFF' }}>{rowMetr}</span>
+                                          <span style={{ fontSize: '13px', fontWeight: '700', color: rowCharge ? '#C0C0D8' : '#4A4A6A' }}>{rowCharge ? `${rowCharge}kg` : '—'}</span>
                                           {rowRecup !== '—' ? (
-                                            <span onClick={() => { hapticJ('tap'); setTimerSec(parseInt(rowRecup)) }} style={{ fontSize: '13px', fontWeight: '700', color: '#2ECC7170', cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', textDecorationColor: '#2ECC7140' }}>⏱ {rowRecup}</span>
+                                            <span onClick={() => { hapticJ('tap'); setTimerSec(parseInt(rowRecup)) }} style={{ fontSize: '13px', fontWeight: '700', color: '#2ECC71', cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted', textDecorationColor: '#2ECC7180' }}>⏱ {rowRecup}</span>
                                           ) : (
-                                            <span style={{ fontSize: '13px', fontWeight: '700', color: '#252525' }}>—</span>
+                                            <span style={{ fontSize: '13px', fontWeight: '700', color: '#4A4A6A' }}>—</span>
                                           )}
                                         </div>
                                       )
