@@ -351,7 +351,7 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                             <span style={{ color: '#6BAAFF', fontSize: '11px', fontWeight: '900', letterSpacing: '1.5px' }}>{bloc.length > 2 ? 'CIRCUIT' : 'SUPERSET'}</span>
                             {seriesShared > 0 && <span style={{ color: '#1A6FFF', fontSize: '13px', fontWeight: '800' }}>{seriesShared} séries</span>}
                             <div style={{ flex: 1 }} />
-                            <span style={{ color: '#1A6FFF60', fontSize: '11px', fontWeight: '700' }}>{bloc.length} exercices</span>
+                            <span style={{ color: '#6BAAFF', fontSize: '11px', fontWeight: '700' }}>{bloc.length} exercices</span>
                           </div>
 
                           {/* Exercices : grille 2 colonnes max desktop, colonne mobile */}
