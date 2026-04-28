@@ -923,7 +923,17 @@ function HistoriqueJoueur({ realisations, isMobile }: { realisations: Realisatio
     if (r.rpe != null) semMap[lundi].rpes.push(r.rpe)
   }
 
-  const semaines: { label: string; nb: number; charge: number; avgRpe: number | null }[] = []
+  // Fatigue : séances + bilans wellness (seance_id null)
+  const fatigueMap: Record<string, number[]> = {}
+  for (const r of realisations) {
+    if (r.fatigue != null && r.date_realisation <= todayStr && r.date_realisation >= debut) {
+      const lundi = getLundi(r.date_realisation)
+      if (!fatigueMap[lundi]) fatigueMap[lundi] = []
+      fatigueMap[lundi].push(r.fatigue)
+    }
+  }
+
+  const semaines: { label: string; nb: number; charge: number; avgRpe: number | null; avgFatigue: number | null }[] = []
   const cur = new Date(getLundi(debut) + 'T12:00:00')
   const finD = new Date(todayStr + 'T12:00:00')
   while (cur <= finD) {
@@ -931,7 +941,9 @@ function HistoriqueJoueur({ realisations, isMobile }: { realisations: Realisatio
     const s = semMap[lundi] || { nb: 0, rpes: [] }
     const avgRpe = s.rpes.length ? Math.round(s.rpes.reduce((a: number, b: number) => a + b, 0) / s.rpes.length * 10) / 10 : null
     const charge = s.rpes.length > 0 ? Math.round(s.rpes.reduce((a: number, b: number) => a + b, 0)) : s.nb * 5
-    semaines.push({ label: new Date(lundi + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }), nb: s.nb, charge, avgRpe })
+    const fats = fatigueMap[lundi] || []
+    const avgFatigue = fats.length ? Math.round(fats.reduce((a, b) => a + b, 0) / fats.length * 10) / 10 : null
+    semaines.push({ label: new Date(lundi + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }), nb: s.nb, charge, avgRpe, avgFatigue })
     cur.setDate(cur.getDate() + 7)
   }
 
@@ -1004,6 +1016,41 @@ function HistoriqueJoueur({ realisations, isMobile }: { realisations: Realisatio
               <span style={{ fontSize: '11px', color: '#9898B8' }}>Charge : <strong style={{ color: '#C9A84C' }}>{semaines.reduce((a, s) => a + s.charge, 0)}</strong></span>
             </div>
           </div>
+
+          {/* Évolution fatigue */}
+          {semaines.some(s => s.avgFatigue !== null) && (
+            <div style={{ background: '#0F0F0F', border: '1px solid #1E1E1E', borderRadius: '16px', padding: '18px 16px' }}>
+              <div style={{ fontSize: '11px', fontWeight: '800', color: '#FF6B35', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>
+                Fatigue moyenne par semaine
+              </div>
+              <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end', height: '80px' }}>
+                {semaines.map((s, i) => {
+                  const f = s.avgFatigue
+                  const barH = f !== null ? Math.max(6, (f / 10) * 68) : 0
+                  const col = f === null ? '#1A1A1A' : f <= 3 ? '#2ECC71' : f <= 5 ? '#C9A84C' : f <= 7 ? '#FF6B35' : '#FF4757'
+                  return (
+                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', justifyContent: 'flex-end', height: '80px' }}>
+                      {f !== null && <span style={{ fontSize: '10px', color: col, fontWeight: '800' }}>{f}</span>}
+                      <div style={{
+                        width: '100%', height: `${barH}px`, minHeight: f !== null ? '6px' : '2px',
+                        background: col, borderRadius: '3px 3px 1px 1px',
+                        opacity: f !== null ? 1 : 0.1,
+                      }} />
+                      <span style={{ fontSize: '10px', color: '#6868A0', textAlign: 'center', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{s.label}</span>
+                    </div>
+                  )
+                })}
+              </div>
+              <div style={{ display: 'flex', gap: '14px', marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #1A1A1A', flexWrap: 'wrap' }}>
+                {[{ label: '≤ 3 Frais', color: '#2ECC71' }, { label: '4–5 Normal', color: '#C9A84C' }, { label: '6–7 Fatigué', color: '#FF6B35' }, { label: '≥ 8 Épuisé', color: '#FF4757' }].map(({ label, color }) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: color }} />
+                    <span style={{ fontSize: '10px', color: '#7878A8', fontWeight: '600' }}>{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Liste séances */}
           <div style={{ background: '#0F0F0F', border: '1px solid #1E1E1E', borderRadius: '16px', overflow: 'hidden' }}>
