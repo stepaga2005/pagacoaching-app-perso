@@ -1,11 +1,11 @@
 # Graph Report - .  (2026-04-28)
 
 ## Corpus Check
-- 47 files · ~61,862 words
+- 48 files · ~61,950 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 200 nodes · 224 edges · 33 communities detected
+- 201 nodes · 225 edges · 33 communities detected
 - Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 26 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -49,24 +49,24 @@
 2. `patchExoLocal()` - 9 edges
 3. `String()` - 8 edges
 4. `saveExoField()` - 7 edges
-5. `loadData()` - 6 edges
-6. `GET()` - 6 edges
+5. `GET()` - 7 edges
+6. `loadData()` - 6 edges
 7. `POST()` - 5 edges
 8. `handleCopier()` - 4 edges
 9. `deleteSeance()` - 4 edges
 10. `loadJoueurs()` - 4 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `fmtChrono()` --calls--> `String()`  [INFERRED]
+  app/joueur/page.tsx → /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/GenerateurSeance.tsx
+- `GET()` --calls--> `isCacheStale()`  [INFERRED]
+  app/api/coach-id/route.ts → /Users/nicolasjover/Desktop/pagacoaching-app-perso/public/sw.js
+- `send()` --calls--> `sendPush()`  [INFERRED]
+  app/joueur/page.tsx → lib/push.ts
+- `send()` --calls--> `sendPush()`  [INFERRED]
+  app/coach/components/ChatView.tsx → lib/push.ts
 - `confirmer()` --calls--> `toast()`  [INFERRED]
   /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Modeles.tsx → /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/lib/toast.ts
-- `fmtChrono()` --calls--> `String()`  [INFERRED]
-  /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/joueur/page.tsx → /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/GenerateurSeance.tsx
-- `handleSave()` --calls--> `toast()`  [INFERRED]
-  /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/EditeurSeance.tsx → /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/lib/toast.ts
-- `String()` --calls--> `deleteSeance()`  [INFERRED]
-  /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/GenerateurSeance.tsx → /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Programmes.tsx
-- `deleteSeance()` --calls--> `toast()`  [INFERRED]
-  /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Programmes.tsx → /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/lib/toast.ts
 
 ## Communities
 
@@ -83,12 +83,12 @@ Cohesion: 0.11
 Nodes (5): goOnline(), hapticJ(), load(), reset(), uploadMedia()
 
 ### Community 3 - "Community 3"
-Cohesion: 0.13
-Nodes (1): confirmer()
+Cohesion: 0.17
+Nodes (6): getSessionUser(), requireAuth(), requireCoach(), GET(), POST(), isCacheStale()
 
 ### Community 4 - "Community 4"
-Cohesion: 0.19
-Nodes (6): getSessionUser(), requireAuth(), requireCoach(), GET(), POST(), isCacheStale()
+Cohesion: 0.13
+Nodes (1): confirmer()
 
 ### Community 5 - "Community 5"
 Cohesion: 0.2
@@ -209,7 +209,7 @@ Nodes (0):
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 19`** (2 nodes): `getDerivedStateFromError()`, `ErrorBoundary.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 20`** (2 nodes): `handleLogin()`, `page.tsx`
+- **Thin community `Community 20`** (2 nodes): `page.tsx`, `handleLogin()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 21`** (1 nodes): `sentry.server.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -240,16 +240,16 @@ Nodes (0):
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `String()` connect `Community 1` to `Community 8`, `Community 7`?**
-  _High betweenness centrality (0.226) - this node is a cross-community bridge._
-- **Why does `toast()` connect `Community 1` to `Community 3`, `Community 6`, `Community 7`?**
-  _High betweenness centrality (0.193) - this node is a cross-community bridge._
+  _High betweenness centrality (0.224) - this node is a cross-community bridge._
+- **Why does `toast()` connect `Community 1` to `Community 4`, `Community 6`, `Community 7`?**
+  _High betweenness centrality (0.191) - this node is a cross-community bridge._
 - **Why does `mpDeleteRealisation()` connect `Community 1` to `Community 0`?**
-  _High betweenness centrality (0.163) - this node is a cross-community bridge._
+  _High betweenness centrality (0.161) - this node is a cross-community bridge._
 - **Are the 10 inferred relationships involving `toast()` (e.g. with `handleSave()` and `handleCopier()`) actually correct?**
   _`toast()` has 10 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 7 inferred relationships involving `String()` (e.g. with `fmtChrono()` and `handleCopier()`) actually correct?**
   _`String()` has 7 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 3 inferred relationships involving `GET()` (e.g. with `requireAuth()` and `requireCoach()`) actually correct?**
+  _`GET()` has 3 INFERRED edges - model-reasoned connections that need verification._
 - **Should `Community 0` be split into smaller, more focused modules?**
   _Cohesion score 0.11 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.09 - nodes in this community are weakly interconnected._
