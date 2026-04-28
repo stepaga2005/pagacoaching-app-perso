@@ -1560,7 +1560,7 @@ export default function JoueurPage() {
             <button key={s} onClick={() => { setActiveSection(s); if (s === 'messages') setUnreadMessages(0) }} style={{
               padding: '14px 20px', background: 'none', border: 'none', cursor: 'pointer',
               fontSize: '14px', fontWeight: '700',
-              color: activeSection === s ? '#1A6FFF' : '#444',
+              color: activeSection === s ? '#1A6FFF' : '#888',
               borderBottom: `2px solid ${activeSection === s ? '#1A6FFF' : 'transparent'}`,
               transition: 'all 0.15s',
               display: 'flex', alignItems: 'center', gap: '8px',
@@ -1616,7 +1616,7 @@ export default function JoueurPage() {
             const circleOpacity = isToday || allDone || someMissed ? 1 : hasSessions ? 0.25 : 0
             return (
               <div key={ds} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '10px', fontWeight: '700', color: isToday ? '#1A6FFF' : '#333', letterSpacing: '0.3px' }}>
+                <span style={{ fontSize: '10px', fontWeight: '700', color: isToday ? '#1A6FFF' : '#888', letterSpacing: '0.3px' }}>
                   {dayLetters[i]}
                 </span>
                 <div style={{
@@ -1625,7 +1625,7 @@ export default function JoueurPage() {
                   background: isToday ? '#1A6FFF' : allDone ? '#2ECC71' : `${circleColor}${hasSessions && !isToday ? '22' : '00'}`,
                   border: `2px solid ${isToday ? '#1A6FFF' : allDone ? '#2ECC71' : someMissed ? '#FF4757' : hasSessions ? '#1A6FFF55' : '#1A1A1A'}`,
                 }}>
-                  <span style={{ fontSize: isMobile ? '13px' : '15px', fontWeight: '800', color: isToday ? '#FFF' : allDone ? '#FFF' : hasSessions ? (isPast ? '#FF4757' : '#1A6FFF') : '#2A2A2A' }}>
+                  <span style={{ fontSize: isMobile ? '13px' : '15px', fontWeight: '800', color: isToday ? '#FFF' : allDone ? '#FFF' : hasSessions ? (isPast ? '#FF4757' : '#1A6FFF') : '#666' }}>
                     {allDone ? '✓' : new Date(ds + 'T12:00:00').getDate()}
                   </span>
                 </div>
@@ -1645,7 +1645,7 @@ export default function JoueurPage() {
             <div key={ds} style={{ marginBottom: '28px' }}>
               {/* En-tête de jour */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', paddingLeft: '2px' }}>
-                <span style={{ fontSize: '11px', fontWeight: '800', color: isToday ? '#1A6FFF' : '#333', textTransform: 'uppercase', letterSpacing: '1.2px' }}>{dateLabel}</span>
+                <span style={{ fontSize: '11px', fontWeight: '800', color: isToday ? '#1A6FFF' : '#AAAACC', textTransform: 'uppercase', letterSpacing: '1.2px' }}>{dateLabel}</span>
                 {isToday && <span style={{ background: '#1A6FFF', color: '#FFF', fontSize: '11px', padding: '2px 8px', borderRadius: '20px', fontWeight: '900', letterSpacing: '0.5px' }}>AUJOURD'HUI</span>}
               </div>
 
@@ -1695,7 +1695,7 @@ export default function JoueurPage() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '12px', fontWeight: '700', color: statusColor }}>{statusLabel}</span>
                               <span style={{ color: '#6868A0', fontSize: '12px' }}>·</span>
-                              <span style={{ color: '#7878A8', fontSize: '12px' }}>{exCount} exercice{exCount > 1 ? 's' : ''}</span>
+                              <span style={{ color: '#9898B8', fontSize: '12px' }}>{exCount} exercice{exCount > 1 ? 's' : ''}</span>
                             </div>
                           </div>
 
@@ -1760,7 +1760,7 @@ export default function JoueurPage() {
             <div style={{ marginTop: '32px', paddingTop: '28px', borderTop: '1px solid #161616' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <div>
-                  <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#6868A0', marginBottom: '4px' }}>Bilan du jour</div>
+                  <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#AAAACC', marginBottom: '4px' }}>Bilan du jour</div>
                   <div style={{ fontSize: '13px', fontWeight: '700', color: '#9898B8' }}>Comment tu te sens aujourd'hui ?</div>
                 </div>
                 {alreadyDone && (
@@ -1780,8 +1780,8 @@ export default function JoueurPage() {
                   ].map(({ label, emoji, val, color }) => (
                     <div key={label} style={{ background: val !== null ? color + '12' : '#0F0F0F', border: `1px solid ${val !== null ? color + '30' : '#1A1A1A'}`, borderRadius: '16px', padding: '16px 12px', textAlign: 'center' }}>
                       <div style={{ fontSize: '20px', marginBottom: '6px' }}>{emoji}</div>
-                      <div style={{ fontSize: '26px', fontWeight: '900', color: val !== null ? color : '#333', lineHeight: 1 }}>{val ?? '–'}</div>
-                      <div style={{ fontSize: '10px', color: '#6A6A8A', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }}>{label}</div>
+                      <div style={{ fontSize: '26px', fontWeight: '900', color: val !== null ? color : '#777', lineHeight: 1 }}>{val ?? '–'}</div>
+                      <div style={{ fontSize: '10px', color: '#9898B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }}>{label}</div>
                     </div>
                   ))}
                 </div>
@@ -1792,7 +1792,7 @@ export default function JoueurPage() {
                   <RatingChips label="Fatigue générale ⚡" value={wellnessForm.fatigue} couleur="#FF4757" onChange={v => setWellnessForm(f => ({ ...f, fatigue: v }))} />
                   <RatingChips label="Courbatures 💪" value={wellnessForm.courbatures} couleur="#FF6B35" onChange={v => setWellnessForm(f => ({ ...f, courbatures: v }))} />
                   <div style={{ marginBottom: '24px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#6868A0', marginBottom: '12px' }}>Notes (facultatif)</div>
+                    <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#AAAACC', marginBottom: '12px' }}>Notes (facultatif)</div>
                     <textarea
                       value={wellnessForm.notes}
                       onChange={e => setWellnessForm(f => ({ ...f, notes: e.target.value }))}
