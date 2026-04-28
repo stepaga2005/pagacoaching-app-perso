@@ -1053,6 +1053,10 @@ export default function JoueurPage() {
   const [form, setForm] = useState<WellnessForm>({ completee: false, fatigue: null, courbatures: null, rpe: null, qualite_sommeil: null, notes_joueur: '' })
   const [saving, setSaving] = useState(false)
   const [activeSection, setActiveSection] = useState<'seances' | 'historique' | 'messages'>('seances')
+  const [wellnessId, setWellnessId] = useState<string | null>(null)
+  const [wellnessForm, setWellnessForm] = useState<{ fatigue: number | null; courbatures: number | null; qualite_sommeil: number | null; notes: string }>({ fatigue: null, courbatures: null, qualite_sommeil: null, notes: '' })
+  const [wellnessSaving, setWellnessSaving] = useState(false)
+  const [wellnessEditing, setWellnessEditing] = useState(false)
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [isOffline, setIsOffline] = useState(false)
@@ -1257,6 +1261,12 @@ export default function JoueurPage() {
       if (result.data) {
         setRealisations(result.data)
         try { localStorage.setItem(`pagacoaching_reals_${joueurId}`, JSON.stringify({ data: result.data, ts: Date.now() })) } catch {}
+        const todayWellness = result.data.find(r => !r.seance_id && r.date_realisation === new Date().toISOString().split('T')[0])
+        if (todayWellness) {
+          setWellnessId(todayWellness.id)
+          setWellnessForm({ fatigue: todayWellness.fatigue ?? null, courbatures: todayWellness.courbatures ?? null, qualite_sommeil: todayWellness.qualite_sommeil ?? null, notes: todayWellness.notes_joueur ?? '' })
+          setWellnessEditing(false)
+        }
       }
     } catch {
       if (loadIdRef.current !== thisId) return
@@ -1365,6 +1375,23 @@ export default function JoueurPage() {
       setSelected(null)
     }
     setSaving(false)
+  }
+
+  async function sauvegarderWellness() {
+    if (!joueur) return
+    setWellnessSaving(true)
+    const patch = { fatigue: wellnessForm.fatigue, courbatures: wellnessForm.courbatures, qualite_sommeil: wellnessForm.qualite_sommeil, notes_joueur: wellnessForm.notes || null }
+    if (wellnessId) {
+      await supabase.from('realisations').update(patch).eq('id', wellnessId)
+    } else {
+      const { data } = await supabase.from('realisations')
+        .insert({ joueur_id: joueur.id, seance_id: null, date_realisation: today, completee: false, ...patch })
+        .select('id').single()
+      if (data) setWellnessId(data.id)
+    }
+    setWellnessEditing(false)
+    setWellnessSaving(false)
+    await load(joueur.id)
   }
 
   const realsParDate: Record<string, Realisation[]> = {}
@@ -1677,6 +1704,80 @@ export default function JoueurPage() {
             <div style={{ color: '#1E1E1E', fontSize: '13px', marginTop: '8px' }}>Profite du repos !</div>
           </div>
         )}
+
+        {/* ── Bilan wellness du jour ── */}
+        {(() => {
+          const alreadyDone = wellnessId && !wellnessEditing
+          const hasData = wellnessForm.fatigue !== null || wellnessForm.courbatures !== null || wellnessForm.qualite_sommeil !== null
+          return (
+            <div style={{ marginTop: '32px', paddingTop: '28px', borderTop: '1px solid #161616' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                <div>
+                  <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#6868A0', marginBottom: '4px' }}>Bilan du jour</div>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#9898B8' }}>Comment tu te sens aujourd'hui ?</div>
+                </div>
+                {alreadyDone && (
+                  <button onClick={() => setWellnessEditing(true)} style={{ background: '#1A1A2A', border: '1px solid #2A2A3A', color: '#9898B8', borderRadius: '10px', padding: '8px 14px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
+                    Modifier
+                  </button>
+                )}
+              </div>
+
+              {alreadyDone ? (
+                /* Résumé readonly */
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                  {[
+                    { label: 'Sommeil', emoji: '😴', val: wellnessForm.qualite_sommeil, color: '#2ECC71' },
+                    { label: 'Fatigue', emoji: '⚡', val: wellnessForm.fatigue, color: '#FF4757' },
+                    { label: 'Courbatures', emoji: '💪', val: wellnessForm.courbatures, color: '#FF6B35' },
+                  ].map(({ label, emoji, val, color }) => (
+                    <div key={label} style={{ background: val !== null ? color + '12' : '#0F0F0F', border: `1px solid ${val !== null ? color + '30' : '#1A1A1A'}`, borderRadius: '16px', padding: '16px 12px', textAlign: 'center' }}>
+                      <div style={{ fontSize: '20px', marginBottom: '6px' }}>{emoji}</div>
+                      <div style={{ fontSize: '26px', fontWeight: '900', color: val !== null ? color : '#333', lineHeight: 1 }}>{val ?? '–'}</div>
+                      <div style={{ fontSize: '10px', color: '#6A6A8A', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }}>{label}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* Formulaire */
+                <div>
+                  <RatingChips label="Qualité du sommeil 😴" value={wellnessForm.qualite_sommeil} couleur="#2ECC71" onChange={v => setWellnessForm(f => ({ ...f, qualite_sommeil: v }))} />
+                  <RatingChips label="Fatigue générale ⚡" value={wellnessForm.fatigue} couleur="#FF4757" onChange={v => setWellnessForm(f => ({ ...f, fatigue: v }))} />
+                  <RatingChips label="Courbatures 💪" value={wellnessForm.courbatures} couleur="#FF6B35" onChange={v => setWellnessForm(f => ({ ...f, courbatures: v }))} />
+                  <div style={{ marginBottom: '24px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#6868A0', marginBottom: '12px' }}>Notes (facultatif)</div>
+                    <textarea
+                      value={wellnessForm.notes}
+                      onChange={e => setWellnessForm(f => ({ ...f, notes: e.target.value }))}
+                      placeholder="Douleurs, fatigue mentale, autre..."
+                      rows={3}
+                      style={{ width: '100%', background: '#0F0F0F', border: '1px solid #1A1A1A', borderRadius: '14px', padding: '14px 16px', color: '#CCC', fontSize: '14px', outline: 'none', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box' as const, lineHeight: '1.6' }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    {wellnessId && (
+                      <button onClick={() => setWellnessEditing(false)} style={{ flex: '0 0 auto', padding: '16px 20px', borderRadius: '16px', border: '1px solid #1A1A1A', background: '#0F0F0F', color: '#6A6A8A', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>
+                        Annuler
+                      </button>
+                    )}
+                    <button
+                      onClick={sauvegarderWellness}
+                      disabled={wellnessSaving || (!hasData && !wellnessForm.notes)}
+                      style={{
+                        flex: 1, padding: '16px', borderRadius: '16px', border: 'none',
+                        background: wellnessSaving || (!hasData && !wellnessForm.notes) ? '#111' : '#2ECC71',
+                        color: wellnessSaving || (!hasData && !wellnessForm.notes) ? '#333' : '#000',
+                        fontWeight: '900', fontSize: '16px', cursor: wellnessSaving || (!hasData && !wellnessForm.notes) ? 'not-allowed' : 'pointer',
+                      }}
+                    >
+                      {wellnessSaving ? 'Enregistrement...' : '✓ Enregistrer mon bilan'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })()}
 
         </>)}
       </div>
