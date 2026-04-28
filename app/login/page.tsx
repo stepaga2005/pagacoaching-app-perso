@@ -27,8 +27,10 @@ export default function LoginPage() {
       return
     }
 
-    // Vérifie si c'est l'admin
-    if (data.user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+    // Détermine le rôle côté serveur (ne pas exposer l'email admin dans le bundle)
+    const roleRes = await fetch('/api/me/role')
+    const { role } = await roleRes.json()
+    if (role === 'coach') {
       router.push('/coach')
       return
     }

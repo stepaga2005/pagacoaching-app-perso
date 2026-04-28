@@ -10,8 +10,8 @@ const supabaseAdmin = createClient(
 export async function GET() {
   const auth = await requireAuth()
   if ('error' in auth) return auth.error
-  const coachEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
-  if (!coachEmail) return NextResponse.json({ error: 'NEXT_PUBLIC_ADMIN_EMAIL not set' }, { status: 500 })
+  const coachEmail = process.env.ADMIN_EMAIL
+  if (!coachEmail) return NextResponse.json({ error: 'ADMIN_EMAIL not set' }, { status: 500 })
 
   const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 })
   const coach = users.find(u => u.email === coachEmail)

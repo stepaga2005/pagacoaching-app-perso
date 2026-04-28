@@ -30,12 +30,12 @@ export default function CoachPage() {
   })
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
         router.push('/login')
       } else {
         setLoading(false)
-        setCoachId(session.user.id)
+        setCoachId(user.id)
       }
     })
   }, [router])

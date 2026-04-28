@@ -27,13 +27,13 @@ export async function requireAuth(): Promise<{ user: { id: string; email?: strin
   return { user }
 }
 
-// Vérifie que l'appelant est le coach (email = NEXT_PUBLIC_ADMIN_EMAIL)
+// Vérifie que l'appelant est le coach (email = ADMIN_EMAIL)
 export async function requireCoach(): Promise<{ user: { id: string; email?: string } } | { error: NextResponse }> {
   const user = await getSessionUser()
   if (!user) {
     return { error: NextResponse.json({ error: 'Non authentifié' }, { status: 401 }) }
   }
-  const coachEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+  const coachEmail = process.env.ADMIN_EMAIL
   if (coachEmail && user.email !== coachEmail) {
     return { error: NextResponse.json({ error: 'Accès réservé au coach' }, { status: 403 }) }
   }

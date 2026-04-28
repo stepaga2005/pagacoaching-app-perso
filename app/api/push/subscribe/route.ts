@@ -10,12 +10,13 @@ const supabaseAdmin = createClient(
 export async function POST(req: Request) {
   const auth = await requireAuth()
   if ('error' in auth) return auth.error
-  const { subscription, user_id } = await req.json()
-  if (!subscription || !user_id) return NextResponse.json({ error: 'missing params' }, { status: 400 })
+  const { subscription } = await req.json()
+  if (!subscription) return NextResponse.json({ error: 'missing params' }, { status: 400 })
 
   // Upsert : un seul abonnement par user (on remplace l'ancien)
+  // user_id vient de la session serveur, jamais du body
   await supabaseAdmin.from('push_subscriptions')
-    .upsert({ user_id, subscription }, { onConflict: 'user_id' })
+    .upsert({ user_id: auth.user.id, subscription }, { onConflict: 'user_id' })
 
   return NextResponse.json({ ok: true })
 }

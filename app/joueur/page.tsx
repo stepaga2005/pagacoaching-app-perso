@@ -741,7 +741,7 @@ function JoueurMessages({ myId, coachId, isMobile }: { myId: string; coachId: st
   useEffect(() => {
     load()
     markRead()
-    subscribePush(myId)
+    subscribePush()
     const interval = setInterval(() => { load(); markRead() }, 3000)
     return () => clearInterval(interval)
   }, [myId, coachId])

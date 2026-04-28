@@ -1,5 +1,5 @@
 // Demande la permission et abonne l'utilisateur aux push notifications
-export async function subscribePush(userId: string): Promise<void> {
+export async function subscribePush(): Promise<void> {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
 
   try {
@@ -12,7 +12,7 @@ export async function subscribePush(userId: string): Promise<void> {
     await fetch('/api/push/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subscription: sub.toJSON(), user_id: userId })
+      body: JSON.stringify({ subscription: sub.toJSON() })
     })
   } catch { /* permission refusée ou non supporté */ }
 }

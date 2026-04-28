@@ -16,7 +16,7 @@ export function ChatView({ myId, otherId, height = 'calc(100vh - 220px)' }: { my
   useEffect(() => {
     load()
     markRead()
-    subscribePush(myId)
+    subscribePush()
     const interval = setInterval(() => { load(); markRead() }, 3000)
     return () => clearInterval(interval)
   }, [myId, otherId])
