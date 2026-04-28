@@ -995,18 +995,18 @@ function HistoriqueJoueur({ realisations, isMobile }: { realisations: Realisatio
             <div style={{ fontSize: '11px', fontWeight: '800', color: '#C9A84C', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>
               Charge par semaine (Σ RPE)
             </div>
-            <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end', height: '80px' }}>
+            <div style={{ display: 'flex', gap: '4px', alignItems: 'flex-end', height: '80px' }}>
               {semaines.map((s, i) => {
                 const barH = s.charge > 0 ? Math.max(6, (s.charge / maxCharge) * 68) : 0
                 return (
-                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', justifyContent: 'flex-end', height: '80px' }}>
-                    {s.nb > 0 && <span style={{ fontSize: '10px', color: '#9898B8', fontWeight: '700' }}>{s.nb}</span>}
+                  <div key={i} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', justifyContent: 'flex-end', height: '80px' }}>
+                    {s.nb > 0 && <span style={{ fontSize: '9px', color: '#9898B8', fontWeight: '700' }}>{s.nb}</span>}
                     <div style={{
                       width: '100%', height: `${barH}px`, minHeight: s.charge > 0 ? '6px' : '2px',
                       background: chargeColor(s.avgRpe, s.charge), borderRadius: '3px 3px 1px 1px',
                       opacity: s.charge > 0 ? 1 : 0.15,
                     }} />
-                    <span style={{ fontSize: '10px', color: '#6868A0', textAlign: 'center', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{s.label}</span>
+                    <span style={{ fontSize: '9px', color: '#6868A0', textAlign: 'center', lineHeight: 1.2, width: '100%', overflow: 'hidden' }}>{s.label}</span>
                   </div>
                 )
               })}
@@ -1023,20 +1023,20 @@ function HistoriqueJoueur({ realisations, isMobile }: { realisations: Realisatio
               <div style={{ fontSize: '11px', fontWeight: '800', color: '#FF6B35', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>
                 Fatigue moyenne par semaine
               </div>
-              <div style={{ display: 'flex', gap: '5px', alignItems: 'flex-end', height: '80px' }}>
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'flex-end', height: '80px' }}>
                 {semaines.map((s, i) => {
                   const f = s.avgFatigue
                   const barH = f !== null ? Math.max(6, (f / 10) * 68) : 0
                   const col = f === null ? '#1A1A1A' : f <= 3 ? '#2ECC71' : f <= 5 ? '#C9A84C' : f <= 7 ? '#FF6B35' : '#FF4757'
                   return (
-                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', justifyContent: 'flex-end', height: '80px' }}>
-                      {f !== null && <span style={{ fontSize: '10px', color: col, fontWeight: '800' }}>{f}</span>}
+                    <div key={i} style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', justifyContent: 'flex-end', height: '80px' }}>
+                      {f !== null && <span style={{ fontSize: '9px', color: col, fontWeight: '800' }}>{f}</span>}
                       <div style={{
                         width: '100%', height: `${barH}px`, minHeight: f !== null ? '6px' : '2px',
                         background: col, borderRadius: '3px 3px 1px 1px',
                         opacity: f !== null ? 1 : 0.1,
                       }} />
-                      <span style={{ fontSize: '10px', color: '#6868A0', textAlign: 'center', lineHeight: 1.2, whiteSpace: 'nowrap' }}>{s.label}</span>
+                      <span style={{ fontSize: '9px', color: '#6868A0', textAlign: 'center', lineHeight: 1.2, width: '100%', overflow: 'hidden' }}>{s.label}</span>
                     </div>
                   )
                 })}
