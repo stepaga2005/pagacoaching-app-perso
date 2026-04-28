@@ -108,7 +108,7 @@
       "source_file": "app/joueur/page.tsx",
       "source_location": "L211",
       "id": "page_fmtchrono",
-      "community": 1,
+      "community": 3,
       "norm_label": "fmtchrono()"
     },
     {
@@ -180,7 +180,7 @@
       "source_file": "app/joueur/page.tsx",
       "source_location": "L768",
       "id": "page_send",
-      "community": 5,
+      "community": 6,
       "norm_label": "send()"
     },
     {
@@ -306,7 +306,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/EditeurSeance.tsx",
       "source_location": "L1",
       "id": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_editeurseance_tsx",
-      "community": 4,
+      "community": 1,
       "norm_label": "editeurseance.tsx"
     },
     {
@@ -315,7 +315,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/EditeurSeance.tsx",
       "source_location": "L30",
       "id": "editeurseance_ajouterexercices",
-      "community": 4,
+      "community": 1,
       "norm_label": "ajouterexercices()"
     },
     {
@@ -324,7 +324,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/EditeurSeance.tsx",
       "source_location": "L44",
       "id": "editeurseance_updateligne",
-      "community": 4,
+      "community": 1,
       "norm_label": "updateligne()"
     },
     {
@@ -333,7 +333,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/EditeurSeance.tsx",
       "source_location": "L48",
       "id": "editeurseance_handleserieschange",
-      "community": 4,
+      "community": 1,
       "norm_label": "handleserieschange()"
     },
     {
@@ -342,7 +342,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/EditeurSeance.tsx",
       "source_location": "L60",
       "id": "editeurseance_updatesetfield",
-      "community": 4,
+      "community": 1,
       "norm_label": "updatesetfield()"
     },
     {
@@ -351,7 +351,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/EditeurSeance.tsx",
       "source_location": "L70",
       "id": "editeurseance_removeligne",
-      "community": 4,
+      "community": 1,
       "norm_label": "removeligne()"
     },
     {
@@ -360,7 +360,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/EditeurSeance.tsx",
       "source_location": "L74",
       "id": "editeurseance_moveligne",
-      "community": 4,
+      "community": 1,
       "norm_label": "moveligne()"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/EditeurSeance.tsx",
       "source_location": "L201",
       "id": "editeurseance_syncseries",
-      "community": 4,
+      "community": 1,
       "norm_label": "syncseries()"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/EditeurSeance.tsx",
       "source_location": "L216",
       "id": "editeurseance_delierid",
-      "community": 4,
+      "community": 1,
       "norm_label": "delierid()"
     },
     {
@@ -423,7 +423,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/CopierJoursModal.tsx",
       "source_location": "L1",
       "id": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_copierjoursmodal_tsx",
-      "community": 1,
+      "community": 3,
       "norm_label": "copierjoursmodal.tsx"
     },
     {
@@ -432,7 +432,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/CopierJoursModal.tsx",
       "source_location": "L25",
       "id": "copierjoursmodal_adddays",
-      "community": 1,
+      "community": 3,
       "norm_label": "adddays()"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/CopierJoursModal.tsx",
       "source_location": "L29",
       "id": "copierjoursmodal_daysbetween",
-      "community": 1,
+      "community": 3,
       "norm_label": "daysbetween()"
     },
     {
@@ -450,7 +450,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/CopierJoursModal.tsx",
       "source_location": "L35",
       "id": "copierjoursmodal_handlecopier",
-      "community": 1,
+      "community": 3,
       "norm_label": "handlecopier()"
     },
     {
@@ -486,7 +486,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/MasterPlannerView.tsx",
       "source_location": "L77",
       "id": "masterplannerview_mpdeleterealisation",
-      "community": 1,
+      "community": 3,
       "norm_label": "mpdeleterealisation()"
     },
     {
@@ -753,37 +753,109 @@
     {
       "label": "GenerateurSeance.tsx",
       "file_type": "code",
-      "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/GenerateurSeance.tsx",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
       "source_location": "L1",
-      "id": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_generateurseance_tsx",
-      "community": 8,
+      "id": "app_coach_components_generateurseance_tsx",
+      "community": 5,
       "norm_label": "generateurseance.tsx"
+    },
+    {
+      "label": "parseDosage()",
+      "file_type": "code",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L39",
+      "id": "generateurseance_parsedosage",
+      "community": 5,
+      "norm_label": "parsedosage()"
+    },
+    {
+      "label": "toPhaseEdits()",
+      "file_type": "code",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L58",
+      "id": "generateurseance_tophaseedits",
+      "community": 5,
+      "norm_label": "tophaseedits()"
+    },
+    {
+      "label": "deleteExo()",
+      "file_type": "code",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L259",
+      "id": "generateurseance_deleteexo",
+      "community": 5,
+      "norm_label": "deleteexo()"
+    },
+    {
+      "label": "updateExo()",
+      "file_type": "code",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L265",
+      "id": "generateurseance_updateexo",
+      "community": 5,
+      "norm_label": "updateexo()"
+    },
+    {
+      "label": "openPicker()",
+      "file_type": "code",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L271",
+      "id": "generateurseance_openpicker",
+      "community": 5,
+      "norm_label": "openpicker()"
+    },
+    {
+      "label": "replaceExo()",
+      "file_type": "code",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L279",
+      "id": "generateurseance_replaceexo",
+      "community": 5,
+      "norm_label": "replaceexo()"
+    },
+    {
+      "label": "sauvegarder()",
+      "file_type": "code",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L299",
+      "id": "generateurseance_sauvegarder",
+      "community": 1,
+      "norm_label": "sauvegarder()"
+    },
+    {
+      "label": "enregistrerFavoris()",
+      "file_type": "code",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L365",
+      "id": "generateurseance_enregistrerfavoris",
+      "community": 1,
+      "norm_label": "enregistrerfavoris()"
+    },
+    {
+      "label": "attribuer()",
+      "file_type": "code",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L370",
+      "id": "generateurseance_attribuer",
+      "community": 5,
+      "norm_label": "attribuer()"
     },
     {
       "label": "generer()",
       "file_type": "code",
-      "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/GenerateurSeance.tsx",
-      "source_location": "L122",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L377",
       "id": "generateurseance_generer",
-      "community": 8,
+      "community": 5,
       "norm_label": "generer()"
-    },
-    {
-      "label": "copier()",
-      "file_type": "code",
-      "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/GenerateurSeance.tsx",
-      "source_location": "L131",
-      "id": "generateurseance_copier",
-      "community": 8,
-      "norm_label": "copier()"
     },
     {
       "label": "String()",
       "file_type": "code",
-      "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/GenerateurSeance.tsx",
-      "source_location": "L192",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L442",
       "id": "generateurseance_string",
-      "community": 1,
+      "community": 3,
       "norm_label": "string()"
     },
     {
@@ -792,7 +864,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Programmes.tsx",
       "source_location": "L1",
       "id": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_programmes_tsx",
-      "community": 7,
+      "community": 8,
       "norm_label": "programmes.tsx"
     },
     {
@@ -801,7 +873,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Programmes.tsx",
       "source_location": "L29",
       "id": "programmes_loadlist",
-      "community": 7,
+      "community": 8,
       "norm_label": "loadlist()"
     },
     {
@@ -810,7 +882,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Programmes.tsx",
       "source_location": "L40",
       "id": "programmes_getexercices",
-      "community": 7,
+      "community": 8,
       "norm_label": "getexercices()"
     },
     {
@@ -819,7 +891,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Programmes.tsx",
       "source_location": "L48",
       "id": "programmes_toggleselect",
-      "community": 7,
+      "community": 8,
       "norm_label": "toggleselect()"
     },
     {
@@ -828,7 +900,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Programmes.tsx",
       "source_location": "L52",
       "id": "programmes_nouvelleseance",
-      "community": 7,
+      "community": 8,
       "norm_label": "nouvelleseance()"
     },
     {
@@ -837,7 +909,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Programmes.tsx",
       "source_location": "L61",
       "id": "programmes_editseance",
-      "community": 7,
+      "community": 8,
       "norm_label": "editseance()"
     },
     {
@@ -846,7 +918,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Programmes.tsx",
       "source_location": "L73",
       "id": "programmes_deleteseance",
-      "community": 7,
+      "community": 8,
       "norm_label": "deleteseance()"
     },
     {
@@ -855,7 +927,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Programmes.tsx",
       "source_location": "L84",
       "id": "programmes_ouvrirapercu",
-      "community": 7,
+      "community": 8,
       "norm_label": "ouvrirapercu()"
     },
     {
@@ -864,7 +936,7 @@
       "source_file": "app/coach/components/ChatView.tsx",
       "source_location": "L1",
       "id": "app_coach_components_chatview_tsx",
-      "community": 5,
+      "community": 6,
       "norm_label": "chatview.tsx"
     },
     {
@@ -873,7 +945,7 @@
       "source_file": "app/coach/components/ChatView.tsx",
       "source_location": "L26",
       "id": "chatview_load",
-      "community": 5,
+      "community": 6,
       "norm_label": "load()"
     },
     {
@@ -882,7 +954,7 @@
       "source_file": "app/coach/components/ChatView.tsx",
       "source_location": "L38",
       "id": "chatview_markread",
-      "community": 5,
+      "community": 6,
       "norm_label": "markread()"
     },
     {
@@ -891,7 +963,7 @@
       "source_file": "app/coach/components/ChatView.tsx",
       "source_location": "L43",
       "id": "chatview_send",
-      "community": 5,
+      "community": 6,
       "norm_label": "send()"
     },
     {
@@ -900,7 +972,7 @@
       "source_file": "app/coach/components/ChatView.tsx",
       "source_location": "L58",
       "id": "chatview_uploadmedia",
-      "community": 5,
+      "community": 6,
       "norm_label": "uploadmedia()"
     },
     {
@@ -909,7 +981,7 @@
       "source_file": "app/coach/components/ChatView.tsx",
       "source_location": "L76",
       "id": "chatview_fmttime",
-      "community": 5,
+      "community": 6,
       "norm_label": "fmttime()"
     },
     {
@@ -918,7 +990,7 @@
       "source_file": "app/coach/components/ChatView.tsx",
       "source_location": "L77",
       "id": "chatview_fmtdate",
-      "community": 5,
+      "community": 6,
       "norm_label": "fmtdate()"
     },
     {
@@ -927,7 +999,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Joueurs.tsx",
       "source_location": "L1",
       "id": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_joueurs_tsx",
-      "community": 6,
+      "community": 7,
       "norm_label": "joueurs.tsx"
     },
     {
@@ -936,7 +1008,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Joueurs.tsx",
       "source_location": "L37",
       "id": "joueurs_loadjoueurs",
-      "community": 6,
+      "community": 7,
       "norm_label": "loadjoueurs()"
     },
     {
@@ -945,7 +1017,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Joueurs.tsx",
       "source_location": "L42",
       "id": "joueurs_loadgroupes",
-      "community": 6,
+      "community": 7,
       "norm_label": "loadgroupes()"
     },
     {
@@ -954,7 +1026,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Joueurs.tsx",
       "source_location": "L48",
       "id": "joueurs_creategroupe",
-      "community": 6,
+      "community": 7,
       "norm_label": "creategroupe()"
     },
     {
@@ -963,7 +1035,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Joueurs.tsx",
       "source_location": "L57",
       "id": "joueurs_deletegroupe",
-      "community": 6,
+      "community": 7,
       "norm_label": "deletegroupe()"
     },
     {
@@ -972,7 +1044,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Joueurs.tsx",
       "source_location": "L64",
       "id": "joueurs_openadd",
-      "community": 6,
+      "community": 7,
       "norm_label": "openadd()"
     },
     {
@@ -981,7 +1053,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Joueurs.tsx",
       "source_location": "L70",
       "id": "joueurs_openedit",
-      "community": 6,
+      "community": 7,
       "norm_label": "openedit()"
     },
     {
@@ -990,7 +1062,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Joueurs.tsx",
       "source_location": "L81",
       "id": "joueurs_handlesave",
-      "community": 6,
+      "community": 7,
       "norm_label": "handlesave()"
     },
     {
@@ -999,7 +1071,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Joueurs.tsx",
       "source_location": "L113",
       "id": "joueurs_toggleactif",
-      "community": 6,
+      "community": 7,
       "norm_label": "toggleactif()"
     },
     {
@@ -1107,7 +1179,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L1",
       "id": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_profiljoueur_tsx",
-      "community": 1,
+      "community": 3,
       "norm_label": "profiljoueur.tsx"
     },
     {
@@ -1116,7 +1188,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L30",
       "id": "profiljoueur_resolvejoueurauthid",
-      "community": 1,
+      "community": 3,
       "norm_label": "resolvejoueurauthid()"
     },
     {
@@ -1125,7 +1197,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L70",
       "id": "profiljoueur_loaddata",
-      "community": 1,
+      "community": 3,
       "norm_label": "loaddata()"
     },
     {
@@ -1134,7 +1206,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L83",
       "id": "profiljoueur_attribuertemplate",
-      "community": 1,
+      "community": 3,
       "norm_label": "attribuertemplate()"
     },
     {
@@ -1143,7 +1215,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L91",
       "id": "profiljoueur_supprimerrealisation",
-      "community": 1,
+      "community": 3,
       "norm_label": "supprimerrealisation()"
     },
     {
@@ -1152,7 +1224,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L102",
       "id": "profiljoueur_sauvegarderwellness",
-      "community": 1,
+      "community": 3,
       "norm_label": "sauvegarderwellness()"
     },
     {
@@ -1161,7 +1233,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L125",
       "id": "profiljoueur_togglecompletee",
-      "community": 1,
+      "community": 3,
       "norm_label": "togglecompletee()"
     },
     {
@@ -1170,7 +1242,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L131",
       "id": "profiljoueur_sauvegarderseance",
-      "community": 1,
+      "community": 3,
       "norm_label": "sauvegarderseance()"
     },
     {
@@ -1179,7 +1251,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L148",
       "id": "profiljoueur_getlundi",
-      "community": 1,
+      "community": 3,
       "norm_label": "getlundi()"
     },
     {
@@ -1188,7 +1260,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L167",
       "id": "profiljoueur_decalerrange",
-      "community": 1,
+      "community": 3,
       "norm_label": "decalerrange()"
     },
     {
@@ -1197,7 +1269,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L172",
       "id": "profiljoueur_alleraujourdhui",
-      "community": 1,
+      "community": 3,
       "norm_label": "alleraujourdhui()"
     },
     {
@@ -1206,7 +1278,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L298",
       "id": "profiljoueur_wcolor",
-      "community": 1,
+      "community": 3,
       "norm_label": "wcolor()"
     },
     {
@@ -1215,7 +1287,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/ProfilJoueur.tsx",
       "source_location": "L556",
       "id": "profiljoueur_wc",
-      "community": 1,
+      "community": 3,
       "norm_label": "wc()"
     },
     {
@@ -1305,7 +1377,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Modeles.tsx",
       "source_location": "L1",
       "id": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_modeles_tsx",
-      "community": 4,
+      "community": 1,
       "norm_label": "modeles.tsx"
     },
     {
@@ -1314,7 +1386,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Modeles.tsx",
       "source_location": "L10",
       "id": "modeles_modeles",
-      "community": 4,
+      "community": 1,
       "norm_label": "modeles()"
     },
     {
@@ -1323,7 +1395,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Modeles.tsx",
       "source_location": "L179",
       "id": "modeles_async",
-      "community": 4,
+      "community": 1,
       "norm_label": "async()"
     },
     {
@@ -1332,7 +1404,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Modeles.tsx",
       "source_location": "L390",
       "id": "modeles_togglejoueur",
-      "community": 4,
+      "community": 1,
       "norm_label": "togglejoueur()"
     },
     {
@@ -1341,7 +1413,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Modeles.tsx",
       "source_location": "L394",
       "id": "modeles_confirmer",
-      "community": 4,
+      "community": 1,
       "norm_label": "confirmer()"
     },
     {
@@ -1431,7 +1503,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/lib/exercises.ts",
       "source_location": "L1",
       "id": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_lib_exercises_ts",
-      "community": 8,
+      "community": 5,
       "norm_label": "exercises.ts"
     },
     {
@@ -1440,7 +1512,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/lib/exercises.ts",
       "source_location": "L457",
       "id": "exercises_pick",
-      "community": 8,
+      "community": 5,
       "norm_label": "pick()"
     },
     {
@@ -1449,7 +1521,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/lib/exercises.ts",
       "source_location": "L475",
       "id": "exercises_genererseance",
-      "community": 8,
+      "community": 5,
       "norm_label": "genererseance()"
     },
     {
@@ -1458,7 +1530,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/lib/exercises.ts",
       "source_location": "L600",
       "id": "exercises_seancetotext",
-      "community": 8,
+      "community": 5,
       "norm_label": "seancetotext()"
     },
     {
@@ -1557,7 +1629,7 @@
       "source_file": "app/api/joueurs/check-access/route.ts",
       "source_location": "L1",
       "id": "app_api_joueurs_check_access_route_ts",
-      "community": 3,
+      "community": 4,
       "norm_label": "route.ts"
     },
     {
@@ -1566,7 +1638,7 @@
       "source_file": "app/api/coach-id/route.ts",
       "source_location": "L10",
       "id": "route_get",
-      "community": 3,
+      "community": 4,
       "norm_label": "get()"
     },
     {
@@ -1575,7 +1647,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/api/joueurs/auth-id/route.ts",
       "source_location": "L1",
       "id": "users_nicolasjover_desktop_pagacoaching_app_perso_app_api_joueurs_auth_id_route_ts",
-      "community": 3,
+      "community": 4,
       "norm_label": "route.ts"
     },
     {
@@ -1584,7 +1656,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/api/joueurs/create/route.ts",
       "source_location": "L1",
       "id": "users_nicolasjover_desktop_pagacoaching_app_perso_app_api_joueurs_create_route_ts",
-      "community": 3,
+      "community": 4,
       "norm_label": "route.ts"
     },
     {
@@ -1593,7 +1665,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/api/push/send/route.ts",
       "source_location": "L17",
       "id": "route_post",
-      "community": 3,
+      "community": 4,
       "norm_label": "post()"
     },
     {
@@ -1602,7 +1674,7 @@
       "source_file": "app/api/push/subscribe/route.ts",
       "source_location": "L1",
       "id": "app_api_push_subscribe_route_ts",
-      "community": 3,
+      "community": 4,
       "norm_label": "route.ts"
     },
     {
@@ -1611,7 +1683,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/api/push/send/route.ts",
       "source_location": "L1",
       "id": "users_nicolasjover_desktop_pagacoaching_app_perso_app_api_push_send_route_ts",
-      "community": 3,
+      "community": 4,
       "norm_label": "route.ts"
     },
     {
@@ -1620,7 +1692,7 @@
       "source_file": "app/api/me/role/route.ts",
       "source_location": "L1",
       "id": "app_api_me_role_route_ts",
-      "community": 3,
+      "community": 4,
       "norm_label": "route.ts"
     },
     {
@@ -1629,7 +1701,7 @@
       "source_file": "app/api/coach-id/route.ts",
       "source_location": "L1",
       "id": "app_api_coach_id_route_ts",
-      "community": 3,
+      "community": 4,
       "norm_label": "route.ts"
     },
     {
@@ -1656,7 +1728,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/public/sw.js",
       "source_location": "L1",
       "id": "users_nicolasjover_desktop_pagacoaching_app_perso_public_sw_js",
-      "community": 3,
+      "community": 4,
       "norm_label": "sw.js"
     },
     {
@@ -1665,7 +1737,7 @@
       "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/public/sw.js",
       "source_location": "L13",
       "id": "sw_iscachestale",
-      "community": 3,
+      "community": 4,
       "norm_label": "iscachestale()"
     },
     {
@@ -1737,7 +1809,7 @@
       "source_file": "lib/push.ts",
       "source_location": "L1",
       "id": "lib_push_ts",
-      "community": 5,
+      "community": 6,
       "norm_label": "push.ts"
     },
     {
@@ -1746,7 +1818,7 @@
       "source_file": "lib/push.ts",
       "source_location": "L2",
       "id": "push_subscribepush",
-      "community": 5,
+      "community": 6,
       "norm_label": "subscribepush()"
     },
     {
@@ -1755,7 +1827,7 @@
       "source_file": "lib/push.ts",
       "source_location": "L21",
       "id": "push_sendpush",
-      "community": 5,
+      "community": 6,
       "norm_label": "sendpush()"
     },
     {
@@ -1764,7 +1836,7 @@
       "source_file": "lib/push.ts",
       "source_location": "L31",
       "id": "push_urlbase64touint8array",
-      "community": 5,
+      "community": 6,
       "norm_label": "urlbase64touint8array()"
     },
     {
@@ -1773,7 +1845,7 @@
       "source_file": "lib/auth-server.ts",
       "source_location": "L1",
       "id": "lib_auth_server_ts",
-      "community": 3,
+      "community": 4,
       "norm_label": "auth-server.ts"
     },
     {
@@ -1782,7 +1854,7 @@
       "source_file": "lib/auth-server.ts",
       "source_location": "L5",
       "id": "auth_server_getsessionuser",
-      "community": 3,
+      "community": 4,
       "norm_label": "getsessionuser()"
     },
     {
@@ -1791,7 +1863,7 @@
       "source_file": "lib/auth-server.ts",
       "source_location": "L22",
       "id": "auth_server_requireauth",
-      "community": 3,
+      "community": 4,
       "norm_label": "requireauth()"
     },
     {
@@ -1800,7 +1872,7 @@
       "source_file": "lib/auth-server.ts",
       "source_location": "L31",
       "id": "auth_server_requirecoach",
-      "community": 3,
+      "community": 4,
       "norm_label": "requirecoach()"
     },
     {
@@ -2969,38 +3041,206 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/GenerateurSeance.tsx",
-      "source_location": "L122",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L39",
       "weight": 1.0,
-      "_src": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_generateurseance_tsx",
+      "_src": "app_coach_components_generateurseance_tsx",
+      "_tgt": "generateurseance_parsedosage",
+      "source": "app_coach_components_generateurseance_tsx",
+      "target": "generateurseance_parsedosage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L58",
+      "weight": 1.0,
+      "_src": "app_coach_components_generateurseance_tsx",
+      "_tgt": "generateurseance_tophaseedits",
+      "source": "app_coach_components_generateurseance_tsx",
+      "target": "generateurseance_tophaseedits",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L259",
+      "weight": 1.0,
+      "_src": "app_coach_components_generateurseance_tsx",
+      "_tgt": "generateurseance_deleteexo",
+      "source": "app_coach_components_generateurseance_tsx",
+      "target": "generateurseance_deleteexo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L265",
+      "weight": 1.0,
+      "_src": "app_coach_components_generateurseance_tsx",
+      "_tgt": "generateurseance_updateexo",
+      "source": "app_coach_components_generateurseance_tsx",
+      "target": "generateurseance_updateexo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L271",
+      "weight": 1.0,
+      "_src": "app_coach_components_generateurseance_tsx",
+      "_tgt": "generateurseance_openpicker",
+      "source": "app_coach_components_generateurseance_tsx",
+      "target": "generateurseance_openpicker",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L279",
+      "weight": 1.0,
+      "_src": "app_coach_components_generateurseance_tsx",
+      "_tgt": "generateurseance_replaceexo",
+      "source": "app_coach_components_generateurseance_tsx",
+      "target": "generateurseance_replaceexo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L299",
+      "weight": 1.0,
+      "_src": "app_coach_components_generateurseance_tsx",
+      "_tgt": "generateurseance_sauvegarder",
+      "source": "app_coach_components_generateurseance_tsx",
+      "target": "generateurseance_sauvegarder",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L365",
+      "weight": 1.0,
+      "_src": "app_coach_components_generateurseance_tsx",
+      "_tgt": "generateurseance_enregistrerfavoris",
+      "source": "app_coach_components_generateurseance_tsx",
+      "target": "generateurseance_enregistrerfavoris",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L370",
+      "weight": 1.0,
+      "_src": "app_coach_components_generateurseance_tsx",
+      "_tgt": "generateurseance_attribuer",
+      "source": "app_coach_components_generateurseance_tsx",
+      "target": "generateurseance_attribuer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L377",
+      "weight": 1.0,
+      "_src": "app_coach_components_generateurseance_tsx",
       "_tgt": "generateurseance_generer",
-      "source": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_generateurseance_tsx",
+      "source": "app_coach_components_generateurseance_tsx",
       "target": "generateurseance_generer",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/GenerateurSeance.tsx",
-      "source_location": "L131",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L456",
       "weight": 1.0,
-      "_src": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_generateurseance_tsx",
-      "_tgt": "generateurseance_copier",
-      "source": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_generateurseance_tsx",
-      "target": "generateurseance_copier",
+      "_src": "app_coach_components_generateurseance_tsx",
+      "_tgt": "generateurseance_string",
+      "source": "app_coach_components_generateurseance_tsx",
+      "target": "generateurseance_string",
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
+      "relation": "calls",
       "confidence": "EXTRACTED",
-      "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/GenerateurSeance.tsx",
-      "source_location": "L212",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L381",
       "weight": 1.0,
-      "_src": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_generateurseance_tsx",
-      "_tgt": "generateurseance_string",
-      "source": "users_nicolasjover_desktop_pagacoaching_app_perso_app_coach_components_generateurseance_tsx",
-      "target": "generateurseance_string",
+      "_src": "generateurseance_generer",
+      "_tgt": "generateurseance_tophaseedits",
+      "source": "generateurseance_tophaseedits",
+      "target": "generateurseance_generer",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L366",
+      "weight": 1.0,
+      "_src": "generateurseance_enregistrerfavoris",
+      "_tgt": "generateurseance_sauvegarder",
+      "source": "generateurseance_sauvegarder",
+      "target": "generateurseance_enregistrerfavoris",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L371",
+      "weight": 1.0,
+      "_src": "generateurseance_attribuer",
+      "_tgt": "generateurseance_sauvegarder",
+      "source": "generateurseance_sauvegarder",
+      "target": "generateurseance_attribuer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L342",
+      "weight": 1.0,
+      "_src": "generateurseance_sauvegarder",
+      "_tgt": "route_get",
+      "source": "generateurseance_sauvegarder",
+      "target": "route_get"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L358",
+      "weight": 1.0,
+      "_src": "generateurseance_sauvegarder",
+      "_tgt": "toast_toast",
+      "source": "generateurseance_sauvegarder",
+      "target": "toast_toast"
+    },
+    {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "app/coach/components/GenerateurSeance.tsx",
+      "source_location": "L367",
+      "weight": 1.0,
+      "_src": "generateurseance_enregistrerfavoris",
+      "_tgt": "toast_toast",
+      "source": "generateurseance_enregistrerfavoris",
+      "target": "toast_toast"
     },
     {
       "relation": "calls",
@@ -3013,18 +3253,6 @@
       "_tgt": "exercises_genererseance",
       "source": "generateurseance_generer",
       "target": "exercises_genererseance"
-    },
-    {
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "/Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/GenerateurSeance.tsx",
-      "source_location": "L133",
-      "weight": 1.0,
-      "_src": "generateurseance_copier",
-      "_tgt": "exercises_seancetotext",
-      "source": "generateurseance_copier",
-      "target": "exercises_seancetotext"
     },
     {
       "relation": "calls",

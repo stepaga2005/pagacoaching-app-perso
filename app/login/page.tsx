@@ -27,8 +27,11 @@ export default function LoginPage() {
       return
     }
 
-    // Détermine le rôle côté serveur (ne pas exposer l'email admin dans le bundle)
-    const roleRes = await fetch('/api/me/role')
+    // Détermine le rôle côté serveur via le token (session pas encore en cookie)
+    const token = data.session?.access_token ?? ''
+    const headers = { 'Authorization': `Bearer ${token}` }
+
+    const roleRes = await fetch('/api/me/role', { headers })
     const { role } = await roleRes.json()
     if (role === 'coach') {
       router.push('/coach')
@@ -36,7 +39,7 @@ export default function LoginPage() {
     }
 
     // Vérifie l'accès du joueur via API (service role)
-    const res = await fetch(`/api/joueurs/check-access?email=${encodeURIComponent(data.user?.email ?? '')}`)
+    const res = await fetch(`/api/joueurs/check-access?email=${encodeURIComponent(data.user?.email ?? '')}`, { headers })
     const access = await res.json()
 
     if (!access.allowed) {
