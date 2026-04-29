@@ -1,12 +1,12 @@
-# Graph Report - .  (2026-04-28)
+# Graph Report - .  (2026-04-29)
 
 ## Corpus Check
-- 48 files · ~63,116 words
+- 49 files · ~67,869 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 209 nodes · 238 edges · 33 communities detected
-- Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 28 edges (avg confidence: 0.8)
+- 216 nodes · 249 edges · 35 communities detected
+- Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 31 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -43,9 +43,11 @@
 - [[_COMMUNITY_Community 30|Community 30]]
 - [[_COMMUNITY_Community 31|Community 31]]
 - [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 33|Community 33]]
+- [[_COMMUNITY_Community 34|Community 34]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `toast()` - 13 edges
+1. `toast()` - 16 edges
 2. `patchExoLocal()` - 9 edges
 3. `String()` - 8 edges
 4. `GET()` - 8 edges
@@ -57,16 +59,16 @@
 10. `deleteSeance()` - 4 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `String()` --calls--> `deleteSeance()`  [INFERRED]
-  app/coach/components/GenerateurSeance.tsx → /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Programmes.tsx
-- `String()` --calls--> `confirmer()`  [INFERRED]
-  app/coach/components/GenerateurSeance.tsx → /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/DuplicationModal.tsx
-- `GET()` --calls--> `isCacheStale()`  [INFERRED]
-  app/api/coach-id/route.ts → /Users/nicolasjover/Desktop/pagacoaching-app-perso/public/sw.js
-- `send()` --calls--> `sendPush()`  [INFERRED]
-  app/joueur/page.tsx → lib/push.ts
 - `handleCopier()` --calls--> `String()`  [INFERRED]
   /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/CopierJoursModal.tsx → app/coach/components/GenerateurSeance.tsx
+- `mpDeleteRealisation()` --calls--> `toast()`  [INFERRED]
+  app/coach/components/MasterPlannerView.tsx → /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/lib/toast.ts
+- `String()` --calls--> `deleteSeance()`  [INFERRED]
+  app/coach/components/GenerateurSeance.tsx → /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/components/Programmes.tsx
+- `supprimerRealisation()` --calls--> `toast()`  [INFERRED]
+  app/coach/components/ProfilJoueur.tsx → /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/lib/toast.ts
+- `sauvegarderWellness()` --calls--> `toast()`  [INFERRED]
+  app/coach/components/ProfilJoueur.tsx → /Users/nicolasjover/Desktop/pagacoaching-app-perso/app/coach/lib/toast.ts
 
 ## Communities
 
@@ -75,16 +77,16 @@ Cohesion: 0.11
 Nodes (17): addSet(), async(), flushSets(), flushSimple(), mpAttribuerSessionId(), mpCopyExoToTargets(), mpDupSession(), mpMoveSession() (+9 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.08
-Nodes (8): confirmer(), datesPrevues(), confirmer(), handleSave(), enregistrerFavoris(), sauvegarder(), confirmer(), toast()
-
-### Community 2 - "Community 2"
-Cohesion: 0.11
+Cohesion: 0.1
 Nodes (5): goOnline(), hapticJ(), load(), reset(), uploadMedia()
 
+### Community 2 - "Community 2"
+Cohesion: 0.13
+Nodes (10): confirmer(), creerActivite(), load(), supprimerActivite(), daysBetween(), handleCopier(), enregistrerFavoris(), sauvegarder() (+2 more)
+
 ### Community 3 - "Community 3"
-Cohesion: 0.14
-Nodes (11): daysBetween(), handleCopier(), String(), mpDeleteRealisation(), fmtChrono(), attribuerTemplate(), loadData(), sauvegarderSeance() (+3 more)
+Cohesion: 0.15
+Nodes (10): confirmer(), String(), mpDeleteRealisation(), fmtChrono(), attribuerTemplate(), loadData(), sauvegarderSeance(), sauvegarderWellness() (+2 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.17
@@ -99,20 +101,20 @@ Cohesion: 0.2
 Nodes (7): load(), send(), uploadMedia(), send(), sendPush(), subscribePush(), urlBase64ToUint8Array()
 
 ### Community 7 - "Community 7"
-Cohesion: 0.36
-Nodes (6): createGroupe(), deleteGroupe(), handleSave(), loadGroupes(), loadJoueurs(), toggleActif()
+Cohesion: 0.2
+Nodes (1): handleSave()
 
 ### Community 8 - "Community 8"
 Cohesion: 0.36
-Nodes (5): deleteSeance(), editSeance(), getExercices(), loadList(), nouvelleSeance()
+Nodes (6): createGroupe(), deleteGroupe(), handleSave(), loadGroupes(), loadJoueurs(), toggleActif()
 
 ### Community 9 - "Community 9"
-Cohesion: 0.33
-Nodes (2): parseCSV(), splitCSVLine()
+Cohesion: 0.36
+Nodes (5): deleteSeance(), editSeance(), getExercices(), loadList(), nouvelleSeance()
 
 ### Community 10 - "Community 10"
-Cohesion: 0.4
-Nodes (0): 
+Cohesion: 0.33
+Nodes (2): parseCSV(), splitCSVLine()
 
 ### Community 11 - "Community 11"
 Cohesion: 0.4
@@ -123,15 +125,15 @@ Cohesion: 0.4
 Nodes (0): 
 
 ### Community 13 - "Community 13"
-Cohesion: 0.5
+Cohesion: 0.4
 Nodes (0): 
 
 ### Community 14 - "Community 14"
 Cohesion: 0.67
-Nodes (0): 
+Nodes (2): confirmer(), datesPrevues()
 
 ### Community 15 - "Community 15"
-Cohesion: 0.67
+Cohesion: 0.5
 Nodes (0): 
 
 ### Community 16 - "Community 16"
@@ -139,11 +141,11 @@ Cohesion: 0.67
 Nodes (0): 
 
 ### Community 17 - "Community 17"
-Cohesion: 1.0
+Cohesion: 0.67
 Nodes (0): 
 
 ### Community 18 - "Community 18"
-Cohesion: 1.0
+Cohesion: 0.67
 Nodes (0): 
 
 ### Community 19 - "Community 19"
@@ -202,51 +204,59 @@ Nodes (0):
 Cohesion: 1.0
 Nodes (0): 
 
+### Community 33 - "Community 33"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 34 - "Community 34"
+Cohesion: 1.0
+Nodes (0): 
+
 ## Knowledge Gaps
-- **Thin community `Community 17`** (2 nodes): `loadData()`, `Dashboard.tsx`
+- **Thin community `Community 19`** (2 nodes): `Dashboard.tsx`, `loadData()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 18`** (2 nodes): `Exercices()`, `Exercices.tsx`
+- **Thin community `Community 20`** (2 nodes): `Exercices()`, `Exercices.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 19`** (2 nodes): `getDerivedStateFromError()`, `ErrorBoundary.tsx`
+- **Thin community `Community 21`** (2 nodes): `getDerivedStateFromError()`, `ErrorBoundary.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 20`** (2 nodes): `page.tsx`, `handleLogin()`
+- **Thin community `Community 22`** (2 nodes): `page.tsx`, `handleLogin()`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 21`** (1 nodes): `sentry.server.config.ts`
+- **Thin community `Community 23`** (1 nodes): `sentry.server.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 22`** (1 nodes): `next-env.d.ts`
+- **Thin community `Community 24`** (1 nodes): `next-env.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 23`** (1 nodes): `sentry.client.config.ts`
+- **Thin community `Community 25`** (1 nodes): `sentry.client.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 24`** (1 nodes): `sentry.edge.config.ts`
+- **Thin community `Community 26`** (1 nodes): `sentry.edge.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 25`** (1 nodes): `next.config.ts`
+- **Thin community `Community 27`** (1 nodes): `next.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 26`** (1 nodes): `layout.tsx`
+- **Thin community `Community 28`** (1 nodes): `layout.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 27`** (1 nodes): `page.tsx`
+- **Thin community `Community 29`** (1 nodes): `page.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 28`** (1 nodes): `SplashScreen.tsx`
+- **Thin community `Community 30`** (1 nodes): `SplashScreen.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 29`** (1 nodes): `VideoThumb.tsx`
+- **Thin community `Community 31`** (1 nodes): `VideoThumb.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 30`** (1 nodes): `SearchableSelect.tsx`
+- **Thin community `Community 32`** (1 nodes): `SearchableSelect.tsx`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 31`** (1 nodes): `types.ts`
+- **Thin community `Community 33`** (1 nodes): `types.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 32`** (1 nodes): `supabase.ts`
+- **Thin community `Community 34`** (1 nodes): `supabase.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `toast()` connect `Community 1` to `Community 8`, `Community 3`, `Community 7`?**
-  _High betweenness centrality (0.256) - this node is a cross-community bridge._
-- **Why does `String()` connect `Community 3` to `Community 8`, `Community 1`, `Community 5`?**
-  _High betweenness centrality (0.248) - this node is a cross-community bridge._
-- **Why does `fmtChrono()` connect `Community 3` to `Community 2`?**
-  _High betweenness centrality (0.184) - this node is a cross-community bridge._
-- **Are the 12 inferred relationships involving `toast()` (e.g. with `handleSave()` and `handleCopier()`) actually correct?**
-  _`toast()` has 12 INFERRED edges - model-reasoned connections that need verification._
+- **Why does `toast()` connect `Community 2` to `Community 3`, `Community 7`, `Community 8`, `Community 9`, `Community 14`?**
+  _High betweenness centrality (0.284) - this node is a cross-community bridge._
+- **Why does `String()` connect `Community 3` to `Community 9`, `Community 2`, `Community 5`?**
+  _High betweenness centrality (0.245) - this node is a cross-community bridge._
+- **Why does `fmtChrono()` connect `Community 3` to `Community 1`?**
+  _High betweenness centrality (0.186) - this node is a cross-community bridge._
+- **Are the 15 inferred relationships involving `toast()` (e.g. with `handleSave()` and `handleCopier()`) actually correct?**
+  _`toast()` has 15 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 7 inferred relationships involving `String()` (e.g. with `fmtChrono()` and `handleCopier()`) actually correct?**
   _`String()` has 7 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 4 inferred relationships involving `GET()` (e.g. with `sauvegarder()` and `requireAuth()`) actually correct?**
