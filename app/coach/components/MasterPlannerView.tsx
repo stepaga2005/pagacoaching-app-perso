@@ -487,7 +487,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                 {r.duree_minutes ? `${r.duree_minutes} min` : 'Appuyer pour saisir la durée'}
                               </div>
                             </div>
-                            <button onClick={e => { e.stopPropagation(); if (confirm('Supprimer cette activité ?')) mpDeleteRealisation(r.id) }}
+                            <button onClick={e => { e.stopPropagation(); mpDeleteRealisation(r.id) }}
                               style={{ background: 'transparent', border: 'none', color: '#C9A84C60', cursor: 'pointer', fontSize: '16px', padding: '4px' }}>🗑</button>
                           </div>
                         )
@@ -514,7 +514,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                 {items.length === 0 && <span style={{ color: '#9898B8', fontSize: '11px' }}>Aucune donnée</span>}
                               </div>
                             </div>
-                            <button onClick={() => { if (confirm('Supprimer cette entrée wellness ?')) mpDeleteRealisation(r.id) }}
+                            <button onClick={() => { mpDeleteRealisation(r.id) }}
                               style={{ background: 'transparent', border: 'none', color: '#2ECC7160', cursor: 'pointer', fontSize: '16px', padding: '4px' }}>🗑</button>
                           </div>
                         )
@@ -664,7 +664,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                           <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '700', fontSize: '12px', color: '#E0C87A' }}>{r.activites?.nom || 'Activité'}</div>
                           {r.duree_minutes != null && <div style={{ fontSize: '11px', color: '#C9A84C', fontWeight: 700 }}>{r.duree_minutes} min</div>}
                         </div>
-                        <button onClick={e => { e.stopPropagation(); if (confirm('Supprimer cette activité ?')) mpDeleteRealisation(r.id) }}
+                        <button onClick={e => { e.stopPropagation(); mpDeleteRealisation(r.id) }}
                           style={{ background: 'transparent', border: 'none', color: '#C9A84C60', cursor: 'pointer', fontSize: '14px', padding: '2px 4px', lineHeight: 1, flexShrink: 0 }}>🗑</button>
                       </div>
                     )
@@ -688,7 +688,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                             {items.length === 0 && <span style={{ color: '#9898B8', fontSize: '10px' }}>—</span>}
                           </div>
                         </div>
-                        <button onClick={() => { if (confirm('Supprimer cette entrée wellness ?')) mpDeleteRealisation(r.id) }}
+                        <button onClick={() => { mpDeleteRealisation(r.id) }}
                           style={{ background: 'transparent', border: 'none', color: '#2ECC7160', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', lineHeight: 1, flexShrink: 0 }}>🗑</button>
                       </div>
                     )
@@ -709,7 +709,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                             <button onClick={() => { setMpMovingSession({ id: r.id, seanceId: r.seance_id!, fromDate: ds, nom: r.seances?.nom || '' }); setMpSessionMenu(null) }}
                               style={{ width: '100%', background: 'transparent', border: 'none', color: '#1A6FFF', cursor: 'pointer', padding: '8px 10px', fontSize: '12px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>↔ Déplacer</button>
                             <div style={{ height: '1px', background: '#2C2C44', margin: '4px 0' }} />
-                            <button onClick={() => { if (confirm('Supprimer cette séance ?')) mpDeleteRealisation(r.id) }}
+                            <button onClick={() => mpDeleteRealisation(r.id)}
                               style={{ width: '100%', background: 'transparent', border: 'none', color: '#FF4757', cursor: 'pointer', padding: '8px 10px', fontSize: '12px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>🗑 Supprimer</button>
                           </div>
                         )}
@@ -973,7 +973,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                 <span style={{ fontSize: '20px' }}>↔</span> Déplacer la séance
               </button>
               <div style={{ height: '1px', background: '#2C2C44', margin: '4px 0' }} />
-              <button onClick={() => { if (confirm('Supprimer cette séance ?')) { mpDeleteRealisation(mpSessionMenu.id); setMpSessionMenu(null) } }}
+              <button onClick={() => { mpDeleteRealisation(mpSessionMenu.id); setMpSessionMenu(null) }}
                 style={{ width: '100%', background: '#FF475710', border: '1px solid #FF475730', borderRadius: '12px', padding: '14px 16px', color: '#FF4757', cursor: 'pointer', fontSize: '15px', fontWeight: '700', textAlign: 'left', display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <span style={{ fontSize: '20px' }}>🗑</span> Supprimer la séance
               </button>
@@ -1385,7 +1385,6 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
             </div>
             <button
               onClick={async () => {
-                if (!confirm('Supprimer cette activité ?')) return
                 await mpDeleteRealisation(mpActiviteModal.id)
                 setMpActiviteModal(null)
               }}
