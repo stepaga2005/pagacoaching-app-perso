@@ -18,10 +18,11 @@ type SeanceExercice = {
   } | null
 }
 type Realisation = {
-  id: string; seance_id: string; date_realisation: string; completee: boolean
+  id: string; seance_id: string | null; activite_id?: string | null; date_realisation: string; completee: boolean
   rpe?: number | null; fatigue?: number | null; courbatures?: number | null
   qualite_sommeil?: number | null; notes_joueur?: string | null
   seances?: { id: string; nom: string; type: string; seance_exercices?: SeanceExercice[] }
+  activites?: { nom: string } | null
 }
 type WellnessForm = {
   completee: boolean; fatigue: number | null; courbatures: number | null
@@ -1300,7 +1301,7 @@ export default function JoueurPage() {
     try {
       const result = await Promise.race([
         supabase.from('realisations')
-          .select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, recuperation_inter_sets, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur))))')
+          .select('id, seance_id, activite_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, recuperation_inter_sets, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur)))), activites(nom)')
           .eq('joueur_id', joueurId).order('date_realisation'),
         new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), 12000)),
       ]) as { data: Realisation[] | null }
@@ -1447,7 +1448,7 @@ export default function JoueurPage() {
     realsParDate[r.date_realisation].push(r)
   }
 
-  const realsSemanine = jours.flatMap(d => realsParDate[d] || [])
+  const realsSemanine = jours.flatMap(d => realsParDate[d] || []).filter(r => r.seance_id)
   const nbTotal = realsSemanine.length
   const nbDone = realsSemanine.filter(r => r.completee).length
 
@@ -1608,11 +1609,13 @@ export default function JoueurPage() {
             const reals = realsParDate[ds] || []
             const isToday = ds === today
             const isPast = ds < today
+            const sessions = reals.filter(r => r.seance_id)
             const hasSessions = reals.length > 0
-            const allDone = hasSessions && reals.every(r => r.completee)
-            const someMissed = hasSessions && !allDone && isPast
+            const allDone = sessions.length > 0 && sessions.every(r => r.completee)
+            const someMissed = sessions.length > 0 && !allDone && isPast
+            const hasOnlyActivites = reals.length > 0 && sessions.length === 0
             const dayLetters = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
-            const circleColor = isToday ? '#1A6FFF' : allDone ? '#2ECC71' : someMissed ? '#FF4757' : hasSessions ? '#1A6FFF' : 'transparent'
+            const circleColor = isToday ? '#1A6FFF' : allDone ? '#2ECC71' : someMissed ? '#FF4757' : hasOnlyActivites ? '#C9A84C' : hasSessions ? '#1A6FFF' : 'transparent'
             const circleOpacity = isToday || allDone || someMissed ? 1 : hasSessions ? 0.25 : 0
             return (
               <div key={ds} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
@@ -1622,11 +1625,11 @@ export default function JoueurPage() {
                 <div style={{
                   width: '100%', aspectRatio: '1', borderRadius: '50%',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: isToday ? '#1A6FFF' : allDone ? '#2ECC71' : `${circleColor}${hasSessions && !isToday ? '22' : '00'}`,
-                  border: `2px solid ${isToday ? '#1A6FFF' : allDone ? '#2ECC71' : someMissed ? '#FF4757' : hasSessions ? '#1A6FFF55' : '#1A1A1A'}`,
+                  background: isToday ? '#1A6FFF' : allDone ? '#2ECC71' : hasOnlyActivites ? '#C9A84C22' : `${circleColor}${hasSessions && !isToday ? '22' : '00'}`,
+                  border: `2px solid ${isToday ? '#1A6FFF' : allDone ? '#2ECC71' : someMissed ? '#FF4757' : hasOnlyActivites ? '#C9A84C55' : hasSessions ? '#1A6FFF55' : '#1A1A1A'}`,
                 }}>
-                  <span style={{ fontSize: isMobile ? '13px' : '15px', fontWeight: '800', color: isToday ? '#FFF' : allDone ? '#FFF' : hasSessions ? (isPast ? '#FF4757' : '#1A6FFF') : '#666' }}>
-                    {allDone ? '✓' : new Date(ds + 'T12:00:00').getDate()}
+                  <span style={{ fontSize: isMobile ? '13px' : '15px', fontWeight: '800', color: isToday ? '#FFF' : allDone ? '#FFF' : hasOnlyActivites ? '#C9A84C' : hasSessions ? (isPast ? '#FF4757' : '#1A6FFF') : '#666' }}>
+                    {allDone ? '✓' : hasOnlyActivites ? '🏃' : new Date(ds + 'T12:00:00').getDate()}
                   </span>
                 </div>
               </div>
@@ -1651,10 +1654,11 @@ export default function JoueurPage() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {reals.map(r => {
+                  const isActivite = !!r.activite_id && !r.seance_id
                   const hasWellness = r.fatigue != null || r.rpe != null || r.courbatures != null || r.qualite_sommeil != null
                   const exCount = r.seances?.seance_exercices?.length || 0
-                  const statusColor = r.completee ? '#2ECC71' : isPast ? '#FF4757' : '#1A6FFF'
-                  const statusLabel = r.completee ? 'Terminé' : isPast ? 'Manqué' : isToday ? 'Prévu aujourd\'hui' : 'À venir'
+                  const statusColor = isActivite ? '#C9A84C' : r.completee ? '#2ECC71' : isPast ? '#FF4757' : '#1A6FFF'
+                  const statusLabel = isActivite ? 'Activité' : r.completee ? 'Terminé' : isPast ? 'Manqué' : isToday ? 'Prévu aujourd\'hui' : 'À venir'
                   const wellnessItems = [
                     r.fatigue != null ? { label: 'Fatigue', val: r.fatigue, color: r.fatigue <= 3 ? '#2ECC71' : r.fatigue <= 5 ? '#F39C12' : r.fatigue <= 7 ? '#FF6B35' : '#FF4757' } : null,
                     r.rpe != null ? { label: 'Effort', val: r.rpe, color: '#1A6FFF' } : null,
@@ -1663,11 +1667,11 @@ export default function JoueurPage() {
                   ].filter(Boolean) as { label: string; val: number; color: string }[]
 
                   return (
-                    <div key={r.id} onClick={() => ouvrir(r)} style={{
+                    <div key={r.id} onClick={() => !isActivite && ouvrir(r)} style={{
                       background: '#0F0F0F',
                       border: '1px solid #1A1A1A',
                       borderRadius: '16px',
-                      cursor: 'pointer',
+                      cursor: isActivite ? 'default' : 'pointer',
                       overflow: 'hidden',
                       display: 'flex',
                     }}>
@@ -1683,19 +1687,21 @@ export default function JoueurPage() {
                           {/* Icône statut */}
                           <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: `${statusColor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${statusColor}30` }}>
                             <span style={{ fontSize: '20px', color: statusColor, lineHeight: 1 }}>
-                              {r.completee ? '✓' : isPast ? '✗' : '▶'}
+                              {isActivite ? '🏃' : r.completee ? '✓' : isPast ? '✗' : '▶'}
                             </span>
                           </div>
 
                           {/* Texte */}
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontWeight: '800', fontSize: isMobile ? '15px' : '16px', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#F0F0F0' }}>
-                              {r.seances?.nom}
+                              {isActivite ? r.activites?.nom : r.seances?.nom}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '12px', fontWeight: '700', color: statusColor }}>{statusLabel}</span>
-                              <span style={{ color: '#9898B8', fontSize: '12px' }}>·</span>
-                              <span style={{ color: '#9898B8', fontSize: '12px' }}>{exCount} exercice{exCount > 1 ? 's' : ''}</span>
+                              {!isActivite && <>
+                                <span style={{ color: '#9898B8', fontSize: '12px' }}>·</span>
+                                <span style={{ color: '#9898B8', fontSize: '12px' }}>{exCount} exercice{exCount > 1 ? 's' : ''}</span>
+                              </>}
                             </div>
                           </div>
 
@@ -1707,7 +1713,7 @@ export default function JoueurPage() {
                               <span style={{ fontSize: '10px', color: '#9898B8' }}>/10</span>
                             </div>
                           ) : (
-                            <div style={{ flexShrink: 0, color: '#9898B8', fontSize: '18px' }}>›</div>
+                            !isActivite && <div style={{ flexShrink: 0, color: '#9898B8', fontSize: '18px' }}>›</div>
                           )}
                         </div>
 

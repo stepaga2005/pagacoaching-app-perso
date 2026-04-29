@@ -13,6 +13,7 @@ import { Modeles } from './components/Modeles'
 import { Programmes } from './components/Programmes'
 import { Messages } from './components/Messages'
 import { GenerateurSeance } from './components/GenerateurSeance'
+import { ActivitesView } from './components/ActivitesView'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
 export default function CoachPage() {
@@ -177,6 +178,7 @@ export default function CoachPage() {
           {displayTab === 'exercices' && <Exercices />}
           {displayTab === 'modeles' && <Modeles />}
           {displayTab === 'programmes' && <Programmes />}
+          {displayTab === 'activites' && <ActivitesView coachId={coachId} />}
           {displayTab === 'generateur' && <GenerateurSeance />}
           {displayTab === 'messages' && <Messages coachId={coachId} onUnreadChange={setUnreadMessages} />}
         </div>

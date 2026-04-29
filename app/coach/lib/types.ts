@@ -160,6 +160,7 @@ export const NAV_ITEMS = [
   { id: 'exercices',  label: 'Exercices',     icon: '⚡' },
   { id: 'modeles',    label: 'Modèles',       icon: '🗓️' },
   { id: 'programmes', label: 'Séances',       icon: '📋' },
+  { id: 'activites',  label: 'Activités',     icon: '🏃' },
   { id: 'generateur', label: 'Générateur',    icon: '🎯' },
   { id: 'messages',   label: 'Messages',      icon: '💬' },
 ]
