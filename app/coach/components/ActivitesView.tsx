@@ -40,14 +40,16 @@ export function ActivitesView({ coachId }: { coachId: string | null }) {
   }
 
   async function creerActivite() {
-    if (!newNom.trim() || !coachId) return
+    if (!newNom.trim()) return
     setSaving(true)
-    const { error } = await supabase.from('activites').insert({ coach_id: coachId, nom: newNom.trim() })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setSaving(false); toast('Session expirée, reconnectez-vous', 'error'); return }
+    const { error } = await supabase.from('activites').insert({ coach_id: user.id, nom: newNom.trim() })
     setSaving(false)
     if (error) { toast('Erreur : ' + error.message, 'error'); return }
     setNewNom('')
     setShowInput(false)
-    load(coachId)
+    load(user.id)
     toast('Activité créée', 'success')
   }
 
