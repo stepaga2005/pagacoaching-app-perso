@@ -1211,7 +1211,10 @@ export default function JoueurPage() {
         .select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, recuperation_inter_sets, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur)))), activites(nom)')
         .eq('joueur_id', joueurId)
         .order('date_realisation')
-      if (data) setRealisations(data as unknown as Realisation[])
+      if (data) {
+        setRealisations(data as unknown as Realisation[])
+        try { localStorage.setItem(`pagacoaching_reals_${joueurId}`, JSON.stringify({ data, ts: Date.now() })) } catch {}
+      }
     }
 
     // Canal real-time (nécessite réplication activée dans Supabase Dashboard → Database → Replication)
@@ -1758,10 +1761,44 @@ export default function JoueurPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {reals.map(r => {
                   const isActivite = !!r.activite_id && !r.seance_id
+                  const isWellness = !r.seance_id && !r.activite_id
                   const hasWellness = r.fatigue != null || r.rpe != null || r.courbatures != null || r.qualite_sommeil != null
                   const exCount = r.seances?.seance_exercices?.length || 0
                   const statusColor = isActivite ? '#C9A84C' : r.completee ? '#2ECC71' : isPast ? '#FF4757' : '#1A6FFF'
                   const statusLabel = isActivite ? 'Activité' : r.completee ? 'Terminé' : isPast ? 'Manqué' : isToday ? 'Prévu aujourd\'hui' : 'À venir'
+
+                  if (isWellness) {
+                    const wItems = [
+                      r.fatigue != null && { label: 'Fatigue', val: r.fatigue, color: r.fatigue <= 3 ? '#2ECC71' : r.fatigue <= 5 ? '#F39C12' : r.fatigue <= 7 ? '#FF6B35' : '#FF4757' },
+                      r.rpe != null && { label: 'RPE', val: r.rpe, color: '#1A6FFF' },
+                      r.courbatures != null && { label: 'Courbatures', val: r.courbatures, color: '#FF6B35' },
+                      r.qualite_sommeil != null && { label: 'Sommeil', val: r.qualite_sommeil, color: '#2ECC71' },
+                    ].filter(Boolean) as { label: string; val: number; color: string }[]
+                    return (
+                      <div key={r.id} style={{ background: '#0F0F0F', border: '1px solid #1A2A1A', borderRadius: '16px', overflow: 'hidden', display: 'flex' }}>
+                        <div style={{ width: '4px', background: '#2ECC71', flexShrink: 0 }} />
+                        <div style={{ flex: 1, padding: isMobile ? '14px 14px 14px 16px' : '16px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ width: '44px', height: '44px', borderRadius: '14px', background: '#2ECC7118', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: '1px solid #2ECC7130' }}>
+                            <span style={{ fontSize: '20px', lineHeight: 1 }}>💚</span>
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: '800', fontSize: isMobile ? '15px' : '16px', color: '#2ECC71', marginBottom: '4px' }}>Wellness</div>
+                            {wItems.length > 0 ? (
+                              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                {wItems.map(item => (
+                                  <span key={item.label} style={{ fontSize: '12px', color: '#9898B8' }}>
+                                    {item.label} <span style={{ color: item.color, fontWeight: '800' }}>{item.val}</span>
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span style={{ fontSize: '12px', color: '#555' }}>Aucun indice renseigné</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  }
                   const wellnessItems = [
                     r.fatigue != null ? { label: 'Fatigue', val: r.fatigue, color: r.fatigue <= 3 ? '#2ECC71' : r.fatigue <= 5 ? '#F39C12' : r.fatigue <= 7 ? '#FF6B35' : '#FF4757' } : null,
                     r.rpe != null ? { label: 'Effort', val: r.rpe, color: '#1A6FFF' } : null,
