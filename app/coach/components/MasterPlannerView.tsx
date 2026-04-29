@@ -62,14 +62,14 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
   async function mpAttribuerSessionId(ds: string, seanceId: string) {
     await supabase.from('realisations').insert({ joueur_id: joueur.id, seance_id: seanceId, date_realisation: ds, completee: false })
     const { data } = await supabase.from('realisations')
-      .select('id, seance_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur))))')
+      .select('id, seance_id, activite_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
       .eq('joueur_id', joueur.id).order('date_realisation')
     if (data) setReals(data as unknown as MPRealisation[])
   }
 
   const mpReload = async () => {
     const { data } = await supabase.from('realisations')
-      .select('id, seance_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur))))')
+      .select('id, seance_id, activite_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
       .eq('joueur_id', joueur.id).order('date_realisation')
     if (data) setReals(data as unknown as MPRealisation[])
   }
@@ -152,7 +152,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
     if (!mpSeanceChoisie) return
     await supabase.from('realisations').insert({ joueur_id: joueur.id, seance_id: mpSeanceChoisie, date_realisation: ds, completee: false })
     const { data } = await supabase.from('realisations')
-      .select('id, seance_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur))))')
+      .select('id, seance_id, activite_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
       .eq('joueur_id', joueur.id).order('date_realisation')
     if (data) setReals(data as unknown as MPRealisation[])
     setMpActionDate(null)
@@ -168,7 +168,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
       notes_joueur: mpWellnessData.notes || null,
     })
     const { data } = await supabase.from('realisations')
-      .select('id, seance_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur))))')
+      .select('id, seance_id, activite_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
       .eq('joueur_id', joueur.id).order('date_realisation')
     if (data) setReals(data as unknown as MPRealisation[])
     setMpWellnessDate(null)
@@ -204,7 +204,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
     setLoading(true)
     supabase
       .from('realisations')
-      .select('id, seance_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur))))')
+      .select('id, seance_id, activite_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
       .eq('joueur_id', joueur.id)
       .order('date_realisation')
       .then(({ data, error }) => {
@@ -474,6 +474,19 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                   {/* Séances du jour */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {dayReals.map(r => {
+                      if (r.activite_id && !r.seance_id) {
+                        return (
+                          <div key={r.id} style={{ background: '#C9A84C10', border: '1px solid #C9A84C30', borderLeft: '4px solid #C9A84C', borderRadius: '14px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '18px' }}>🏃</span>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontWeight: '800', fontSize: '14px', color: '#E0C87A' }}>{r.activites?.nom || 'Activité'}</div>
+                              <div style={{ fontSize: '11px', color: '#9898B8', marginTop: '2px' }}>Activité planifiée</div>
+                            </div>
+                            <button onClick={() => { if (confirm('Supprimer cette activité ?')) mpDeleteRealisation(r.id) }}
+                              style={{ background: 'transparent', border: 'none', color: '#C9A84C60', cursor: 'pointer', fontSize: '16px', padding: '4px' }}>🗑</button>
+                          </div>
+                        )
+                      }
                       const exos = [...(r.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
                       const isExpanded = expandedSessions.has(r.id)
                       const statusColor = r.completee ? '#2ECC71' : isPast ? '#FF4757' : '#1A6FFF'
@@ -500,7 +513,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                 <span style={{ color: '#6A6A8A', fontSize: '14px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', flexShrink: 0 }}>▼</span>
                               </button>
                               {/* Bouton ⋮ → bottom sheet actions session */}
-                              <button onClick={e => { e.stopPropagation(); setMpSessionMenu({ id: r.id, seanceId: r.seance_id, date: ds, nom: r.seances?.nom || '' }) }}
+                              <button onClick={e => { e.stopPropagation(); setMpSessionMenu({ id: r.id, seanceId: r.seance_id!, date: ds, nom: r.seances?.nom || '' }) }}
                                 style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '8px', color: '#2ECC71', cursor: 'pointer', fontSize: '16px', padding: '6px 10px', lineHeight: 1, flexShrink: 0 }}>⋮</button>
                             </div>
 
@@ -610,6 +623,16 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
               {/* Sessions */}
               <div style={{ padding: '6px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {dayReals.map(r => {
+                  if (r.activite_id && !r.seance_id) {
+                    return (
+                      <div key={r.id} style={{ background: '#C9A84C10', border: '1px solid #C9A84C30', borderLeft: '3px solid #C9A84C', borderRadius: '8px', padding: '7px 8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '14px' }}>🏃</span>
+                        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '700', fontSize: '12px', color: '#E0C87A' }}>{r.activites?.nom || 'Activité'}</div>
+                        <button onClick={() => { if (confirm('Supprimer cette activité ?')) mpDeleteRealisation(r.id) }}
+                          style={{ background: 'transparent', border: 'none', color: '#C9A84C60', cursor: 'pointer', fontSize: '14px', padding: '2px 4px', lineHeight: 1, flexShrink: 0 }}>🗑</button>
+                      </div>
+                    )
+                  }
                   const exos = [...(r.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
                   const typeLabel = (LABELS_TYPE[r.seances?.type || ''] || 'SÉANCE').toUpperCase()
                   return (
@@ -617,13 +640,13 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                       <div style={{ padding: '7px 8px', borderBottom: '1px solid #1E1E30', display: 'flex', alignItems: 'center', gap: '5px', background: '#18182A', position: 'relative' }}>
                         <div style={{ flex: 1, fontWeight: '700', fontSize: '12px', color: '#DDD', lineHeight: 1.3, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
                         <span style={{ fontSize: '11px', fontWeight: '800', color: '#9898B8', background: '#18182A', border: '1px solid #282840', borderRadius: '4px', padding: '2px 5px', whiteSpace: 'nowrap', flexShrink: 0 }}>{typeLabel}</span>
-                        <button onClick={e => { e.stopPropagation(); setMpSessionMenu(mpSessionMenu?.id === r.id ? null : { id: r.id, seanceId: r.seance_id, date: ds, nom: r.seances?.nom || '' }) }}
+                        <button onClick={e => { e.stopPropagation(); setMpSessionMenu(mpSessionMenu?.id === r.id ? null : { id: r.id, seanceId: r.seance_id!, date: ds, nom: r.seances?.nom || '' }) }}
                           style={{ background: '#1A2A1A', border: '1px solid #2ECC7135', borderRadius: '5px', color: '#2ECC71', cursor: 'pointer', fontSize: '13px', padding: '2px 6px', lineHeight: 1, flexShrink: 0 }}>⋮</button>
                         {mpSessionMenu?.id === r.id && (
                           <div style={{ position: 'absolute', top: '100%', right: 0, zIndex: 50, background: '#212135', border: '1px solid #2C2C44', borderRadius: '10px', padding: '6px', minWidth: '180px', boxShadow: '0 8px 24px #000A' }}>
-                            <button onClick={() => { setMpDupModal({ seanceId: r.seance_id, nom: r.seances?.nom || '' }); setMpDupDate(ds); setMpSessionMenu(null) }}
+                            <button onClick={() => { setMpDupModal({ seanceId: r.seance_id!, nom: r.seances?.nom || '' }); setMpDupDate(ds); setMpSessionMenu(null) }}
                               style={{ width: '100%', background: 'transparent', border: 'none', color: '#DDD', cursor: 'pointer', padding: '8px 10px', fontSize: '12px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>📋 Dupliquer</button>
-                            <button onClick={() => { setMpMovingSession({ id: r.id, seanceId: r.seance_id, fromDate: ds, nom: r.seances?.nom || '' }); setMpSessionMenu(null) }}
+                            <button onClick={() => { setMpMovingSession({ id: r.id, seanceId: r.seance_id!, fromDate: ds, nom: r.seances?.nom || '' }); setMpSessionMenu(null) }}
                               style={{ width: '100%', background: 'transparent', border: 'none', color: '#1A6FFF', cursor: 'pointer', padding: '8px 10px', fontSize: '12px', fontWeight: '600', textAlign: 'left', borderRadius: '6px', display: 'flex', gap: '8px', alignItems: 'center' }}>↔ Déplacer</button>
                             <div style={{ height: '1px', background: '#2C2C44', margin: '4px 0' }} />
                             <button onClick={() => { if (confirm('Supprimer cette séance ?')) mpDeleteRealisation(r.id) }}

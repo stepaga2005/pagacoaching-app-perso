@@ -69,7 +69,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
 
   async function loadData() {
     const [realsRes, tmplRes, exsRes, favsRes] = await Promise.allSettled([
-      supabase.from('realisations').select('id, seance_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, est_template, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur))))').eq('joueur_id', joueur.id).order('date_realisation'),
+      supabase.from('realisations').select('id, seance_id, activite_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, est_template, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur)))), activites(nom)').eq('joueur_id', joueur.id).order('date_realisation'),
       supabase.from('seances').select('id, nom, type').eq('est_template', true).order('nom').limit(2000),
       supabase.from('exercices').select('*, familles(id, nom, couleur)').order('nom').limit(5000),
       supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('est_template', true).order('nom').limit(2000),
@@ -292,7 +292,19 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                       {/* Cartes séances */}
                       <div style={{ flex: 1, padding: '4px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
                         {realsJour.map(r => {
-                          const isWellness = !r.seances
+                          const isActivite = !!r.activite_id && !r.seance_id
+                          const isWellness = !r.seances && !isActivite
+                          if (isActivite) {
+                            return (
+                              <div key={r.id} style={{
+                                background: '#C9A84C12', border: '1px solid #C9A84C28', borderLeft: '3px solid #C9A84C',
+                                borderRadius: '6px', padding: '6px 7px',
+                              }}>
+                                <div style={{ fontSize: '10px', fontWeight: '800', color: '#C9A84C', marginBottom: '2px', letterSpacing: '0.3px' }}>🏃 Activité</div>
+                                <div style={{ fontSize: '11px', fontWeight: '700', color: '#E0C87A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.activites?.nom || '—'}</div>
+                              </div>
+                            )
+                          }
                           if (isWellness) {
                             // Couleur par valeur: fatigue/rpe/courbatures = vert→rouge, sommeil = rouge→vert
                             const wColor = (v: number, inverted = false) => {

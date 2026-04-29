@@ -91,7 +91,8 @@ export type SeanceProg = {
 
 export type Realisation = {
   id: string
-  seance_id: string
+  seance_id: string | null
+  activite_id?: string | null
   date_realisation: string
   completee: boolean
   rpe?: number | null
@@ -109,6 +110,7 @@ export type Realisation = {
       exercices?: { nom: string; video_url?: string; consignes_execution?: string; familles?: { nom: string; couleur: string } | null } | null
     }[]
   } | null
+  activites?: { nom: string } | null
 }
 
 export type MPSeanceExercice = {
@@ -130,7 +132,8 @@ export type MPSeanceExercice = {
 
 export type MPRealisation = {
   id: string
-  seance_id: string
+  seance_id: string | null
+  activite_id?: string | null
   date_realisation: string
   completee: boolean
   rpe?: number | null
@@ -139,6 +142,7 @@ export type MPRealisation = {
   qualite_sommeil?: number | null
   notes_joueur?: string | null
   seances?: { id: string; nom: string; type: string; est_template: boolean; seance_exercices?: MPSeanceExercice[] } | null
+  activites?: { nom: string } | null
 }
 
 export type SemaineConfig = {
