@@ -208,10 +208,66 @@ export function ActivitesView({ coachId }: { coachId: string | null }) {
   )
 }
 
+function CalendrierMultiDate({ selected, onChange }: { selected: string[]; onChange: (dates: string[]) => void }) {
+  const todayStr = new Date().toISOString().split('T')[0]
+  const todayDate = new Date()
+  const [viewYear, setViewYear] = useState(todayDate.getFullYear())
+  const [viewMonth, setViewMonth] = useState(todayDate.getMonth())
+
+  const MOIS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre']
+  const JOURS_L = ['L','M','M','J','V','S','D']
+
+  const firstDow = (() => { const d = new Date(viewYear, viewMonth, 1).getDay(); return d === 0 ? 6 : d - 1 })()
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
+  const cells: (string | null)[] = [
+    ...Array(firstDow).fill(null),
+    ...Array.from({ length: daysInMonth }, (_, i) => {
+      const d = i + 1
+      return `${viewYear}-${String(viewMonth + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`
+    }),
+  ]
+
+  function toggle(ds: string) {
+    onChange(selected.includes(ds) ? selected.filter(d => d !== ds) : [...selected, ds].sort())
+  }
+  function prevMonth() { viewMonth === 0 ? (setViewYear(y => y-1), setViewMonth(11)) : setViewMonth(m => m-1) }
+  function nextMonth() { viewMonth === 11 ? (setViewYear(y => y+1), setViewMonth(0)) : setViewMonth(m => m+1) }
+
+  return (
+    <div style={{ background: '#0A0A14', borderRadius: '12px', padding: '14px', border: '1px solid #22223A' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+        <button onClick={prevMonth} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '20px', lineHeight: 1, padding: '2px 8px' }}>‹</button>
+        <span style={{ color: '#F0F0F8', fontWeight: 700, fontSize: '14px' }}>{MOIS[viewMonth]} {viewYear}</span>
+        <button onClick={nextMonth} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '20px', lineHeight: 1, padding: '2px 8px' }}>›</button>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '3px', marginBottom: '4px' }}>
+        {JOURS_L.map((l, i) => <div key={i} style={{ textAlign: 'center', fontSize: '11px', fontWeight: 700, color: '#6868A0', padding: '2px 0' }}>{l}</div>)}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '3px' }}>
+        {cells.map((ds, i) => {
+          if (!ds) return <div key={`e${i}`} />
+          const isSel = selected.includes(ds)
+          const isToday = ds === todayStr
+          return (
+            <button key={ds} onClick={() => toggle(ds)} style={{
+              aspectRatio: '1', borderRadius: '8px', border: isToday && !isSel ? '1px solid #1A6FFF60' : '1px solid transparent',
+              background: isSel ? '#1A6FFF' : 'transparent',
+              color: isSel ? '#FFF' : isToday ? '#6AAEFF' : '#C0C0D8',
+              fontWeight: isSel ? 700 : 400, fontSize: '13px', cursor: 'pointer',
+            }}>
+              {new Date(ds + 'T12:00:00').getDate()}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function AttributionActiviteModal({ activites, onClose }: { activites: Activite[]; onClose: () => void }) {
   const [joueurs, setJoueurs] = useState<JoueurLight[]>([])
   const [selectedJoueurs, setSelectedJoueurs] = useState<Set<string>>(new Set())
-  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0])
+  const [selectedDates, setSelectedDates] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -225,43 +281,56 @@ function AttributionActiviteModal({ activites, onClose }: { activites: Activite[
   }
 
   async function confirmer() {
-    if (selectedJoueurs.size === 0) return
+    if (selectedJoueurs.size === 0 || selectedDates.length === 0) return
     setSaving(true)
     const rows: { joueur_id: string; activite_id: string; date_realisation: string; completee: boolean }[] = []
     for (const joueurId of selectedJoueurs) {
       for (const act of activites) {
-        rows.push({ joueur_id: joueurId, activite_id: act.id, date_realisation: date, completee: false })
+        for (const date of selectedDates) {
+          rows.push({ joueur_id: joueurId, activite_id: act.id, date_realisation: date, completee: false })
+        }
       }
     }
     const { error } = await supabase.from('realisations').insert(rows)
     setSaving(false)
     if (error) { toast('Erreur : ' + error.message, 'error'); return }
-    toast(`✓ ${activites.length} activité${activites.length > 1 ? 's' : ''} attribuée${activites.length > 1 ? 's' : ''} à ${selectedJoueurs.size} joueur${selectedJoueurs.size > 1 ? 's' : ''}`, 'success')
+    const total = selectedDates.length * selectedJoueurs.size
+    toast(`✓ ${total} attribution${total > 1 ? 's' : ''} créée${total > 1 ? 's' : ''}`, 'success')
     onClose()
   }
 
+  const canConfirm = selectedJoueurs.size > 0 && selectedDates.length > 0 && !saving
+
   return (
     <div className="modal-overlay">
-      <div className="modal-box" style={{ maxWidth: '480px' }}>
+      <div className="modal-box" style={{ maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
         <div className="modal-title">Attribuer des activités</div>
-        <div className="modal-subtitle">
-          {activites.map(a => a.nom).join(', ')}
-        </div>
+        <div className="modal-subtitle">{activites.map(a => a.nom).join(', ')}</div>
 
-        {/* Date */}
-        <div style={{ marginBottom: '20px' }}>
-          <label className="section-label" style={{ display: 'block', marginBottom: '8px' }}>Date</label>
-          <input type="date" value={date} onChange={e => setDate(e.target.value)} className="input" style={{ width: 'auto' }} />
+        {/* Calendrier multi-dates */}
+        <div style={{ marginBottom: '16px' }}>
+          <label className="section-label" style={{ display: 'block', marginBottom: '8px' }}>
+            Dates{selectedDates.length > 0 && <span style={{ color: '#5599FF', textTransform: 'none', letterSpacing: 0 }}> — {selectedDates.length} sélectionnée{selectedDates.length > 1 ? 's' : ''}</span>}
+          </label>
+          <CalendrierMultiDate selected={selectedDates} onChange={setSelectedDates} />
+          {selectedDates.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '10px' }}>
+              {selectedDates.map(ds => (
+                <span key={ds} onClick={() => setSelectedDates(prev => prev.filter(d => d !== ds))}
+                  style={{ background: '#1A6FFF20', border: '1px solid #1A6FFF50', borderRadius: '20px', padding: '3px 10px', fontSize: '12px', color: '#6AAEFF', cursor: 'pointer', fontWeight: 600 }}>
+                  {new Date(ds + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} ✕
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Joueurs */}
-        <div style={{ marginBottom: '24px' }}>
+        <div style={{ marginBottom: '20px' }}>
           <label className="section-label" style={{ display: 'block', marginBottom: '10px' }}>
-            Joueurs{selectedJoueurs.size > 0 && (
-              <span style={{ color: '#5599FF', textTransform: 'none', letterSpacing: 0 }}> — {selectedJoueurs.size} sélectionné{selectedJoueurs.size > 1 ? 's' : ''}</span>
-            )}
+            Joueurs{selectedJoueurs.size > 0 && <span style={{ color: '#5599FF', textTransform: 'none', letterSpacing: 0 }}> — {selectedJoueurs.size} sélectionné{selectedJoueurs.size > 1 ? 's' : ''}</span>}
           </label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '240px', overflowY: 'auto' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', maxHeight: '180px', overflowY: 'auto' }}>
             {joueurs.length === 0 && <span style={{ color: '#7878A8', fontSize: '13px' }}>Aucun joueur actif</span>}
             {joueurs.map(j => {
               const sel = selectedJoueurs.has(j.id)
@@ -281,11 +350,11 @@ function AttributionActiviteModal({ activites, onClose }: { activites: Activite[
           <button onClick={onClose} className="btn btn-ghost" style={{ flex: 1 }}>Annuler</button>
           <button
             onClick={confirmer}
-            disabled={saving || selectedJoueurs.size === 0}
-            className={`btn${selectedJoueurs.size > 0 && !saving ? ' btn-success' : ''}`}
-            style={{ flex: 2, justifyContent: 'center', padding: '12px', ...(selectedJoueurs.size === 0 || saving ? { background: '#22223A', color: '#3A3A50', cursor: 'not-allowed' } : {}) }}
+            disabled={!canConfirm}
+            className={`btn${canConfirm ? ' btn-success' : ''}`}
+            style={{ flex: 2, justifyContent: 'center', padding: '12px', ...(!canConfirm ? { background: '#22223A', color: '#3A3A50', cursor: 'not-allowed' } : {}) }}
           >
-            {saving ? 'Attribution…' : `Attribuer à ${selectedJoueurs.size || '…'} joueur${selectedJoueurs.size > 1 ? 's' : ''}`}
+            {saving ? 'Attribution…' : canConfirm ? `Attribuer (${selectedDates.length}j × ${selectedJoueurs.size} joueur${selectedJoueurs.size > 1 ? 's' : ''})` : 'Choisir dates + joueurs'}
           </button>
         </div>
       </div>
