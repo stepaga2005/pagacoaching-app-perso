@@ -67,6 +67,22 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
   const [wellnessData, setWellnessData] = useState({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' })
   useEffect(() => { loadData() }, [joueur.id])
 
+  useEffect(() => {
+    const joueurId = joueur.id
+    async function refreshReals() {
+      const { data } = await supabase
+        .from('realisations')
+        .select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, est_template, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur)))), activites(nom)')
+        .eq('joueur_id', joueurId).order('date_realisation')
+      if (data) setRealisations(data as unknown as Realisation[])
+    }
+    const channel = supabase
+      .channel(`profil-reals-${joueurId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'realisations', filter: `joueur_id=eq.${joueurId}` }, refreshReals)
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [joueur.id])
+
   async function loadData() {
     const [realsRes, tmplRes, exsRes, favsRes] = await Promise.allSettled([
       supabase.from('realisations').select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, est_template, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur)))), activites(nom)').eq('joueur_id', joueur.id).order('date_realisation'),

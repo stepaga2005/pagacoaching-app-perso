@@ -211,9 +211,25 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
       .order('date_realisation')
       .then(({ data, error }) => {
         if (!error && data) setReals(data as unknown as MPRealisation[])
-        else setReals(initialReals) // fallback si colonnes manquantes en DB
+        else setReals(initialReals)
         setLoading(false)
       })
+  }, [joueur.id])
+
+  useEffect(() => {
+    const joueurId = joueur.id
+    const channel = supabase
+      .channel(`mp-reals-${joueurId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'realisations', filter: `joueur_id=eq.${joueurId}` }, () => {
+        supabase
+          .from('realisations')
+          .select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
+          .eq('joueur_id', joueurId)
+          .order('date_realisation')
+          .then(({ data }) => { if (data) setReals(data as unknown as MPRealisation[]) })
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [joueur.id])
 
   const days = Array.from({ length: nbDays }, (_, i) => {
