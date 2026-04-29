@@ -386,16 +386,14 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
           <button onClick={prevWeek} style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 14px', color: '#888', cursor: 'pointer', fontSize: '16px', minHeight: '36px', minWidth: '36px' }}>‹</button>
           <button onClick={nextWeek} style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 14px', color: '#888', cursor: 'pointer', fontSize: '16px', minHeight: '36px', minWidth: '36px' }}>›</button>
           <span style={{ color: '#A8A8C4', fontSize: '12px', whiteSpace: 'nowrap', flex: 1, fontWeight: '600' }}>{weekLabel}</span>
-          {!isMobile && (
-            <div style={{ display: 'flex', gap: '2px', background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '2px' }}>
-              {[1, 2, 3, 4].map(n => (
-                <button key={n} onClick={() => setNbSemaines(n)}
-                  style={{ background: nbSemaines === n ? '#1A6FFF' : 'transparent', border: 'none', borderRadius: '6px', padding: '4px 10px', color: nbSemaines === n ? '#FFF' : '#666', cursor: 'pointer', fontSize: '11px', fontWeight: '800', minWidth: '32px', transition: 'all 0.15s' }}>
-                  {n}S
-                </button>
-              ))}
-            </div>
-          )}
+          <div style={{ display: 'flex', gap: '2px', background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '2px', flexShrink: 0 }}>
+            {[1, 2, 3, 4].map(n => (
+              <button key={n} onClick={() => setNbSemaines(n)}
+                style={{ background: nbSemaines === n ? '#1A6FFF' : 'transparent', border: 'none', borderRadius: '6px', padding: '4px 10px', color: nbSemaines === n ? '#FFF' : '#666', cursor: 'pointer', fontSize: '11px', fontWeight: '800', minWidth: '32px', transition: 'all 0.15s' }}>
+                {n}S
+              </button>
+            ))}
+          </div>
           <input type="date" onChange={e => e.target.value && jumpToDate(e.target.value)}
             style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#007AFF', fontSize: '12px', outline: 'none', cursor: 'pointer', minHeight: '36px' }} />
         </div>
