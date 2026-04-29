@@ -95,6 +95,7 @@ export type Realisation = {
   activite_id?: string | null
   date_realisation: string
   completee: boolean
+  duree_minutes?: number | null
   rpe?: number | null
   fatigue?: number | null
   courbatures?: number | null
@@ -136,6 +137,7 @@ export type MPRealisation = {
   activite_id?: string | null
   date_realisation: string
   completee: boolean
+  duree_minutes?: number | null
   rpe?: number | null
   fatigue?: number | null
   courbatures?: number | null

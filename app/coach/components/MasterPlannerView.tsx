@@ -48,6 +48,8 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
   const [joursSelectionnes, setJoursSelectionnes] = useState<Set<string>>(new Set())
   const [showCopierModal, setShowCopierModal] = useState(false)
   const [allJoueurs, setAllJoueurs] = useState<{ id: string; nom: string; prenom: string }[]>([])
+  const [mpActiviteModal, setMpActiviteModal] = useState<{ id: string; nom: string; duree: number | null } | null>(null)
+  const [mpActiviteDuree, setMpActiviteDuree] = useState<string>('')
 
   useEffect(() => {
     supabase.from('seances').select('id, nom').eq('est_template', true).order('nom').limit(2000)
@@ -62,14 +64,14 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
   async function mpAttribuerSessionId(ds: string, seanceId: string) {
     await supabase.from('realisations').insert({ joueur_id: joueur.id, seance_id: seanceId, date_realisation: ds, completee: false })
     const { data } = await supabase.from('realisations')
-      .select('id, seance_id, activite_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
+      .select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
       .eq('joueur_id', joueur.id).order('date_realisation')
     if (data) setReals(data as unknown as MPRealisation[])
   }
 
   const mpReload = async () => {
     const { data } = await supabase.from('realisations')
-      .select('id, seance_id, activite_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
+      .select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
       .eq('joueur_id', joueur.id).order('date_realisation')
     if (data) setReals(data as unknown as MPRealisation[])
   }
@@ -152,7 +154,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
     if (!mpSeanceChoisie) return
     await supabase.from('realisations').insert({ joueur_id: joueur.id, seance_id: mpSeanceChoisie, date_realisation: ds, completee: false })
     const { data } = await supabase.from('realisations')
-      .select('id, seance_id, activite_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
+      .select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
       .eq('joueur_id', joueur.id).order('date_realisation')
     if (data) setReals(data as unknown as MPRealisation[])
     setMpActionDate(null)
@@ -168,7 +170,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
       notes_joueur: mpWellnessData.notes || null,
     })
     const { data } = await supabase.from('realisations')
-      .select('id, seance_id, activite_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
+      .select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
       .eq('joueur_id', joueur.id).order('date_realisation')
     if (data) setReals(data as unknown as MPRealisation[])
     setMpWellnessDate(null)
@@ -204,7 +206,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
     setLoading(true)
     supabase
       .from('realisations')
-      .select('id, seance_id, activite_id, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
+      .select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
       .eq('joueur_id', joueur.id)
       .order('date_realisation')
       .then(({ data, error }) => {
@@ -476,13 +478,16 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                     {dayReals.map(r => {
                       if (r.activite_id && !r.seance_id) {
                         return (
-                          <div key={r.id} style={{ background: '#C9A84C10', border: '1px solid #C9A84C30', borderLeft: '4px solid #C9A84C', borderRadius: '14px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div key={r.id} onClick={() => { setMpActiviteModal({ id: r.id, nom: r.activites?.nom || 'Activité', duree: r.duree_minutes ?? null }); setMpActiviteDuree(r.duree_minutes != null ? String(r.duree_minutes) : '') }}
+                            style={{ background: '#C9A84C10', border: '1px solid #C9A84C30', borderLeft: '4px solid #C9A84C', borderRadius: '14px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
                             <span style={{ fontSize: '18px' }}>🏃</span>
                             <div style={{ flex: 1 }}>
                               <div style={{ fontWeight: '800', fontSize: '14px', color: '#E0C87A' }}>{r.activites?.nom || 'Activité'}</div>
-                              <div style={{ fontSize: '11px', color: '#9898B8', marginTop: '2px' }}>Activité planifiée</div>
+                              <div style={{ fontSize: '11px', color: r.duree_minutes ? '#C9A84C' : '#9898B8', marginTop: '2px', fontWeight: r.duree_minutes ? 700 : 400 }}>
+                                {r.duree_minutes ? `${r.duree_minutes} min` : 'Appuyer pour saisir la durée'}
+                              </div>
                             </div>
-                            <button onClick={() => { if (confirm('Supprimer cette activité ?')) mpDeleteRealisation(r.id) }}
+                            <button onClick={e => { e.stopPropagation(); if (confirm('Supprimer cette activité ?')) mpDeleteRealisation(r.id) }}
                               style={{ background: 'transparent', border: 'none', color: '#C9A84C60', cursor: 'pointer', fontSize: '16px', padding: '4px' }}>🗑</button>
                           </div>
                         )
@@ -625,10 +630,14 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                 {dayReals.map(r => {
                   if (r.activite_id && !r.seance_id) {
                     return (
-                      <div key={r.id} style={{ background: '#C9A84C10', border: '1px solid #C9A84C30', borderLeft: '3px solid #C9A84C', borderRadius: '8px', padding: '7px 8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div key={r.id} onClick={() => { setMpActiviteModal({ id: r.id, nom: r.activites?.nom || 'Activité', duree: r.duree_minutes ?? null }); setMpActiviteDuree(r.duree_minutes != null ? String(r.duree_minutes) : '') }}
+                        style={{ background: '#C9A84C10', border: '1px solid #C9A84C30', borderLeft: '3px solid #C9A84C', borderRadius: '8px', padding: '7px 8px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
                         <span style={{ fontSize: '14px' }}>🏃</span>
-                        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '700', fontSize: '12px', color: '#E0C87A' }}>{r.activites?.nom || 'Activité'}</div>
-                        <button onClick={() => { if (confirm('Supprimer cette activité ?')) mpDeleteRealisation(r.id) }}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '700', fontSize: '12px', color: '#E0C87A' }}>{r.activites?.nom || 'Activité'}</div>
+                          {r.duree_minutes != null && <div style={{ fontSize: '11px', color: '#C9A84C', fontWeight: 700 }}>{r.duree_minutes} min</div>}
+                        </div>
+                        <button onClick={e => { e.stopPropagation(); if (confirm('Supprimer cette activité ?')) mpDeleteRealisation(r.id) }}
                           style={{ background: 'transparent', border: 'none', color: '#C9A84C60', cursor: 'pointer', fontSize: '14px', padding: '2px 4px', lineHeight: 1, flexShrink: 0 }}>🗑</button>
                       </div>
                     )
@@ -1268,6 +1277,58 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
           onDone={() => { setShowCopierModal(false); setModeSelection(false); setJoursSelectionnes(new Set()) }}
           onClose={() => setShowCopierModal(false)}
         />
+      )}
+
+      {/* Modal durée activité */}
+      {mpActiviteModal && (
+        <div className="modal-overlay" onClick={() => setMpActiviteModal(null)}>
+          <div className="modal-box" style={{ maxWidth: '340px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+              <span style={{ fontSize: '22px' }}>🏃</span>
+              <div className="modal-title" style={{ margin: 0 }}>{mpActiviteModal.nom}</div>
+            </div>
+            <div className="modal-subtitle" style={{ marginBottom: '20px' }}>Temps de jeu / participation</div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+              <input
+                autoFocus
+                type="number"
+                min={1}
+                max={200}
+                placeholder="—"
+                value={mpActiviteDuree}
+                onChange={e => setMpActiviteDuree(e.target.value)}
+                onKeyDown={async e => {
+                  if (e.key === 'Enter') {
+                    const val = mpActiviteDuree === '' ? null : Number(mpActiviteDuree)
+                    await supabase.from('realisations').update({ duree_minutes: val }).eq('id', mpActiviteModal.id)
+                    setReals(prev => prev.map(r => r.id === mpActiviteModal.id ? { ...r, duree_minutes: val } : r))
+                    setMpActiviteModal(null)
+                  }
+                }}
+                className="input"
+                style={{ flex: 1, fontSize: '28px', fontWeight: '900', textAlign: 'center', color: '#E0C87A' }}
+              />
+              <span style={{ color: '#9898B8', fontSize: '16px', fontWeight: '700', flexShrink: 0 }}>min</span>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => setMpActiviteModal(null)} className="btn btn-ghost" style={{ flex: 1 }}>Annuler</button>
+              <button
+                onClick={async () => {
+                  const val = mpActiviteDuree === '' ? null : Number(mpActiviteDuree)
+                  await supabase.from('realisations').update({ duree_minutes: val }).eq('id', mpActiviteModal.id)
+                  setReals(prev => prev.map(r => r.id === mpActiviteModal.id ? { ...r, duree_minutes: val } : r))
+                  setMpActiviteModal(null)
+                }}
+                className="btn btn-primary"
+                style={{ flex: 2, justifyContent: 'center', padding: '12px' }}
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
