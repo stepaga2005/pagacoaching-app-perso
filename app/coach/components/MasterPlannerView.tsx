@@ -50,6 +50,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
   const [allJoueurs, setAllJoueurs] = useState<{ id: string; nom: string; prenom: string }[]>([])
   const [mpActiviteModal, setMpActiviteModal] = useState<{ id: string; nom: string; duree: number | null } | null>(null)
   const [mpActiviteDuree, setMpActiviteDuree] = useState<string>('')
+  const [nbSemaines, setNbSemaines] = useState(1)
 
   useEffect(() => {
     supabase.from('seances').select('id, nom').eq('est_template', true).order('nom').limit(2000)
@@ -194,7 +195,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
     return () => window.removeEventListener('resize', check)
   }, [])
 
-  const nbDays = 7
+  const nbDays = (isMobile ? 1 : nbSemaines) * 7
   const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set())
   function toggleExpandSession(id: string) {
     setExpandedSessions(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
@@ -385,6 +386,16 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
           <button onClick={prevWeek} style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 14px', color: '#888', cursor: 'pointer', fontSize: '16px', minHeight: '36px', minWidth: '36px' }}>‹</button>
           <button onClick={nextWeek} style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 14px', color: '#888', cursor: 'pointer', fontSize: '16px', minHeight: '36px', minWidth: '36px' }}>›</button>
           <span style={{ color: '#A8A8C4', fontSize: '12px', whiteSpace: 'nowrap', flex: 1, fontWeight: '600' }}>{weekLabel}</span>
+          {!isMobile && (
+            <div style={{ display: 'flex', gap: '2px', background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '2px' }}>
+              {[1, 2, 3, 4].map(n => (
+                <button key={n} onClick={() => setNbSemaines(n)}
+                  style={{ background: nbSemaines === n ? '#1A6FFF' : 'transparent', border: 'none', borderRadius: '6px', padding: '4px 10px', color: nbSemaines === n ? '#FFF' : '#666', cursor: 'pointer', fontSize: '11px', fontWeight: '800', minWidth: '32px', transition: 'all 0.15s' }}>
+                  {n}S
+                </button>
+              ))}
+            </div>
+          )}
           <input type="date" onChange={e => e.target.value && jumpToDate(e.target.value)}
             style={{ background: '#1C1C2C', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#007AFF', fontSize: '12px', outline: 'none', cursor: 'pointer', minHeight: '36px' }} />
         </div>
@@ -423,7 +434,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
               const letters = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
               return (
                 <div key={ds} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
-                  <span style={{ fontSize: '11px', fontWeight: '700', color: isToday ? '#1A6FFF' : '#888' }}>{letters[i]}</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: isToday ? '#1A6FFF' : '#888' }}>{letters[i % 7]}</span>
                   <div style={{
                     width: '100%', aspectRatio: '1', borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -609,7 +620,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
 
       {/* ══ DESKTOP : grille de colonnes ══ */}
       {!loading && !isMobile && (
-      <div onClick={() => mpSessionMenu && setMpSessionMenu(null)} style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, 1fr)`, gap: '1px', background: '#1E1E30', overflow: 'hidden' }}>
+      <div onClick={() => mpSessionMenu && setMpSessionMenu(null)} style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: `repeat(${nbDays}, minmax(${nbSemaines > 1 ? '120px' : '1fr'}, 1fr))`, gap: '1px', background: '#1E1E30', overflowX: nbSemaines > 1 ? 'auto' : 'hidden', overflowY: 'hidden' }}>
         {days.map((ds, di) => {
           const isToday = ds === today
           const dateObj = new Date(ds + 'T12:00:00')
@@ -627,7 +638,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
               {/* Day header — sticky */}
               <div style={{ position: 'sticky', top: 0, zIndex: 2, padding: '8px 6px 6px', borderBottom: '1px solid #222238', background: estSelectionne ? '#0D2015' : (isToday ? '#0C1020' : '#0E0E18') }}>
                 <div style={{ textAlign: 'center', marginBottom: '4px' }}>
-                  <div style={{ color: estSelectionne ? '#2ECC71' : (isToday ? '#5AABFF' : '#555'), fontSize: '10px', fontWeight: '800', letterSpacing: '0.8px', textTransform: 'uppercase' }}>{JOUR_NOMS[di]}</div>
+                  <div style={{ color: estSelectionne ? '#2ECC71' : (isToday ? '#5AABFF' : '#555'), fontSize: '10px', fontWeight: '800', letterSpacing: '0.8px', textTransform: 'uppercase' }}>{JOUR_NOMS[di % 7]}</div>
                   <div style={{ color: estSelectionne ? '#2ECC71' : (isToday ? '#007AFF' : '#888'), fontSize: '22px', fontWeight: '900', lineHeight: 1, marginTop: '1px' }}>{dateNum}</div>
                   <div style={{ color: '#7878A8', fontSize: '10px', marginTop: '1px' }}>{mois}</div>
                 </div>
