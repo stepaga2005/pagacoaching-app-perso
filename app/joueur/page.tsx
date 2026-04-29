@@ -19,6 +19,7 @@ type SeanceExercice = {
 }
 type Realisation = {
   id: string; seance_id: string | null; activite_id?: string | null; date_realisation: string; completee: boolean
+  duree_minutes?: number | null
   rpe?: number | null; fatigue?: number | null; courbatures?: number | null
   qualite_sommeil?: number | null; notes_joueur?: string | null
   seances?: { id: string; nom: string; type: string; seance_exercices?: SeanceExercice[] }
@@ -1105,6 +1106,8 @@ export default function JoueurPage() {
   const [wellnessForm, setWellnessForm] = useState<{ fatigue: number | null; courbatures: number | null; qualite_sommeil: number | null; notes: string }>({ fatigue: null, courbatures: null, qualite_sommeil: null, notes: '' })
   const [wellnessSaving, setWellnessSaving] = useState(false)
   const [wellnessEditing, setWellnessEditing] = useState(false)
+  const [activiteModal, setActiviteModal] = useState<{ id: string; nom: string; duree: number | null } | null>(null)
+  const [activiteDuree, setActiviteDuree] = useState('')
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [isMobile, setIsMobile] = useState(false)
   const [isOffline, setIsOffline] = useState(false)
@@ -1196,6 +1199,17 @@ export default function JoueurPage() {
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [joueur?.auth_id, joueur?.coach_id, activeSection])
+
+  // Real-time sync: recharge les réalisations dès que le coach modifie
+  useEffect(() => {
+    if (!joueur?.id) return
+    const channel = supabase
+      .channel(`reals-joueur-${joueur.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'realisations', filter: `joueur_id=eq.${joueur.id}` },
+        () => { load(joueur.id) })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [joueur?.id])
 
   function readCache(): { joueur: Joueur; reals: Realisation[]; ts?: number } | null {
     try {
@@ -1301,7 +1315,7 @@ export default function JoueurPage() {
     try {
       const result = await Promise.race([
         supabase.from('realisations')
-          .select('id, seance_id, activite_id, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, recuperation_inter_sets, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur)))), activites(nom)')
+          .select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, recuperation_inter_sets, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur)))), activites(nom)')
           .eq('joueur_id', joueurId).order('date_realisation'),
         new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), 12000)),
       ]) as { data: Realisation[] | null }
@@ -1496,6 +1510,63 @@ export default function JoueurPage() {
         </div>
       )}
 
+      {/* Modal activité joueur */}
+      {activiteModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 200, padding: '0' }}
+          onClick={() => setActiviteModal(null)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#111828', borderRadius: '20px 20px 0 0', padding: '24px 20px 40px', width: '100%', maxWidth: '520px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <span style={{ fontSize: '28px' }}>🏃</span>
+              <div>
+                <div style={{ fontWeight: '900', fontSize: '18px', color: '#E0C87A' }}>{activiteModal.nom}</div>
+                <div style={{ color: '#9898B8', fontSize: '12px', marginTop: '2px' }}>Temps de participation</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px' }}>
+              <input
+                autoFocus
+                type="number"
+                min={1}
+                max={200}
+                placeholder="—"
+                value={activiteDuree}
+                onChange={e => setActiviteDuree(e.target.value)}
+                style={{ flex: 1, background: '#0A0A14', border: '1px solid #2A2A4A', borderRadius: '12px', padding: '16px', fontSize: '32px', fontWeight: '900', textAlign: 'center', color: '#E0C87A', outline: 'none' }}
+              />
+              <span style={{ color: '#9898B8', fontSize: '18px', fontWeight: '700' }}>min</span>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={async () => {
+                  if (!confirm('Supprimer cette activité ?')) return
+                  await supabase.from('realisations').delete().eq('id', activiteModal.id)
+                  setRealisations(prev => prev.filter(r => r.id !== activiteModal.id))
+                  setActiviteModal(null)
+                }}
+                style={{ padding: '14px', borderRadius: '12px', border: '1px solid #FF475730', background: '#FF475710', color: '#FF4757', cursor: 'pointer', fontSize: '14px', fontWeight: '700' }}>
+                Supprimer
+              </button>
+              <button onClick={() => setActiviteModal(null)}
+                style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #2A2A4A', background: 'transparent', color: '#888', cursor: 'pointer', fontSize: '14px' }}>
+                Annuler
+              </button>
+              <button
+                onClick={async () => {
+                  const val = activiteDuree === '' ? null : Number(activiteDuree)
+                  await supabase.from('realisations').update({ duree_minutes: val }).eq('id', activiteModal.id)
+                  setRealisations(prev => prev.map(r => r.id === activiteModal.id ? { ...r, duree_minutes: val } : r))
+                  setActiviteModal(null)
+                }}
+                style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: '#C9A84C', color: '#000', cursor: 'pointer', fontSize: '14px', fontWeight: '900' }}>
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* SessionDetail overlay */}
       {selected && (
         <SessionDetail
@@ -1667,11 +1738,11 @@ export default function JoueurPage() {
                   ].filter(Boolean) as { label: string; val: number; color: string }[]
 
                   return (
-                    <div key={r.id} onClick={() => !isActivite && ouvrir(r)} style={{
+                    <div key={r.id} onClick={() => isActivite ? (setActiviteModal({ id: r.id, nom: r.activites?.nom || 'Activité', duree: r.duree_minutes ?? null }), setActiviteDuree(r.duree_minutes != null ? String(r.duree_minutes) : '')) : ouvrir(r)} style={{
                       background: '#0F0F0F',
                       border: '1px solid #1A1A1A',
                       borderRadius: '16px',
-                      cursor: isActivite ? 'default' : 'pointer',
+                      cursor: 'pointer',
                       overflow: 'hidden',
                       display: 'flex',
                     }}>
@@ -1698,6 +1769,10 @@ export default function JoueurPage() {
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '12px', fontWeight: '700', color: statusColor }}>{statusLabel}</span>
+                              {isActivite && r.duree_minutes != null && <>
+                                <span style={{ color: '#9898B8', fontSize: '12px' }}>·</span>
+                                <span style={{ color: '#C9A84C', fontSize: '12px', fontWeight: 700 }}>{r.duree_minutes} min</span>
+                              </>}
                               {!isActivite && <>
                                 <span style={{ color: '#9898B8', fontSize: '12px' }}>·</span>
                                 <span style={{ color: '#9898B8', fontSize: '12px' }}>{exCount} exercice{exCount > 1 ? 's' : ''}</span>
