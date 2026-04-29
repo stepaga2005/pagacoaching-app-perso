@@ -1203,12 +1203,32 @@ export default function JoueurPage() {
   // Real-time sync: recharge les réalisations dès que le coach modifie
   useEffect(() => {
     if (!joueur?.id) return
+    const joueurId = joueur.id
+
+    async function refreshReals() {
+      const { data } = await supabase
+        .from('realisations')
+        .select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, recuperation_inter_sets, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur)))), activites(nom)')
+        .eq('joueur_id', joueurId)
+        .order('date_realisation')
+      if (data) setRealisations(data as unknown as Realisation[])
+    }
+
+    // Canal real-time (nécessite réplication activée dans Supabase Dashboard → Database → Replication)
     const channel = supabase
-      .channel(`reals-joueur-${joueur.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'realisations', filter: `joueur_id=eq.${joueur.id}` },
-        () => { load(joueur.id) })
+      .channel(`reals-joueur-${joueurId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'realisations', filter: `joueur_id=eq.${joueurId}` },
+        refreshReals)
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+
+    // Fallback : rafraîchit quand l'utilisateur revient sur l'app
+    const onVisible = () => { if (document.visibilityState === 'visible') refreshReals() }
+    document.addEventListener('visibilitychange', onVisible)
+
+    return () => {
+      supabase.removeChannel(channel)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [joueur?.id])
 
   function readCache(): { joueur: Joueur; reals: Realisation[]; ts?: number } | null {
