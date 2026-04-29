@@ -1231,6 +1231,18 @@ export default function JoueurPage() {
     }
   }, [joueur?.id])
 
+  // Rafraîchit les réalisations quand le joueur revient sur l'onglet Séances
+  useEffect(() => {
+    if (activeSection === 'seances' && joueur?.id) {
+      supabase
+        .from('realisations')
+        .select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, recuperation_inter_sets, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, consignes_execution, familles(nom, couleur)))), activites(nom)')
+        .eq('joueur_id', joueur.id)
+        .order('date_realisation')
+        .then(({ data }) => { if (data) setRealisations(data as unknown as Realisation[]) })
+    }
+  }, [activeSection])
+
   function readCache(): { joueur: Joueur; reals: Realisation[]; ts?: number } | null {
     try {
       const raw = localStorage.getItem('pagacoaching_joueur')
