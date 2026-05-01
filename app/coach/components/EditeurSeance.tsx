@@ -20,7 +20,14 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
   const [nom, setNom] = useState(seance.nom)
   const [type, setType] = useState(seance.type)
   const [notes, setNotes] = useState(seance.notes || '')
-  const [lignes, setLignes] = useState<SeanceExercice[]>(seance.seance_exercices || [])
+  const [lignes, setLignes] = useState<SeanceExercice[]>(
+    (seance.seance_exercices || []).map(l => ({
+      ...l,
+      sets_config: Array.isArray(l.sets_config) ? l.sets_config
+        : typeof l.sets_config === 'string' ? (() => { try { return JSON.parse(l.sets_config as unknown as string) } catch { return undefined } })()
+        : undefined,
+    }))
+  )
   const [recherche, setRecherche] = useState('')
   const [showPicker, setShowPicker] = useState(false)
   const [saving, setSaving] = useState(false)
