@@ -571,7 +571,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                 {exos.map((exo, ei) => {
                                   const fam = exo.exercices?.familles
                                   const couleur = fam?.couleur || '#555'
-                                  const hasSets = exo.sets_config && exo.sets_config.length > 0
+                                  const hasSets = Array.isArray(exo.sets_config) && exo.sets_config.length > 0
                                   const seriesSummary = (() => {
                                     if (hasSets) {
                                       const s = exo.sets_config![0]
@@ -744,7 +744,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                           const renderExo = (exo: MPSeanceExercice, exoIdx: number, insideGroup: boolean, isLastInGroup = false) => {
                             const fam = exo.exercices?.familles
                             const couleur = fam?.couleur || '#555'
-                            const hasSets = exo.sets_config && exo.sets_config.length > 0
+                            const hasSets = Array.isArray(exo.sets_config) && exo.sets_config.length > 0
                             const hasVideo = !!exo.exercices?.video_url
                             const seriesSummary = (() => {
                               if (hasSets && exo.sets_config!.length > 0) {
@@ -934,7 +934,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                   const fam = exo.exercices?.familles
                   const couleur = fam?.couleur || '#555'
                   const isSelected = mpCopyExoTargets.has(exo.id)
-                  const hasSets = exo.sets_config && exo.sets_config.length > 0
+                  const hasSets = Array.isArray(exo.sets_config) && exo.sets_config.length > 0
                   const summary = hasSets
                     ? `${exo.sets_config!.length} séries configurées`
                     : [exo.series ? `${exo.series}×` : '', exo.repetitions ? `${exo.repetitions}r` : '', exo.charge_kg ? `${exo.charge_kg}kg` : ''].filter(Boolean).join(' ') || '—'
@@ -1188,7 +1188,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
         if (!r || !exo) return null
         const fam = exo.exercices?.familles
         const couleur = fam?.couleur || '#555'
-        const hasSets = exo.sets_config && exo.sets_config.length > 0
+        const hasSets = Array.isArray(exo.sets_config) && exo.sets_config.length > 0
         const inputLg: React.CSSProperties = { background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '10px', color: '#FFF', fontSize: '16px', outline: 'none', textAlign: 'center', width: '100%', boxSizing: 'border-box' as const }
         return (
           <>

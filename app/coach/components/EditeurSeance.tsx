@@ -365,7 +365,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
           }
 
           // Exercice standard (hors superset)
-          const hasPerSet = l.sets_config && l.sets_config.length > 0
+          const hasPerSet = Array.isArray(l.sets_config) && l.sets_config.length > 0
           return (
             <div key={idx} style={{ marginTop: idx > 0 ? '8px' : '0' }}>
               <div style={{

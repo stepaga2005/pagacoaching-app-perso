@@ -467,7 +467,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                     const isSuperset = bloc.length > 1
                     const seriesCount = bloc[0].series || 0
                     const lastEx = bloc[bloc.length - 1]
-                    const recupEntreBlocsVal = lastEx.sets_config && lastEx.sets_config.length > 0
+                    const recupEntreBlocsVal = Array.isArray(lastEx.sets_config) && lastEx.sets_config.length > 0
                       ? (lastEx.sets_config[lastEx.sets_config.length - 1].recup ?? lastEx.sets_config[0].recup)
                       : lastEx.recuperation_secondes
                     return (

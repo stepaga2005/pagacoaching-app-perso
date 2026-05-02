@@ -332,7 +332,7 @@ function SessionDetail({ realisation, form, setForm, saving, onSave, onComplete,
                   const recuperInterSets = lastExo.recuperation_inter_sets ?? 0
                   // Récup après le bloc : pour superset → recuperation_secondes du dernier exo
                   //                       pour solo → dernier recup de sets_config, sinon recuperation_secondes
-                  const lastSetRecup = !isSuperset && lastExo.sets_config && lastExo.sets_config.length > 0
+                  const lastSetRecup = !isSuperset && Array.isArray(lastExo.sets_config) && lastExo.sets_config.length > 0
                     ? (lastExo.sets_config[lastExo.sets_config.length - 1]?.recup ?? 0)
                     : 0
                   const recuperBloc = lastSetRecup > 0 ? lastSetRecup : (lastExo.recuperation_secondes ?? 0)
