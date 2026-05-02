@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getYoutubeId, getVimeoId } from '../../lib/utils'
 
 type FamilleMin = { id?: string; nom: string; couleur: string }
@@ -14,10 +14,30 @@ const FAMILLE_EMOJI: Record<string, string> = {
   'Technique de base': '🎓', 'Technique athlétique': '🏆',
 }
 
-// Module-level cache: vimeoId → thumbnail URL
-const vimeoThumbCache = new Map<string, string>()
+// Module-level: thumbnail cache + in-flight dedup
+const thumbCache = new Map<string, string>()
+const inFlight = new Map<string, Promise<string>>()
 
-function FamillePlaceholder({ famille, size, fullWidth }: { famille?: FamilleMin | null; size: number; fullWidth: boolean }) {
+async function fetchThumb(vimeoId: string): Promise<string> {
+  const cached = thumbCache.get(vimeoId)
+  if (cached) return cached
+  if (inFlight.has(vimeoId)) return inFlight.get(vimeoId)!
+  const p = fetch(`/api/vimeo-thumb?id=${vimeoId}`)
+    .then(r => r.json())
+    .then((d: { url?: string }) => {
+      const url = d.url || ''
+      if (url) thumbCache.set(vimeoId, url)
+      inFlight.delete(vimeoId)
+      return url
+    })
+    .catch(() => { inFlight.delete(vimeoId); return '' })
+  inFlight.set(vimeoId, p)
+  return p
+}
+
+function GradientBox({ famille, fullWidth, size, withEmoji }: {
+  famille?: FamilleMin | null; fullWidth: boolean; size: number; withEmoji: boolean
+}) {
   const color = famille?.couleur || '#2C2C44'
   const hex = color.replace('#', '')
   const r = parseInt(hex.slice(0, 2), 16) || 44
@@ -29,8 +49,8 @@ function FamillePlaceholder({ famille, size, fullWidth }: { famille?: FamilleMin
       background: `linear-gradient(135deg, rgba(${r},${g},${b},0.45) 0%, rgba(${r},${g},${b},0.18) 100%)`,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
-      {fullWidth && famille && (
-        <span style={{ fontSize: 40, lineHeight: 1, opacity: 0.7 }}>
+      {withEmoji && fullWidth && famille && (
+        <span style={{ fontSize: 40, lineHeight: 1, opacity: 0.75 }}>
           {FAMILLE_EMOJI[famille.nom] || '🏅'}
         </span>
       )}
@@ -46,38 +66,19 @@ export function VideoThumb({
   famille?: FamilleMin | null
   fullWidth?: boolean
 }) {
-  const [thumbUrl, setThumbUrl] = useState<string | null>(() => {
-    const vid = url ? getVimeoId(url) : null
-    return vid ? (vimeoThumbCache.get(vid) || null) : null
-  })
-  const [hovered, setHovered] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-
   const ytId = url ? getYoutubeId(url) : null
   const vimeoId = url ? getVimeoId(url) : null
 
-  // Lazy-fetch Vimeo thumbnail when element enters viewport
-  useEffect(() => {
-    if (!vimeoId) return
-    const cached = vimeoThumbCache.get(vimeoId)
-    if (cached) { setThumbUrl(cached); return }
+  const [thumbUrl, setThumbUrl] = useState<string | null>(() =>
+    vimeoId ? (thumbCache.get(vimeoId) || null) : null
+  )
+  const [hovered, setHovered] = useState(false)
 
-    const el = containerRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return
-      observer.disconnect()
-      fetch(`/api/vimeo-thumb?id=${vimeoId}`)
-        .then(r => r.json())
-        .then((data: { url?: string }) => {
-          const u = data.url || ''
-          if (u) { vimeoThumbCache.set(vimeoId, u); setThumbUrl(u) }
-        })
-        .catch(() => {})
-    }, { rootMargin: '600px' })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [vimeoId])
+  // Fetch Vimeo thumbnail immediately on mount (deduped)
+  useEffect(() => {
+    if (!vimeoId || thumbUrl) return
+    fetchThumb(vimeoId).then(u => { if (u) setThumbUrl(u) })
+  }, [vimeoId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const containerStyle: React.CSSProperties = {
     width: fullWidth ? '100%' : size,
@@ -89,16 +90,16 @@ export function VideoThumb({
     position: 'relative',
   }
 
-  // ── No URL → famille emoji placeholder (fullWidth) or gradient (small) ──
+  // ── No URL → emoji placeholder ──────────────────────────────────
   if (!url) {
     return (
       <div style={containerStyle}>
-        <FamillePlaceholder famille={famille} size={size} fullWidth={fullWidth} />
+        <GradientBox famille={famille} fullWidth={fullWidth} size={size} withEmoji={true} />
       </div>
     )
   }
 
-  // ── YouTube ──
+  // ── YouTube ──────────────────────────────────────────────────────
   if (ytId) {
     const thumb = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`
     return (
@@ -119,10 +120,10 @@ export function VideoThumb({
     )
   }
 
-  // ── Vimeo ──
+  // ── Vimeo ─────────────────────────────────────────────────────────
   if (vimeoId) {
     return (
-      <div ref={containerRef} style={containerStyle}
+      <div style={containerStyle}
         onMouseEnter={() => fullWidth && setHovered(true)}
         onMouseLeave={() => fullWidth && setHovered(false)}
       >
@@ -135,14 +136,14 @@ export function VideoThumb({
         ) : thumbUrl ? (
           <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         ) : (
-          // Loading: show famille gradient (disappears once thumbnail loads)
-          <FamillePlaceholder famille={famille} size={size} fullWidth={fullWidth} />
+          // Still loading: gradient without emoji (video exists but thumb not yet ready)
+          <GradientBox famille={famille} fullWidth={fullWidth} size={size} withEmoji={false} />
         )}
       </div>
     )
   }
 
-  // ── Raw video file ──
+  // ── Raw video file ────────────────────────────────────────────────
   return (
     <div style={containerStyle}>
       <video src={url} muted loop playsInline preload="metadata"

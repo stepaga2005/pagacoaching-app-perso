@@ -7,14 +7,15 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const res = await fetch(`https://vimeo.com/api/v2/video/${id}.json`, {
-      headers: { Accept: 'application/json' },
-      next: { revalidate: 86400 }, // cache 24h
-    })
+    // oEmbed — official endpoint, works for public + unlisted
+    const res = await fetch(
+      `https://vimeo.com/api/oembed.json?url=https://vimeo.com/${id}&width=640`,
+      { headers: { Accept: 'application/json' } }
+    )
     if (!res.ok) return NextResponse.json({ url: '' }, { status: 404 })
 
-    const data = await res.json() as Array<{ thumbnail_large?: string; thumbnail_medium?: string }>
-    const url = data[0]?.thumbnail_large || data[0]?.thumbnail_medium || ''
+    const data = await res.json() as { thumbnail_url?: string }
+    const url = data.thumbnail_url || ''
     return NextResponse.json({ url }, {
       headers: { 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800' },
     })
