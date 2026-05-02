@@ -589,14 +589,16 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                         <div style={{ height: '1px', background: '#1C1C2C', margin: '0 14px' }} />
                                       )}
                                       <button onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
-                                        style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', minHeight: '44px' }}>
-                                        <VideoThumb url={exo.exercices?.video_url} size={56} />
+                                        style={{ width: '100%', background: '#1A1A2E', border: 'none', borderRadius: '10px', cursor: 'pointer', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', minHeight: '52px', margin: '2px 8px', width: 'calc(100% - 16px)' }}>
+                                        <VideoThumb url={exo.exercices?.video_url} size={52} famille={exo.exercices?.familles} />
                                         <div style={{ flex: 1, minWidth: 0 }}>
-                                          <span style={{ color: '#CCC', fontSize: '13px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{exo.exercices?.nom}</span>
-                                          {exo.lien_suivant && <span style={{ fontSize: '10px', color: '#1A6FFF60' }}>⇌ superset</span>}
+                                          <span style={{ color: '#EEE', fontSize: '13px', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{exo.exercices?.nom}</span>
+                                          <span style={{ fontSize: '11px', color: seriesSummary !== '—' ? '#1A6FFF' : '#555', fontWeight: '600' }}>
+                                            {seriesSummary !== '—' ? seriesSummary : 'Appuyer pour configurer'}
+                                          </span>
+                                          {exo.lien_suivant && <span style={{ fontSize: '10px', color: '#1A6FFF80', marginLeft: '6px' }}>⇌</span>}
                                         </div>
-                                        <span style={{ color: '#9898B8', fontSize: '11px', fontWeight: '600', flexShrink: 0 }}>{seriesSummary}</span>
-                                        <span style={{ color: '#2C2C44', fontSize: '14px', flexShrink: 0 }}>›</span>
+                                        <span style={{ color: '#1A6FFF80', fontSize: '18px', flexShrink: 0 }}>✏️</span>
                                       </button>
                                     </div>
                                   )
@@ -1204,10 +1206,17 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
               </div>
               {/* Header */}
               <div style={{ padding: '8px 16px 12px', borderBottom: '1px solid #1E1E30' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: exo.exercices?.video_url ? '10px' : '0' }}>
-                  <div style={{ width: '32px', height: '32px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ color: couleur, fontSize: '12px', fontWeight: '900' }}>{exo.ordre}</span>
-                  </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  {exo.exercices?.video_url ? (
+                    <button onClick={() => setVideoModal(exo.exercices!.video_url!)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
+                      <VideoThumb url={exo.exercices.video_url} size={56} famille={exo.exercices.familles ? { nom: exo.exercices.familles.nom, couleur: exo.exercices.familles.couleur } : null} />
+                    </button>
+                  ) : (
+                    <div style={{ width: '32px', height: '32px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ color: couleur, fontSize: '12px', fontWeight: '900' }}>{exo.ordre}</span>
+                    </div>
+                  )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     {fam && <div style={{ color: couleur, fontSize: '10px', fontWeight: '800', textTransform: 'uppercase' }}>{fam.nom}</div>}
                     <div style={{ color: '#FFF', fontWeight: '800', fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
@@ -1218,15 +1227,9 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                     <button onClick={() => { removeExo(r.id, exo.id); setExpandedExo(null) }} style={{ background: '#FF475710', border: '1px solid #FF475730', borderRadius: '8px', padding: '8px 12px', color: '#FF4757', cursor: 'pointer', fontSize: '14px' }}>✕</button>
                   </div>
                 </div>
-                {exo.exercices?.video_url && (
-                  <button onClick={() => setVideoModal(exo.exercices!.video_url!)}
-                    style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: '4px' }}>
-                    <VideoThumb url={exo.exercices.video_url} fullWidth famille={exo.exercices.familles ? { nom: exo.exercices.familles.nom, couleur: exo.exercices.familles.couleur } : null} />
-                  </button>
-                )}
               </div>
               {/* Body scrollable */}
-              <div style={{ overflowY: 'auto', flex: 1, padding: '16px' }}>
+              <div style={{ overflowY: 'auto', flex: 1, padding: '16px', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
                 {/* Nb séries */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
                   <span style={{ color: '#9898B8', fontSize: '12px', fontWeight: '700', textTransform: 'uppercase' }}>Séries</span>
