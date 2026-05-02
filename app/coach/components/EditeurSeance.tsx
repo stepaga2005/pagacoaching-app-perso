@@ -384,7 +384,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                       <button onClick={() => moveLigne(idx, -1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
                       <button onClick={() => moveLigne(idx, 1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
                     </div>
-                    <VideoThumb url={l.exercices?.video_url} size={48} famille={fam} />
+                    <VideoThumb url={l.exercices?.video_url} size={80} famille={fam} />
                     <div>
                       <div style={{ fontWeight: '600', fontSize: '13px' }}>{l.exercices?.nom}</div>
                       <div style={{ display: 'flex', gap: '5px', marginTop: '3px', flexWrap: 'wrap' }}>

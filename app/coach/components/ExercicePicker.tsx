@@ -127,7 +127,7 @@ export function ExercicePicker({ exercices, onConfirm, onClose }: {
                     border: `1px solid ${selected ? 'rgba(0,122,255,0.4)' : '#22223A'}`,
                     transition: 'all 0.15s ease',
                   }}>
-                  <VideoThumb url={ex.video_url} size={44} famille={ex.familles} />
+                  <VideoThumb url={ex.video_url} size={60} famille={ex.familles} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: '700', fontSize: '13px', color: selected ? '#60B8FF' : '#F0F0F8', marginBottom: '2px' }} className="truncate">
                       {ex.nom}

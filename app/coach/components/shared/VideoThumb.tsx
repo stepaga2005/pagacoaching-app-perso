@@ -5,16 +5,7 @@ import { getYoutubeId, getVimeoId } from '../../lib/utils'
 
 type FamilleMin = { id?: string; nom: string; couleur: string }
 
-const FAMILLE_EMOJI: Record<string, string> = {
-  'Vitesse': '⚡', 'Accélération': '🏃', 'Décélération': '🛑',
-  'Force': '💪', 'Puissance': '🔥', 'Pliométrie': '🦘',
-  'Coordination': '🎯', 'Appuis': '👟', 'COD': '↩️',
-  'Mobilité': '🔄', 'Stretch': '🧘', 'Prévention': '🛡️',
-  'Cardio': '❤️', 'Proprioception': '⚖️',
-  'Technique de base': '🎓', 'Technique athlétique': '🏆',
-}
-
-// Module-level cache: vimeoId → thumbnail URL (or 'error')
+// Module-level cache: vimeoId → thumbnail URL
 const vimeoThumbCache = new Map<string, string>()
 
 export function VideoThumb({
@@ -25,14 +16,16 @@ export function VideoThumb({
   famille?: FamilleMin | null
   fullWidth?: boolean
 }) {
-  const [hovered, setHovered] = useState(false)
-  const [thumbUrl, setThumbUrl] = useState<string | null>(null)
+  const [thumbUrl, setThumbUrl] = useState<string | null>(() => {
+    const vimeoId = url ? getVimeoId(url) : null
+    return vimeoId ? (vimeoThumbCache.get(vimeoId) || null) : null
+  })
   const containerRef = useRef<HTMLDivElement>(null)
 
   const ytId = url ? getYoutubeId(url) : null
   const vimeoId = url ? getVimeoId(url) : null
 
-  // Lazy-fetch Vimeo thumbnail on visibility
+  // Lazy-fetch Vimeo thumbnail when visible
   useEffect(() => {
     if (!vimeoId) return
     const cached = vimeoThumbCache.get(vimeoId)
@@ -50,140 +43,64 @@ export function VideoThumb({
           if (u) { vimeoThumbCache.set(vimeoId, u); setThumbUrl(u) }
         })
         .catch(() => {})
-    }, { rootMargin: '400px' })
+    }, { rootMargin: '600px' })
     observer.observe(el)
     return () => observer.disconnect()
   }, [vimeoId])
 
-  const PlayBtn = ({ small = false }: { small?: boolean }) => (
-    <div style={{
-      width: small ? 22 : 28, height: small ? 22 : 28, borderRadius: '50%',
-      background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(4px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-    }}>
-      <div style={{
-        width: 0, height: 0, borderStyle: 'solid',
-        borderWidth: small ? '4px 0 4px 7px' : '5px 0 5px 9px',
-        borderColor: 'transparent transparent transparent #111',
-        marginLeft: '2px',
-      }} />
-    </div>
-  )
-
   const w = fullWidth ? '100%' : size
-  const h = fullWidth ? undefined : size * 0.56
-  const ratio = fullWidth ? '16/9' : undefined
-  const baseStyle: React.CSSProperties = {
+  const h = fullWidth ? undefined : Math.round(size * 0.56)
+  const ratio = fullWidth ? ('16/9' as const) : undefined
+
+  const containerStyle: React.CSSProperties = {
     width: w, height: h, aspectRatio: ratio,
     borderRadius: fullWidth ? 0 : '8px',
-    overflow: 'hidden', flexShrink: 0, position: 'relative',
+    overflow: 'hidden', flexShrink: 0,
+    background: '#12121E',
   }
 
-  if (!url) {
-    const color = famille?.couleur || '#6B7280'
-    const emoji = famille ? (FAMILLE_EMOJI[famille.nom] || '🏅') : '▷'
-    const hex = color.replace('#', '')
-    const r = parseInt(hex.slice(0, 2), 16)
-    const g = parseInt(hex.slice(2, 4), 16)
-    const b = parseInt(hex.slice(4, 6), 16)
-    const containerH = fullWidth ? undefined : size
-    const containerW = fullWidth ? '100%' : size
-    return (
-      <div style={{
-        width: containerW, height: containerH, aspectRatio: ratio,
-        borderRadius: fullWidth ? 0 : '10px',
-        background: `linear-gradient(135deg, rgba(${r},${g},${b},0.35) 0%, rgba(${r},${g},${b},0.15) 100%)`,
-        border: fullWidth ? 'none' : `1.5px solid rgba(${r},${g},${b},0.5)`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexShrink: 0,
-      }}>
-        <span style={{ fontSize: fullWidth ? 36 : size * 0.42, lineHeight: 1 }}>{emoji}</span>
-      </div>
-    )
-  }
-
+  // YouTube — static thumbnail image
   if (ytId) {
     const thumb = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`
     return (
-      <div style={baseStyle} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-        {!hovered ? (
-          <>
-            <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', cursor: 'pointer' }} />
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.25)' }}>
-              <PlayBtn small={!fullWidth && size < 60} />
-            </div>
-          </>
-        ) : (
-          <iframe
-            src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0&modestbranding=1`}
-            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-            allow="autoplay"
-          />
-        )}
+      <div style={containerStyle}>
+        <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
       </div>
     )
   }
 
+  // Vimeo — lazy-loaded static thumbnail
   if (vimeoId) {
     return (
-      <div ref={containerRef} style={baseStyle} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-        {!hovered ? (
-          thumbUrl ? (
-            <>
-              <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', cursor: 'pointer' }} />
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)' }}>
-                <PlayBtn small={!fullWidth && size < 60} />
-              </div>
-            </>
-          ) : !fullWidth ? (
-            // Small size while loading: show famille-colored placeholder
-            (() => {
-              const color = famille?.couleur || '#1AB7EA'
-              const emoji = famille ? (FAMILLE_EMOJI[famille.nom] || '🏅') : '▶'
-              const hex = color.replace('#', '')
-              const r = parseInt(hex.slice(0, 2), 16)
-              const g = parseInt(hex.slice(2, 4), 16)
-              const b = parseInt(hex.slice(4, 6), 16)
-              return (
-                <div style={{
-                  width: '100%', height: '100%',
-                  background: `linear-gradient(135deg, rgba(${r},${g},${b},0.35) 0%, rgba(${r},${g},${b},0.15) 100%)`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <span style={{ fontSize: size * 0.38, lineHeight: 1 }}>{emoji}</span>
-                </div>
-              )
-            })()
-          ) : (
-            // Full-width while loading: subtle gradient
-            <div style={{
-              width: '100%', height: '100%', cursor: 'pointer',
-              background: 'linear-gradient(135deg, #1AB7EA18, #1AB7EA08)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <PlayBtn small={false} />
-            </div>
-          )
-        ) : (
-          <iframe
-            src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&loop=1&background=1`}
-            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-            allow="autoplay; fullscreen"
-          />
-        )}
+      <div ref={containerRef} style={containerStyle}>
+        {thumbUrl
+          ? <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          : <div style={{ width: '100%', height: '100%', background: '#12121E' }} />
+        }
       </div>
     )
   }
 
+  // No URL — colored family placeholder
+  if (!url) {
+    const color = famille?.couleur || '#2C2C44'
+    const hex = color.replace('#', '')
+    const r = parseInt(hex.slice(0, 2), 16) || 44
+    const g = parseInt(hex.slice(2, 4), 16) || 44
+    const b = parseInt(hex.slice(4, 6), 16) || 68
+    return (
+      <div style={{
+        ...containerStyle,
+        background: `linear-gradient(135deg, rgba(${r},${g},${b},0.4) 0%, rgba(${r},${g},${b},0.15) 100%)`,
+      }} />
+    )
+  }
+
+  // Raw video file
   return (
-    <div style={baseStyle}>
-      <video
-        src={url} muted loop playsInline preload="metadata"
-        onMouseEnter={e => (e.currentTarget as HTMLVideoElement).play().catch(() => {})}
-        onMouseLeave={e => { const v = e.currentTarget as HTMLVideoElement; v.pause(); v.currentTime = 0 }}
-        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', cursor: 'pointer' }}
-      />
+    <div style={containerStyle}>
+      <video src={url} muted loop playsInline preload="metadata"
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
     </div>
   )
 }
