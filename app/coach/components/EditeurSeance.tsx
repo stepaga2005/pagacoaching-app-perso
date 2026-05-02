@@ -33,6 +33,13 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
   const [showPicker, setShowPicker] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showDup, setShowDup] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
 
   function ajouterExercices(exs: Exercice[]) {
@@ -154,19 +161,22 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
   return (
     <div className="page-section">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-        <button onClick={onCancel} className="btn btn-ghost">← Retour</button>
-        <h1 className="page-title" style={{ flex: 1, fontSize: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: seance.id && isMobile ? '8px' : '24px' }}>
+        <button onClick={onCancel} className="btn btn-ghost btn-sm">← Retour</button>
+        <h1 className="page-title" style={{ flex: 1, minWidth: 0, fontSize: isMobile ? '16px' : '20px' }}>
           {seance.id ? 'Éditer la séance' : 'Nouvelle séance'}
         </h1>
-        {seance.id && (
+        {seance.id && !isMobile && (
           <button onClick={() => setShowDup(true)} className="btn btn-gold">⚡ Dupliquer avec progression</button>
         )}
-        <button onClick={handleSave} disabled={saving} className="btn btn-primary"
+        <button onClick={handleSave} disabled={saving} className="btn btn-primary btn-sm"
           style={saving ? { opacity: 0.6, cursor: 'not-allowed' } : {}}>
-          {saving ? 'Enregistrement...' : 'Enregistrer'}
+          {saving ? '...' : 'Enregistrer'}
         </button>
       </div>
+      {seance.id && isMobile && (
+        <button onClick={() => setShowDup(true)} className="btn btn-gold" style={{ width: '100%', marginBottom: '16px' }}>⚡ Dupliquer avec progression</button>
+      )}
 
       {/* Infos séance */}
       <input value={nom} onChange={e => setNom(e.target.value)} placeholder="Nom de la séance *"
@@ -330,29 +340,28 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                 {/* Footer : récup après le superset complet + Délier */}
                 {finGroupe && (
                   <div style={{
-                    display: 'flex', alignItems: 'center', gap: '12px',
+                    display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap',
                     background: '#1A6FFF10',
-                    borderTop: 'none',
                     borderBottom: '1px solid #1A6FFF50',
                     borderLeft: '1px solid #1A6FFF50',
                     borderRight: '1px solid #1A6FFF50',
                     borderRadius: '0 0 10px 10px',
                     padding: '8px 14px',
                   }}>
-                    <span style={{ color: '#2ECC71AA', fontSize: '12px' }}>⟳ Entre les sets :</span>
+                    <span style={{ color: '#2ECC71AA', fontSize: '12px', whiteSpace: 'nowrap' }}>⟳ Entre sets :</span>
                     <input
                       type="number" placeholder="0"
                       value={l.recuperation_inter_sets ?? ''}
                       onChange={e => setLignes(prev => prev.map((li, i) => i === idx ? { ...li, recuperation_inter_sets: e.target.value === '' ? undefined : Number(e.target.value) } : li))}
-                      style={{ width: '56px', background: '#212135', border: '1px solid #2ECC7140', borderRadius: '6px', padding: '5px 8px', color: '#2ECC71', fontSize: '13px', outline: 'none', textAlign: 'center' }}
+                      style={{ width: '52px', background: '#212135', border: '1px solid #2ECC7140', borderRadius: '6px', padding: '5px 8px', color: '#2ECC71', fontSize: '13px', outline: 'none', textAlign: 'center' }}
                     />
                     <span style={{ color: '#888', fontSize: '12px' }}>s</span>
-                    <span style={{ color: '#888', fontSize: '12px', marginLeft: '12px' }}>↦ Après le superset :</span>
+                    <span style={{ color: '#888', fontSize: '12px' }}>↦ Après superset :</span>
                     <input
                       type="number" placeholder="0"
                       value={l.recuperation_secondes ?? ''}
                       onChange={e => updateLigne(idx, 'recuperation_secondes', e.target.value)}
-                      style={{ width: '56px', background: '#212135', border: '1px solid #1A6FFF40', borderRadius: '6px', padding: '5px 8px', color: '#1A6FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }}
+                      style={{ width: '52px', background: '#212135', border: '1px solid #1A6FFF40', borderRadius: '6px', padding: '5px 8px', color: '#1A6FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }}
                     />
                     <span style={{ color: '#888', fontSize: '12px' }}>s</span>
                     <button onClick={delierId} style={{
@@ -380,14 +389,14 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                   display: 'grid', gridTemplateColumns: '1fr auto auto auto',
                   gap: '8px', padding: '10px 8px', alignItems: 'center',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
                       <button onClick={() => moveLigne(idx, -1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
                       <button onClick={() => moveLigne(idx, 1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
                     </div>
-                    <VideoThumb url={l.exercices?.video_url} size={80} famille={fam} />
-                    <div>
-                      <div style={{ fontWeight: '600', fontSize: '13px' }}>{l.exercices?.nom}</div>
+                    <VideoThumb url={l.exercices?.video_url} size={isMobile ? 48 : 80} famille={fam} />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontWeight: '600', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.exercices?.nom}</div>
                       <div style={{ display: 'flex', gap: '5px', marginTop: '3px', flexWrap: 'wrap' }}>
                         {fam && <span style={{ fontSize: '10px', color: fam.couleur }}>{fam.nom}</span>}
                         <button onClick={() => setLignes(prev => prev.map((li, i) => i === idx ? { ...li, uni_podal: !li.uni_podal } : li))}
@@ -396,19 +405,19 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                     </div>
                   </div>
                   {/* Séries */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ color: '#9898B8', fontSize: '11px', whiteSpace: 'nowrap' }}>Séries</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {!isMobile && <span style={{ color: '#9898B8', fontSize: '11px', whiteSpace: 'nowrap' }}>Séries</span>}
                     <input
-                      type="number" placeholder="-"
+                      type="number" placeholder={isMobile ? 'S' : '-'}
                       value={l.series ?? ''}
                       onChange={e => handleSeriesChange(idx, e.target.value)}
-                      style={{ width: '55px', background: '#212135', border: '1px solid #2C2C44', borderRadius: '6px', padding: '6px 8px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }}
+                      style={{ width: isMobile ? '44px' : '55px', background: '#212135', border: '1px solid #2C2C44', borderRadius: '6px', padding: '6px 6px', color: '#FFF', fontSize: '13px', outline: 'none', textAlign: 'center' }}
                     />
                   </div>
                   {/* Notes */}
                   <input value={l.notes || ''} onChange={e => updateLigne(idx, 'notes', e.target.value)}
                     placeholder="note..."
-                    style={{ width: '110px', background: '#212135', border: '1px solid #2C2C44', borderRadius: '6px', padding: '6px 8px', color: '#FFF', fontSize: '12px', outline: 'none' }} />
+                    style={{ width: isMobile ? '72px' : '110px', background: '#212135', border: '1px solid #2C2C44', borderRadius: '6px', padding: '6px 8px', color: '#FFF', fontSize: '12px', outline: 'none' }} />
                   <button onClick={() => removeLigne(idx)} style={{
                     background: 'transparent', border: '1px solid #FF475730', color: '#FF4757',
                     borderRadius: '6px', padding: '6px', cursor: 'pointer', fontSize: '12px',
@@ -419,14 +428,14 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                 {hasPerSet && (
                   <div style={{ borderTop: '1px solid #2A2A2A' }}>
                     {/* Sous-header */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '60px 65px 65px 65px 65px 65px', gap: '6px', padding: '5px 12px', background: '#0B0B14' }}>
-                      {['Série', 'Reps', 'Durée(s)', 'Dist(m)', 'Charge(kg)', 'Récup(s)'].map(h => (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'auto repeat(5, minmax(0, 1fr))', gap: '6px', padding: '5px 12px', background: '#0B0B14' }}>
+                      {['Sér.', 'Reps', 'Durée(s)', 'Dist(m)', 'Charge(kg)', 'Récup(s)'].map(h => (
                         <div key={h} style={{ color: '#7878A8', fontSize: '10px', letterSpacing: '0.3px', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
                       ))}
                     </div>
                     {l.sets_config!.map((s, si) => (
                       <div key={si} style={{
-                        display: 'grid', gridTemplateColumns: '60px 65px 65px 65px 65px 65px', gap: '6px',
+                        display: 'grid', gridTemplateColumns: 'auto repeat(5, minmax(0, 1fr))', gap: '6px',
                         padding: '6px 12px', borderTop: '1px solid #222238', alignItems: 'center',
                         background: si % 2 === 0 ? '#0E0E18' : '#18182A',
                       }}>
@@ -449,12 +458,12 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                 {/* Mode simple (pas de sets_config) */}
                 {!hasPerSet && (
                   <div style={{ borderTop: '1px solid #1E1E30' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '65px 65px 65px 65px 65px', gap: '6px', padding: '5px 12px', background: '#0B0B14' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '6px', padding: '5px 12px', background: '#0B0B14' }}>
                       {['Reps', 'Durée(s)', 'Dist(m)', 'Charge(kg)', 'Récup(s)'].map(h => (
                         <div key={h} style={{ color: '#7878A8', fontSize: '10px', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
                       ))}
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '65px 65px 65px 65px 65px', gap: '6px', padding: '8px 12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: '6px', padding: '8px 12px' }}>
                       {paramInput(idx, 'repetitions', '-', '100%')}
                       {paramInput(idx, 'duree_secondes', '-', '100%')}
                       {paramInput(idx, 'distance_metres', '-', '100%')}
