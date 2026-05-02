@@ -591,18 +591,20 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                       {exo.lien_suivant === false && ei > 0 && (
                                         <div style={{ height: '1px', background: '#1C1C2C', margin: '0 14px' }} />
                                       )}
-                                      <button onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
-                                        style={{ width: '100%', background: '#1A1A2E', border: 'none', borderRadius: '10px', cursor: 'pointer', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', minHeight: '52px', margin: '2px 8px', width: 'calc(100% - 16px)' }}>
-                                        <VideoThumb url={exo.exercices?.video_url} size={52} famille={exo.exercices?.familles} />
-                                        <div style={{ flex: 1, minWidth: 0 }}>
-                                          <span style={{ color: '#EEE', fontSize: '13px', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{exo.exercices?.nom}</span>
-                                          <span style={{ fontSize: '11px', color: seriesSummary !== '—' ? '#1A6FFF' : '#555', fontWeight: '600' }}>
-                                            {seriesSummary !== '—' ? seriesSummary : 'Appuyer pour configurer'}
-                                          </span>
-                                          {exo.lien_suivant && <span style={{ fontSize: '10px', color: '#1A6FFF80', marginLeft: '6px' }}>⇌</span>}
-                                        </div>
-                                        <span style={{ color: '#1A6FFF80', fontSize: '18px', flexShrink: 0 }}>✏️</span>
-                                      </button>
+                                      <div style={{ padding: '2px 8px' }}>
+                                        <button onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
+                                          style={{ width: '100%', background: '#1A1A2E', border: 'none', borderRadius: '10px', cursor: 'pointer', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', minHeight: '52px', boxSizing: 'border-box' }}>
+                                          <VideoThumb url={exo.exercices?.video_url} size={52} famille={exo.exercices?.familles} />
+                                          <div style={{ flex: 1, minWidth: 0 }}>
+                                            <span style={{ color: '#EEE', fontSize: '13px', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{exo.exercices?.nom}</span>
+                                            <span style={{ fontSize: '11px', color: seriesSummary !== '—' ? '#1A6FFF' : '#555', fontWeight: '600' }}>
+                                              {seriesSummary !== '—' ? seriesSummary : 'Appuyer pour configurer'}
+                                            </span>
+                                            {exo.lien_suivant && <span style={{ fontSize: '10px', color: '#1A6FFF80', marginLeft: '6px' }}>⇌</span>}
+                                          </div>
+                                          <span style={{ color: '#1A6FFF80', fontSize: '16px', flexShrink: 0 }}>✏️</span>
+                                        </button>
+                                      </div>
                                     </div>
                                   )
                                 })}
