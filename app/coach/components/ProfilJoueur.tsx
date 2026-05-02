@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 
 import { Joueur, Realisation, MPRealisation, Exercice, Seance, Groupe } from '../lib/types'
 import { SearchableSelect } from './shared/SearchableSelect'
-import { haptic } from '../lib/utils'
+import { haptic, getYoutubeId, getVimeoId } from '../lib/utils'
 import { toast } from '../lib/toast'
 import { WellnessGraphiques } from './WellnessGraphiques'
 import { CopierJoursModal } from './CopierJoursModal'
@@ -65,6 +65,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
   const [actionMenuDate, setActionMenuDate] = useState<string | null>(null)
   const [wellnessDate, setWellnessDate] = useState<string | null>(null)
   const [wellnessData, setWellnessData] = useState({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' })
+  const [videoModal, setVideoModal] = useState<string | null>(null)
   useEffect(() => { loadData() }, [joueur.id])
 
   useEffect(() => {
@@ -507,7 +508,7 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
                                     <div style={{ fontSize: '15px', fontWeight: '800', color: '#EEE', letterSpacing: '-0.2px', lineHeight: 1.2 }}>{ex.exercices?.nom}</div>
                                   </div>
                                   {ex.exercices?.video_url && (
-                                    <button onClick={() => window.open(ex.exercices!.video_url!, '_blank')}
+                                    <button onClick={() => setVideoModal(ex.exercices!.video_url!)}
                                       style={{ background: '#1A6FFF20', border: '1px solid #1A6FFF40', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', cursor: 'pointer', fontSize: '13px', flexShrink: 0 }}>▶</button>
                                   )}
                                 </div>
@@ -772,6 +773,36 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
           </div>
         </div>
       )}
+
+      {/* ── Video popup modal ── */}
+      {videoModal && (() => {
+        const ytId = getYoutubeId(videoModal)
+        const vimeoId = getVimeoId(videoModal)
+        const embedSrc = ytId
+          ? `https://www.youtube.com/embed/${ytId}?autoplay=1&controls=1`
+          : vimeoId
+          ? `https://player.vimeo.com/video/${vimeoId}?autoplay=1&controls=1`
+          : null
+        return (
+          <>
+            <div onClick={() => setVideoModal(null)} style={{ position: 'fixed', inset: 0, zIndex: 600, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)' }} />
+            <div style={{ position: 'fixed', inset: 0, zIndex: 601, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', pointerEvents: 'none' }}>
+              <div style={{ width: '100%', maxWidth: '720px', pointerEvents: 'auto' }}>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
+                  {embedSrc ? (
+                    <iframe src={embedSrc} style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
+                  ) : (
+                    <video src={videoModal} autoPlay controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  )}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px' }}>
+                  <button onClick={() => setVideoModal(null)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '20px', padding: '8px 24px', color: '#FFF', cursor: 'pointer', fontSize: '13px', fontWeight: '700', backdropFilter: 'blur(8px)' }}>✕ Fermer</button>
+                </div>
+              </div>
+            </div>
+          </>
+        )
+      })()}
     </div>
   )
 }

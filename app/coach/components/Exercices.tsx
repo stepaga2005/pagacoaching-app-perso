@@ -146,15 +146,8 @@ export function Exercices() {
                 <iframe src={src} style={{ width: '100%', height: '100%', border: 'none' }} allow="autoplay; fullscreen" allowFullScreen />
               </div>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#0D1A2E', border: '1px solid #1A6FFF30', borderRadius: '10px', padding: '10px 14px', marginBottom: '20px' }}>
-                <span style={{ color: '#1A6FFF', fontSize: '13px' }}>▶</span>
-                <span style={{ color: '#888', fontSize: '12px', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{apercu.video_url}</span>
-                <button onClick={() => navigator.clipboard?.writeText(apercu.video_url!).then(() => toast('Lien copié !', 'success'))} style={{
-                  background: '#1A6FFF20', border: '1px solid #1A6FFF40', borderRadius: '6px', padding: '4px 10px', color: '#1A6FFF', cursor: 'pointer', fontSize: '11px', fontWeight: '600',
-                }}>Copier</button>
-                <button onClick={() => window.open(apercu.video_url!, '_blank')} style={{
-                  background: '#1A6FFF', border: 'none', borderRadius: '6px', padding: '4px 10px', color: '#FFF', cursor: 'pointer', fontSize: '11px', fontWeight: '600',
-                }}>Ouvrir</button>
+              <div style={{ marginBottom: '20px', borderRadius: '12px', overflow: 'hidden', background: '#000', aspectRatio: '16/9' }}>
+                <video src={apercu.video_url!} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
             )
           })()}

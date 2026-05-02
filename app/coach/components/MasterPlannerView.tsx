@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Joueur, MPRealisation, MPSeanceExercice, Exercice, Seance, SetConfig, JOURS, JOURS_FULL, LABELS_TYPE, TYPE_COLORS } from '../lib/types'
 import { VideoThumb } from './shared/VideoThumb'
-import { haptic } from '../lib/utils'
+import { haptic, getYoutubeId, getVimeoId } from '../lib/utils'
 import { toast } from '../lib/toast'
 import { EditeurSeance } from './EditeurSeance'
 import { ExercicePicker } from './ExercicePicker'
@@ -51,6 +51,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
   const [allJoueurs, setAllJoueurs] = useState<{ id: string; nom: string; prenom: string }[]>([])
   const [mpActiviteModal, setMpActiviteModal] = useState<{ id: string; nom: string; duree: number | null } | null>(null)
   const [mpActiviteDuree, setMpActiviteDuree] = useState<string>('')
+  const [videoModal, setVideoModal] = useState<string | null>(null)
 
   useEffect(() => {
     supabase.from('seances').select('id, nom').eq('est_template', true).order('nom').limit(2000)
@@ -788,7 +789,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                       <button onClick={() => moveExo(r.id, exo.id, 1)} style={{ background: 'none', border: 'none', color: '#2C2C44', cursor: 'pointer', fontSize: '10px', lineHeight: 1, padding: '1px 2px' }}>▼</button>
                                     </div>
                                     {hasVideo ? (
-                                      <button onClick={() => window.open(exo.exercices!.video_url!.replace('vimeo.com/', 'player.vimeo.com/video/'), '_blank')}
+                                      <button onClick={() => setVideoModal(exo.exercices!.video_url!)}
                                         style={{ width: '24px', height: '24px', background: '#212135', border: '1px solid #2C2C44', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '11px', color: '#1A6FFF' }}>▶</button>
                                     ) : (
                                       <div style={{ width: '24px', height: '24px', background: couleur + '18', border: `1px solid ${couleur}30`, borderRadius: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -1218,20 +1219,10 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                   </div>
                 </div>
                 {exo.exercices?.video_url && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#0D1A2E', border: '1px solid #1A6FFF30', borderRadius: '10px', padding: '8px 12px' }}>
-                    <span style={{ color: '#1A6FFF', fontSize: '13px' }}>▶</span>
-                    <span style={{ color: '#888', fontSize: '11px', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices.video_url}</span>
-                    <button
-                      onClick={() => navigator.clipboard.writeText(exo.exercices!.video_url!).then(() => toast('Lien copié !', 'success'))}
-                      style={{ background: '#1A6FFF20', border: '1px solid #1A6FFF40', borderRadius: '7px', padding: '5px 10px', color: '#1A6FFF', cursor: 'pointer', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
-                      Copier
-                    </button>
-                    <button
-                      onClick={() => window.open(exo.exercices!.video_url!, '_blank')}
-                      style={{ background: '#1A6FFF', border: 'none', borderRadius: '7px', padding: '5px 10px', color: '#FFF', cursor: 'pointer', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
-                      Ouvrir
-                    </button>
-                  </div>
+                  <button onClick={() => setVideoModal(exo.exercices!.video_url!)}
+                    style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginTop: '4px' }}>
+                    <VideoThumb url={exo.exercices.video_url} fullWidth famille={exo.exercices.familles ? { nom: exo.exercices.familles.nom, couleur: exo.exercices.familles.couleur } : null} />
+                  </button>
                 )}
               </div>
               {/* Body scrollable */}
@@ -1412,6 +1403,35 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
           </div>
         </div>
       )}
+      {/* ── Video popup modal ── */}
+      {videoModal && (() => {
+        const ytId = getYoutubeId(videoModal)
+        const vimeoId = getVimeoId(videoModal)
+        const embedSrc = ytId
+          ? `https://www.youtube.com/embed/${ytId}?autoplay=1&controls=1`
+          : vimeoId
+          ? `https://player.vimeo.com/video/${vimeoId}?autoplay=1&controls=1`
+          : null
+        return (
+          <>
+            <div onClick={() => setVideoModal(null)} style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)' }} />
+            <div style={{ position: 'fixed', inset: 0, zIndex: 501, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', pointerEvents: 'none' }}>
+              <div style={{ width: '100%', maxWidth: '720px', pointerEvents: 'auto' }}>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', borderRadius: '12px', overflow: 'hidden', background: '#000' }}>
+                  {embedSrc ? (
+                    <iframe src={embedSrc} style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
+                  ) : (
+                    <video src={videoModal} autoPlay controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  )}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px' }}>
+                  <button onClick={() => setVideoModal(null)} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '20px', padding: '8px 24px', color: '#FFF', cursor: 'pointer', fontSize: '13px', fontWeight: '700', backdropFilter: 'blur(8px)' }}>✕ Fermer</button>
+                </div>
+              </div>
+            </div>
+          </>
+        )
+      })()}
     </div>
   )
 }
