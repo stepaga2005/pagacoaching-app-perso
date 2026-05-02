@@ -136,14 +136,33 @@ export function VideoThumb({
                 <PlayBtn small={!fullWidth && size < 60} />
               </div>
             </>
+          ) : !fullWidth ? (
+            // Small size while loading: show famille-colored placeholder
+            (() => {
+              const color = famille?.couleur || '#1AB7EA'
+              const emoji = famille ? (FAMILLE_EMOJI[famille.nom] || '🏅') : '▶'
+              const hex = color.replace('#', '')
+              const r = parseInt(hex.slice(0, 2), 16)
+              const g = parseInt(hex.slice(2, 4), 16)
+              const b = parseInt(hex.slice(4, 6), 16)
+              return (
+                <div style={{
+                  width: '100%', height: '100%',
+                  background: `linear-gradient(135deg, rgba(${r},${g},${b},0.35) 0%, rgba(${r},${g},${b},0.15) 100%)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span style={{ fontSize: size * 0.38, lineHeight: 1 }}>{emoji}</span>
+                </div>
+              )
+            })()
           ) : (
+            // Full-width while loading: subtle gradient
             <div style={{
               width: '100%', height: '100%', cursor: 'pointer',
-              background: 'linear-gradient(135deg, #1AB7EA22, #1AB7EA0A)',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px',
+              background: 'linear-gradient(135deg, #1AB7EA18, #1AB7EA08)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <PlayBtn small={!fullWidth && size < 60} />
-              <span style={{ fontSize: '10px', fontWeight: '800', color: '#1AB7EA', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Vimeo</span>
+              <PlayBtn small={false} />
             </div>
           )
         ) : (
