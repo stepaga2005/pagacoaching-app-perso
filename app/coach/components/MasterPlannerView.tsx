@@ -304,7 +304,10 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
   async function addSet(realisationId: string, exoId: string, exo: MPSeanceExercice) {
     const current = exo.sets_config || []
     const s1: SetConfig = current[0] || { reps: exo.repetitions, charge: exo.charge_kg, recup: exo.recuperation_secondes }
-    const newSets = [...current, { ...s1 }]
+    // Si on part du mode simple avec N séries déjà définies → expand toutes en une fois
+    const newSets = current.length === 0 && exo.series && exo.series > 1
+      ? Array.from({ length: exo.series }, () => ({ ...s1 }))
+      : [...current, { ...s1 }]
     const updates = { sets_config: newSets, series: newSets.length }
     patchExoLocal(realisationId, exoId, updates)
     await saveExoField(exoId, updates)
@@ -1256,20 +1259,27 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                         <div key={hi} style={{ color: '#9898B8', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{h}</div>
                       ))}
                     </div>
-                    {exo.sets_config!.map((s, si) => (
-                      <div key={si} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr 1fr 1fr 28px', gap: '6px', alignItems: 'center' }}>
-                        <div style={{ color: '#C9A84C', fontSize: '13px', fontWeight: '800', textAlign: 'center' }}>{si + 1}</div>
-                        {(['reps', 'duree', 'dist', 'charge', 'recup'] as (keyof SetConfig)[]).map(key => (
-                          <input key={key} type="number" placeholder="-" min="0"
-                            value={s[key] ?? ''}
-                            onChange={e => patchSet(r.id, exo.id, exo, si, key, e.target.value)}
-                            onBlur={() => flushSets(exo.id, r.id)}
-                            style={inputLg} />
-                        ))}
-                        <button onClick={() => removeSet(r.id, exo.id, exo, si)}
-                          style={{ background: 'transparent', border: 'none', color: '#FF475760', cursor: 'pointer', fontSize: '16px', padding: '0' }}>✕</button>
-                      </div>
-                    ))}
+                    {exo.sets_config!.map((s, si) => {
+                      const isLast = si === exo.sets_config!.length - 1
+                      return (
+                        <div key={si} style={{ display: 'grid', gridTemplateColumns: '28px 1fr 1fr 1fr 1fr 1fr 28px', gap: '6px', alignItems: 'center' }}>
+                          <div style={{ color: '#C9A84C', fontSize: '13px', fontWeight: '800', textAlign: 'center' }}>{si + 1}</div>
+                          {(['reps', 'duree', 'dist', 'charge', 'recup'] as (keyof SetConfig)[]).map(key => (
+                            <input key={key} type="number" placeholder="-" min="0"
+                              value={s[key] ?? ''}
+                              onChange={e => patchSet(r.id, exo.id, exo, si, key, e.target.value)}
+                              onBlur={() => flushSets(exo.id, r.id)}
+                              style={{ ...inputLg, borderColor: isLast && key === 'recup' ? '#2ECC7140' : undefined, color: isLast && key === 'recup' ? '#2ECC71' : undefined }} />
+                          ))}
+                          <button onClick={() => removeSet(r.id, exo.id, exo, si)}
+                            style={{ background: 'transparent', border: 'none', color: '#FF475760', cursor: 'pointer', fontSize: '16px', padding: '0' }}>✕</button>
+                        </div>
+                      )
+                    })}
+                    {/* Légende dernière série */}
+                    <div style={{ fontSize: '11px', color: '#2ECC7170', fontStyle: 'italic', textAlign: 'right', paddingRight: '34px' }}>
+                      ↑ Réc. série {exo.sets_config!.length} = récup entre les tours
+                    </div>
                   </div>
                 ) : (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: '8px' }}>
