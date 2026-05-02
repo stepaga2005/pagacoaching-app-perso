@@ -66,6 +66,13 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
   const [wellnessDate, setWellnessDate] = useState<string | null>(null)
   const [wellnessData, setWellnessData] = useState({ fatigue: 5, rpe: 5, courbatures: 5, qualite_sommeil: 5, notes: '' })
   const [videoModal, setVideoModal] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
   useEffect(() => { loadData() }, [joueur.id])
 
   useEffect(() => {
@@ -224,28 +231,39 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-        <button onClick={onBack} style={{ background: 'none', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '13px' }}>← Retour</button>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1 }}>
-          <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#1A6FFF20', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1A6FFF', fontWeight: '800', fontSize: '15px' }}>
+      <div style={{ marginBottom: '16px' }}>
+        {/* Ligne 1 : retour + avatar + nom */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+          <button onClick={onBack} style={{ background: 'none', border: '1px solid #2C2C44', borderRadius: '8px', padding: '8px 12px', color: '#888', cursor: 'pointer', fontSize: '13px', flexShrink: 0 }}>← Retour</button>
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#1A6FFF20', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1A6FFF', fontWeight: '800', fontSize: '13px', flexShrink: 0 }}>
             {joueur.prenom[0]}{joueur.nom[0]}
           </div>
-          <div>
-            <div style={{ fontWeight: '800', fontSize: '18px' }}>{joueur.prenom} {joueur.nom}</div>
-            <div style={{ color: '#888', fontSize: '12px' }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: '800', fontSize: isMobile ? '15px' : '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{joueur.prenom} {joueur.nom}</div>
+            {!isMobile && <div style={{ color: '#888', fontSize: '12px' }}>
               {joueur.poste && `${joueur.poste} · `}{joueur.club && `${joueur.club} · `}
               <span style={{ color: joueur.actif ? '#2ECC71' : '#FF4757' }}>{joueur.actif ? 'Actif' : 'Suspendu'}</span>
-            </div>
+            </div>}
           </div>
         </div>
+        {/* Ligne 2 : onglets */}
         <div style={{ display: 'flex', gap: '4px', background: '#212135', borderRadius: '10px', padding: '4px' }}>
-          {(['calendrier', 'graphiques', 'favoris', 'messages'] as const).map(o => (
-            <button key={o} onClick={() => setOnglet(o)} style={{
-              padding: '7px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
-              background: onglet === o ? '#2C2C44' : 'transparent',
-              color: onglet === o ? '#FFF' : '#555',
-            }}>{o === 'calendrier' ? 'Calendrier' : o === 'graphiques' ? '📊 Graphiques' : o === 'favoris' ? '⭐ Favoris' : '💬 Messages'}</button>
-          ))}
+          {(['calendrier', 'graphiques', 'favoris', 'messages'] as const).map(o => {
+            const labels: Record<string, string> = {
+              calendrier: isMobile ? '📅' : 'Calendrier',
+              graphiques: isMobile ? '📊' : '📊 Graphiques',
+              favoris: isMobile ? '⭐' : '⭐ Favoris',
+              messages: isMobile ? '💬' : '💬 Messages',
+            }
+            return (
+              <button key={o} onClick={() => setOnglet(o)} style={{
+                flex: 1, padding: isMobile ? '8px 4px' : '7px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                fontSize: isMobile ? '18px' : '13px', fontWeight: '600',
+                background: onglet === o ? '#2C2C44' : 'transparent',
+                color: onglet === o ? '#FFF' : '#555',
+              }}>{labels[o]}</button>
+            )
+          })}
         </div>
       </div>
 
@@ -253,127 +271,165 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
         <div>
           {/* Navigation plage */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-            {/* Ligne 1 : nav + Master Planner */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <button onClick={allerAujourdhui} style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap' }}>Aujourd'hui</button>
               <button onClick={() => decalerRange(-7)} style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>‹</button>
               <button onClick={() => decalerRange(7)} style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '7px 12px', color: '#888', cursor: 'pointer', fontSize: '14px' }}>›</button>
               <button onClick={() => setShowMasterPlanner(true)} style={{ background: '#1A6FFF20', border: '1px solid #1A6FFF50', borderRadius: '8px', padding: '7px 14px', color: '#1A6FFF', cursor: 'pointer', fontSize: '12px', fontWeight: '700', whiteSpace: 'nowrap', letterSpacing: '-0.3px' }}>▦ Master Planner</button>
             </div>
-            {/* Ligne 2 : plage de dates */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ color: '#9898B8', fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px' }}>DE</span>
-              <input type="date" value={rangeDebut} onChange={e => setRangeDebut(e.target.value)}
-                style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', fontSize: '13px', fontWeight: '600', outline: 'none', cursor: 'pointer' }} />
-              <span style={{ color: '#9898B8', fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px' }}>À</span>
-              <input type="date" value={rangeFin} onChange={e => setRangeFin(e.target.value)}
-                style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', fontSize: '13px', fontWeight: '600', outline: 'none', cursor: 'pointer' }} />
-            </div>
+            {!isMobile && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ color: '#9898B8', fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px' }}>DE</span>
+                <input type="date" value={rangeDebut} onChange={e => setRangeDebut(e.target.value)}
+                  style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', fontSize: '13px', fontWeight: '600', outline: 'none', cursor: 'pointer' }} />
+                <span style={{ color: '#9898B8', fontSize: '12px', fontWeight: '700', letterSpacing: '0.5px' }}>À</span>
+                <input type="date" value={rangeFin} onChange={e => setRangeFin(e.target.value)}
+                  style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '6px 10px', color: '#1A6FFF', fontSize: '13px', fontWeight: '600', outline: 'none', cursor: 'pointer' }} />
+              </div>
+            )}
           </div>
 
-          {/* En-têtes jours fixes */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px', marginBottom: '4px' }}>
-            {jourNoms.map(j => (
-              <div key={j} style={{ textAlign: 'center', color: '#9898B8', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', padding: '4px 0' }}>{j}</div>
-            ))}
-          </div>
-
-          {/* Semaines empilées */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {semaines.map((semaine, si) => (
-              <div key={si} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
-                {semaine.map((ds, i) => {
-                  const realsJour = realsParDate[ds] || []
-                  const isToday = ds === today
-                  const isPast = ds < today
-                  const dateNum = new Date(ds + 'T12:00:00').getDate()
-                  return (
-                    <div key={ds} style={{
-                      minHeight: '100px',
-                      background: isToday ? '#1A6FFF08' : '#18182A',
-                      borderTop: `2px solid ${isToday ? '#1A6FFF' : isPast ? '#1E1E1E' : '#2C2C44'}`,
-                      borderBottom: '1px solid #1E1E30',
-                      borderLeft: '1px solid #1E1E30',
-                      borderRight: '1px solid #1E1E1E',
-                      borderRadius: '8px',
-                      display: 'flex', flexDirection: 'column',
-                      overflow: 'hidden',
-                    }}>
-                      {/* Header jour */}
-                      <div style={{ padding: '7px 7px 5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #222238' }}>
-                        <div style={{ fontSize: '18px', fontWeight: isToday ? '900' : '600', color: isToday ? '#007AFF' : isPast ? '#888' : '#CCC', lineHeight: 1 }}>{dateNum}</div>
-                        <button onClick={() => setActionMenuDate(ds)}
-                          style={{ width: '26px', height: '26px', borderRadius: '6px', border: '1px solid #2C2C44', background: 'transparent', color: '#9898B8', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, padding: 0 }}>+</button>
-                      </div>
-
-                      {/* Cartes séances */}
-                      <div style={{ flex: 1, padding: '4px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          {/* ── MOBILE : liste verticale par jour ── */}
+          {isMobile && (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {semaines.flat().map(ds => {
+                const realsJour = realsParDate[ds] || []
+                const isToday = ds === today
+                const isPast = ds < today
+                const dateLabel = new Date(ds + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+                const wColor = (v: number, inverted = false) => {
+                  const n = inverted ? 11 - v : v
+                  if (n <= 3) return '#2ECC71'; if (n <= 5) return '#F39C12'; if (n <= 7) return '#FF6B35'; return '#FF4757'
+                }
+                return (
+                  <div key={ds} style={{ borderBottom: '1px solid #1E1E30' }}>
+                    {/* En-tête jour */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 2px 8px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.5px', color: isToday ? '#1A6FFF' : isPast ? '#555' : '#9898B8' }}>
+                        {dateLabel}
+                      </span>
+                      <button onClick={() => setActionMenuDate(ds)}
+                        style={{ width: '28px', height: '28px', borderRadius: '8px', border: '1px solid #2C2C44', background: 'transparent', color: '#9898B8', cursor: 'pointer', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>+</button>
+                    </div>
+                    {/* Cartes */}
+                    {realsJour.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', paddingBottom: '10px' }}>
                         {realsJour.map(r => {
                           const isActivite = !!r.activite_id && !r.seance_id
                           const isWellness = !r.seances && !isActivite
-                          if (isActivite) {
-                            return (
-                              <div key={r.id} style={{
-                                background: '#C9A84C12', border: '1px solid #C9A84C28', borderLeft: '3px solid #C9A84C',
-                                borderRadius: '6px', padding: '6px 7px',
-                              }}>
-                                <div style={{ fontSize: '10px', fontWeight: '800', color: '#C9A84C', marginBottom: '2px', letterSpacing: '0.3px' }}>🏃 Activité</div>
-                                <div style={{ fontSize: '11px', fontWeight: '700', color: '#E0C87A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.activites?.nom || '—'}</div>
-                                {r.duree_minutes != null && <div style={{ fontSize: '11px', fontWeight: '700', color: '#C9A84C', marginTop: '1px' }}>{r.duree_minutes} min</div>}
+                          if (isActivite) return (
+                            <div key={r.id} style={{ background: '#C9A84C10', border: '1px solid #C9A84C25', borderRadius: '12px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#C9A84C20', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '18px' }}>🏃</div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontWeight: '700', fontSize: '14px', color: '#E0C87A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.activites?.nom || '—'}</div>
+                                {r.duree_minutes != null && <div style={{ fontSize: '12px', color: '#C9A84C80', marginTop: '2px' }}>{r.duree_minutes} min</div>}
                               </div>
-                            )
-                          }
-                          if (isWellness) {
-                            // Couleur par valeur: fatigue/rpe/courbatures = vert→rouge, sommeil = rouge→vert
-                            const wColor = (v: number, inverted = false) => {
-                              const n = inverted ? 11 - v : v
-                              if (n <= 3) return '#2ECC71'
-                              if (n <= 5) return '#F39C12'
-                              if (n <= 7) return '#FF6B35'
-                              return '#FF4757'
-                            }
-                            return (
-                              <div key={r.id} onClick={() => setSeanceDetail(r)} style={{
-                                background: '#2ECC7112',
-                                border: '1px solid #2ECC7128', borderLeft: '3px solid #2ECC71',
-                                borderRadius: '6px', padding: '6px 7px', cursor: 'pointer',
-                              }}>
-                                <div style={{ fontSize: '10px', fontWeight: '800', color: '#2ECC71', marginBottom: '4px', letterSpacing: '0.3px' }}>💚 Wellness</div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 6px' }}>
-                                  {r.fatigue != null && <span style={{ fontSize: '11px', fontWeight: '800', color: wColor(r.fatigue) }}>F <span style={{ fontSize: '13px' }}>{r.fatigue}</span></span>}
-                                  {r.rpe != null && <span style={{ fontSize: '11px', fontWeight: '800', color: wColor(r.rpe) }}>R <span style={{ fontSize: '13px' }}>{r.rpe}</span></span>}
-                                  {r.qualite_sommeil != null && <span style={{ fontSize: '11px', fontWeight: '800', color: wColor(r.qualite_sommeil, true) }}>S <span style={{ fontSize: '13px' }}>{r.qualite_sommeil}</span></span>}
-                                  {r.courbatures != null && <span style={{ fontSize: '11px', fontWeight: '800', color: wColor(r.courbatures) }}>C <span style={{ fontSize: '13px' }}>{r.courbatures}</span></span>}
+                            </div>
+                          )
+                          if (isWellness) return (
+                            <div key={r.id} onClick={() => setSeanceDetail(r)} style={{ background: '#2ECC7108', border: '1px solid #2ECC7122', borderRadius: '12px', padding: '12px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#2ECC7120', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '18px' }}>💚</div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: '700', fontSize: '14px', color: '#2ECC71', marginBottom: '4px' }}>Wellness</div>
+                                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                  {r.fatigue != null && <span style={{ fontSize: '12px', fontWeight: '700', color: wColor(r.fatigue) }}>Fat <b>{r.fatigue}</b></span>}
+                                  {r.rpe != null && <span style={{ fontSize: '12px', fontWeight: '700', color: wColor(r.rpe) }}>RPE <b>{r.rpe}</b></span>}
+                                  {r.qualite_sommeil != null && <span style={{ fontSize: '12px', fontWeight: '700', color: wColor(r.qualite_sommeil, true) }}>Som <b>{r.qualite_sommeil}</b></span>}
+                                  {r.courbatures != null && <span style={{ fontSize: '12px', fontWeight: '700', color: wColor(r.courbatures) }}>Cou <b>{r.courbatures}</b></span>}
                                 </div>
                               </div>
-                            )
-                          }
+                            </div>
+                          )
                           const couleur = r.completee ? '#2ECC71' : isPast ? '#FF4757' : '#1A6FFF'
                           return (
-                            <div key={r.id} onClick={() => setSeanceDetail(r)} style={{
-                              background: r.completee ? '#2ECC7112' : isPast ? '#FF475710' : '#1A6FFF0E',
-                              border: `1px solid ${couleur}28`,
-                              borderLeft: `3px solid ${couleur}`,
-                              borderRadius: '6px', padding: '6px 7px',
-                              cursor: 'pointer',
-                              display: 'flex', alignItems: 'center', gap: '6px',
-                              minHeight: '36px',
-                            }}>
-                              <input type="checkbox" checked={r.completee} onChange={e => { e.stopPropagation(); toggleCompletee(r) }}
-                                style={{ accentColor: couleur, flexShrink: 0, cursor: 'pointer', width: '14px', height: '14px' }} />
-                              <div style={{ flex: 1, overflow: 'hidden' }}>
-                                <div style={{ fontSize: '12px', fontWeight: '700', color: '#E0E0E0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.seances?.nom || 'Séance'}</div>
+                            <div key={r.id} onClick={() => setSeanceDetail(r)} style={{ background: '#18182A', border: `1px solid ${couleur}30`, borderRadius: '12px', padding: '12px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <div onClick={e => { e.stopPropagation(); toggleCompletee(r) }}
+                                style={{ width: '28px', height: '28px', borderRadius: '8px', border: `2px solid ${couleur}`, background: r.completee ? couleur : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, cursor: 'pointer' }}>
+                                {r.completee && <span style={{ color: '#000', fontSize: '14px', fontWeight: '900' }}>✓</span>}
                               </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontWeight: '700', fontSize: '14px', color: '#E0E0E0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.seances?.nom || 'Séance'}</div>
+                                {r.seances?.type && <div style={{ fontSize: '12px', color: '#7878A8', marginTop: '2px' }}>{r.seances.type}</div>}
+                              </div>
+                              <span style={{ color: '#2C2C44', fontSize: '18px', flexShrink: 0 }}>›</span>
                             </div>
                           )
                         })}
                       </div>
-                    </div>
-                  )
-                })}
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* ── DESKTOP : grille 7 colonnes ── */}
+          {!isMobile && (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px', marginBottom: '4px' }}>
+                {jourNoms.map(j => (
+                  <div key={j} style={{ textAlign: 'center', color: '#9898B8', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', padding: '4px 0' }}>{j}</div>
+                ))}
               </div>
-            ))}
-          </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {semaines.map((semaine, si) => (
+                  <div key={si} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
+                    {semaine.map((ds) => {
+                      const realsJour = realsParDate[ds] || []
+                      const isToday = ds === today
+                      const isPast = ds < today
+                      const dateNum = new Date(ds + 'T12:00:00').getDate()
+                      const wColor = (v: number, inverted = false) => {
+                        const n = inverted ? 11 - v : v
+                        if (n <= 3) return '#2ECC71'; if (n <= 5) return '#F39C12'; if (n <= 7) return '#FF6B35'; return '#FF4757'
+                      }
+                      return (
+                        <div key={ds} style={{ minHeight: '100px', background: isToday ? '#1A6FFF08' : '#18182A', borderTop: `2px solid ${isToday ? '#1A6FFF' : isPast ? '#1E1E1E' : '#2C2C44'}`, borderBottom: '1px solid #1E1E30', borderLeft: '1px solid #1E1E30', borderRight: '1px solid #1E1E1E', borderRadius: '8px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                          <div style={{ padding: '7px 7px 5px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #222238' }}>
+                            <div style={{ fontSize: '18px', fontWeight: isToday ? '900' : '600', color: isToday ? '#007AFF' : isPast ? '#888' : '#CCC', lineHeight: 1 }}>{dateNum}</div>
+                            <button onClick={() => setActionMenuDate(ds)} style={{ width: '26px', height: '26px', borderRadius: '6px', border: '1px solid #2C2C44', background: 'transparent', color: '#9898B8', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, padding: 0 }}>+</button>
+                          </div>
+                          <div style={{ flex: 1, padding: '4px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                            {realsJour.map(r => {
+                              const isActivite = !!r.activite_id && !r.seance_id
+                              const isWellness = !r.seances && !isActivite
+                              if (isActivite) return (
+                                <div key={r.id} style={{ background: '#C9A84C12', border: '1px solid #C9A84C28', borderLeft: '3px solid #C9A84C', borderRadius: '6px', padding: '6px 7px' }}>
+                                  <div style={{ fontSize: '10px', fontWeight: '800', color: '#C9A84C', marginBottom: '2px', letterSpacing: '0.3px' }}>🏃 Activité</div>
+                                  <div style={{ fontSize: '11px', fontWeight: '700', color: '#E0C87A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.activites?.nom || '—'}</div>
+                                  {r.duree_minutes != null && <div style={{ fontSize: '11px', fontWeight: '700', color: '#C9A84C', marginTop: '1px' }}>{r.duree_minutes} min</div>}
+                                </div>
+                              )
+                              if (isWellness) return (
+                                <div key={r.id} onClick={() => setSeanceDetail(r)} style={{ background: '#2ECC7112', border: '1px solid #2ECC7128', borderLeft: '3px solid #2ECC71', borderRadius: '6px', padding: '6px 7px', cursor: 'pointer' }}>
+                                  <div style={{ fontSize: '10px', fontWeight: '800', color: '#2ECC71', marginBottom: '4px', letterSpacing: '0.3px' }}>💚 Wellness</div>
+                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 6px' }}>
+                                    {r.fatigue != null && <span style={{ fontSize: '11px', fontWeight: '800', color: wColor(r.fatigue) }}>F <span style={{ fontSize: '13px' }}>{r.fatigue}</span></span>}
+                                    {r.rpe != null && <span style={{ fontSize: '11px', fontWeight: '800', color: wColor(r.rpe) }}>R <span style={{ fontSize: '13px' }}>{r.rpe}</span></span>}
+                                    {r.qualite_sommeil != null && <span style={{ fontSize: '11px', fontWeight: '800', color: wColor(r.qualite_sommeil, true) }}>S <span style={{ fontSize: '13px' }}>{r.qualite_sommeil}</span></span>}
+                                    {r.courbatures != null && <span style={{ fontSize: '11px', fontWeight: '800', color: wColor(r.courbatures) }}>C <span style={{ fontSize: '13px' }}>{r.courbatures}</span></span>}
+                                  </div>
+                                </div>
+                              )
+                              const couleur = r.completee ? '#2ECC71' : isPast ? '#FF4757' : '#1A6FFF'
+                              return (
+                                <div key={r.id} onClick={() => setSeanceDetail(r)} style={{ background: r.completee ? '#2ECC7112' : isPast ? '#FF475710' : '#1A6FFF0E', border: `1px solid ${couleur}28`, borderLeft: `3px solid ${couleur}`, borderRadius: '6px', padding: '6px 7px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', minHeight: '36px' }}>
+                                  <input type="checkbox" checked={r.completee} onChange={e => { e.stopPropagation(); toggleCompletee(r) }} style={{ accentColor: couleur, flexShrink: 0, cursor: 'pointer', width: '14px', height: '14px' }} />
+                                  <div style={{ flex: 1, overflow: 'hidden' }}>
+                                    <div style={{ fontSize: '12px', fontWeight: '700', color: '#E0E0E0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.seances?.nom || 'Séance'}</div>
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 
