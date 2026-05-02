@@ -67,10 +67,10 @@ export function VideoThumb({
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return
       observer.disconnect()
-      fetch(`https://vimeo.com/api/v2/video/${vimeoId}.json`)
+      fetch(`/api/vimeo-thumb?id=${vimeoId}`)
         .then(r => r.json())
-        .then((data: Array<{ thumbnail_large?: string; thumbnail_medium?: string }>) => {
-          const u = data[0]?.thumbnail_large || data[0]?.thumbnail_medium || ''
+        .then((data: { url?: string }) => {
+          const u = data.url || ''
           if (u) { vimeoThumbCache.set(vimeoId, u); setThumbUrl(u) }
         })
         .catch(() => {})
