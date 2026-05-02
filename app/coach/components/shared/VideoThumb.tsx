@@ -5,8 +5,38 @@ import { getYoutubeId, getVimeoId } from '../../lib/utils'
 
 type FamilleMin = { id?: string; nom: string; couleur: string }
 
+const FAMILLE_EMOJI: Record<string, string> = {
+  'Vitesse': '⚡', 'Accélération': '🏃', 'Décélération': '🛑',
+  'Force': '💪', 'Puissance': '🔥', 'Pliométrie': '🦘',
+  'Coordination': '🎯', 'Appuis': '👟', 'COD': '↩️',
+  'Mobilité': '🔄', 'Stretch': '🧘', 'Prévention': '🛡️',
+  'Cardio': '❤️', 'Proprioception': '⚖️',
+  'Technique de base': '🎓', 'Technique athlétique': '🏆',
+}
+
 // Module-level cache: vimeoId → thumbnail URL
 const vimeoThumbCache = new Map<string, string>()
+
+function FamillePlaceholder({ famille, size, fullWidth }: { famille?: FamilleMin | null; size: number; fullWidth: boolean }) {
+  const color = famille?.couleur || '#2C2C44'
+  const hex = color.replace('#', '')
+  const r = parseInt(hex.slice(0, 2), 16) || 44
+  const g = parseInt(hex.slice(2, 4), 16) || 44
+  const b = parseInt(hex.slice(4, 6), 16) || 68
+  return (
+    <div style={{
+      width: '100%', height: '100%',
+      background: `linear-gradient(135deg, rgba(${r},${g},${b},0.45) 0%, rgba(${r},${g},${b},0.18) 100%)`,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      {fullWidth && famille && (
+        <span style={{ fontSize: 40, lineHeight: 1, opacity: 0.7 }}>
+          {FAMILLE_EMOJI[famille.nom] || '🏅'}
+        </span>
+      )}
+    </div>
+  )
+}
 
 export function VideoThumb({
   url, size = 72, famille, fullWidth = false,
@@ -17,15 +47,16 @@ export function VideoThumb({
   fullWidth?: boolean
 }) {
   const [thumbUrl, setThumbUrl] = useState<string | null>(() => {
-    const vimeoId = url ? getVimeoId(url) : null
-    return vimeoId ? (vimeoThumbCache.get(vimeoId) || null) : null
+    const vid = url ? getVimeoId(url) : null
+    return vid ? (vimeoThumbCache.get(vid) || null) : null
   })
+  const [hovered, setHovered] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const ytId = url ? getYoutubeId(url) : null
   const vimeoId = url ? getVimeoId(url) : null
 
-  // Lazy-fetch Vimeo thumbnail when visible
+  // Lazy-fetch Vimeo thumbnail when element enters viewport
   useEffect(() => {
     if (!vimeoId) return
     const cached = vimeoThumbCache.get(vimeoId)
@@ -48,55 +79,70 @@ export function VideoThumb({
     return () => observer.disconnect()
   }, [vimeoId])
 
-  const w = fullWidth ? '100%' : size
-  const h = fullWidth ? undefined : Math.round(size * 0.56)
-  const ratio = fullWidth ? ('16/9' as const) : undefined
-
   const containerStyle: React.CSSProperties = {
-    width: w, height: h, aspectRatio: ratio,
+    width: fullWidth ? '100%' : size,
+    height: fullWidth ? undefined : Math.round(size * 0.56),
+    aspectRatio: fullWidth ? '16/9' : undefined,
     borderRadius: fullWidth ? 0 : '8px',
-    overflow: 'hidden', flexShrink: 0,
-    background: '#12121E',
+    overflow: 'hidden',
+    flexShrink: 0,
+    position: 'relative',
   }
 
-  // YouTube — static thumbnail image
+  // ── No URL → famille emoji placeholder (fullWidth) or gradient (small) ──
+  if (!url) {
+    return (
+      <div style={containerStyle}>
+        <FamillePlaceholder famille={famille} size={size} fullWidth={fullWidth} />
+      </div>
+    )
+  }
+
+  // ── YouTube ──
   if (ytId) {
     const thumb = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`
     return (
-      <div style={containerStyle}>
-        <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+      <div style={containerStyle}
+        onMouseEnter={() => fullWidth && setHovered(true)}
+        onMouseLeave={() => fullWidth && setHovered(false)}
+      >
+        {fullWidth && hovered ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0`}
+            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+            allow="autoplay"
+          />
+        ) : (
+          <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        )}
       </div>
     )
   }
 
-  // Vimeo — lazy-loaded static thumbnail
+  // ── Vimeo ──
   if (vimeoId) {
     return (
-      <div ref={containerRef} style={containerStyle}>
-        {thumbUrl
-          ? <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-          : <div style={{ width: '100%', height: '100%', background: '#12121E' }} />
-        }
+      <div ref={containerRef} style={containerStyle}
+        onMouseEnter={() => fullWidth && setHovered(true)}
+        onMouseLeave={() => fullWidth && setHovered(false)}
+      >
+        {fullWidth && hovered ? (
+          <iframe
+            src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&loop=1&background=1`}
+            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+            allow="autoplay; fullscreen"
+          />
+        ) : thumbUrl ? (
+          <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        ) : (
+          // Loading: show famille gradient (disappears once thumbnail loads)
+          <FamillePlaceholder famille={famille} size={size} fullWidth={fullWidth} />
+        )}
       </div>
     )
   }
 
-  // No URL — colored family placeholder
-  if (!url) {
-    const color = famille?.couleur || '#2C2C44'
-    const hex = color.replace('#', '')
-    const r = parseInt(hex.slice(0, 2), 16) || 44
-    const g = parseInt(hex.slice(2, 4), 16) || 44
-    const b = parseInt(hex.slice(4, 6), 16) || 68
-    return (
-      <div style={{
-        ...containerStyle,
-        background: `linear-gradient(135deg, rgba(${r},${g},${b},0.4) 0%, rgba(${r},${g},${b},0.15) 100%)`,
-      }} />
-    )
-  }
-
-  // Raw video file
+  // ── Raw video file ──
   return (
     <div style={containerStyle}>
       <video src={url} muted loop playsInline preload="metadata"
