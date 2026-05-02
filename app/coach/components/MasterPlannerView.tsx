@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Joueur, MPRealisation, MPSeanceExercice, Exercice, Seance, SetConfig, JOURS, JOURS_FULL, LABELS_TYPE, TYPE_COLORS } from '../lib/types'
+import { VideoThumb } from './shared/VideoThumb'
 import { haptic } from '../lib/utils'
 import { toast } from '../lib/toast'
 import { EditeurSeance } from './EditeurSeance'
@@ -587,8 +588,8 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                         <div style={{ height: '1px', background: '#1C1C2C', margin: '0 14px' }} />
                                       )}
                                       <button onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
-                                        style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', minHeight: '44px' }}>
-                                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: couleur, flexShrink: 0 }} />
+                                        style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', minHeight: '44px' }}>
+                                        <VideoThumb url={exo.exercices?.video_url} size={44} />
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                           <span style={{ color: '#CCC', fontSize: '13px', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{exo.exercices?.nom}</span>
                                           {exo.lien_suivant && <span style={{ fontSize: '10px', color: '#1A6FFF60' }}>⇌ superset</span>}

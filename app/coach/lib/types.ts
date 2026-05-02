@@ -61,7 +61,7 @@ export type SeanceExercice = {
   uni_podal?: boolean
   notes?: string
   sets_config?: SetConfig[]
-  exercices?: { nom: string; familles?: { nom: string; couleur: string } }
+  exercices?: { nom: string; video_url?: string | null; familles?: { nom: string; couleur: string } }
 }
 
 export type Seance = {

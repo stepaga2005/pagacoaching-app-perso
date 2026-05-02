@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { SeanceExercice, Exercice, SetConfig, Seance, TYPES_SEANCE, LABELS_TYPE, TYPE_COLORS } from '../lib/types'
+import { VideoThumb } from './shared/VideoThumb'
 import { SearchableSelect } from './shared/SearchableSelect'
 import { ExercicePicker } from './ExercicePicker'
 import { DuplicationModal } from './DuplicationModal'
@@ -383,6 +384,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                       <button onClick={() => moveLigne(idx, -1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
                       <button onClick={() => moveLigne(idx, 1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
                     </div>
+                    <VideoThumb url={l.exercices?.video_url} size={48} famille={fam} />
                     <div>
                       <div style={{ fontWeight: '600', fontSize: '13px' }}>{l.exercices?.nom}</div>
                       <div style={{ display: 'flex', gap: '5px', marginTop: '3px', flexWrap: 'wrap' }}>

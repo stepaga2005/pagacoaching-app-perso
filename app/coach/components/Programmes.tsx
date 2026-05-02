@@ -61,7 +61,7 @@ export function Programmes() {
   async function editSeance(s: Seance) {
     setLoadingEdit(true)
     const [{ data: full }, exs] = await Promise.all([
-      supabase.from('seances').select('*, seance_exercices(*, exercices(nom, familles(id, nom, couleur)))').eq('id', s.id).single(),
+      supabase.from('seances').select('*, seance_exercices(*, exercices(nom, video_url, familles(id, nom, couleur)))').eq('id', s.id).single(),
       getExercices(),
     ])
     setExercices(exs)

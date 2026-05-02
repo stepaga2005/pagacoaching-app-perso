@@ -6,6 +6,7 @@ import { Exercice, Famille } from '../lib/types'
 import { getYoutubeId, getVimeoId } from '../lib/utils'
 import { toast } from '../lib/toast'
 import { MultiCheck } from './shared/MultiCheck'
+import { VideoThumb } from './shared/VideoThumb'
 
 export function Exercices() {
   const [exercices, setExercices] = useState<Exercice[]>([])
@@ -321,27 +322,27 @@ export function Exercices() {
             return (
               <div key={ex.id} style={{
                 background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px',
-                padding: '16px', cursor: 'pointer', transition: 'border-color 0.15s',
+                cursor: 'pointer', transition: 'border-color 0.15s', overflow: 'hidden',
               }}
                 onClick={() => { scrollRef.current = window.scrollY; setApercu(ex) }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <div style={{ fontWeight: '700', fontSize: '14px', flex: 1 }}>{ex.nom}</div>
-                  {fam && (
-                    <span style={{
-                      padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600',
-                      background: fam.couleur + '20', color: fam.couleur, whiteSpace: 'nowrap', marginLeft: '8px',
-                    }}>{fam.nom}</span>
+                <VideoThumb url={ex.video_url} famille={fam} fullWidth />
+                <div style={{ padding: '10px 14px 12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                    <div style={{ fontWeight: '700', fontSize: '13px', flex: 1 }}>{ex.nom}</div>
+                    {fam && (
+                      <span style={{
+                        padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: '600',
+                        background: fam.couleur + '20', color: fam.couleur, whiteSpace: 'nowrap', marginLeft: '8px', flexShrink: 0,
+                      }}>{fam.nom}</span>
+                    )}
+                  </div>
+                  {ex.description && (
+                    <p style={{ color: '#A8A8C4', fontSize: '11px', lineHeight: '1.4', margin: 0,
+                      display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                    }}>{ex.description}</p>
                   )}
-                </div>
-                {ex.description && (
-                  <p style={{ color: '#A8A8C4', fontSize: '12px', lineHeight: '1.5',
-                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                  }}>{ex.description}</p>
-                )}
-                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                  {ex.video_url && <span style={{ color: '#1A6FFF', fontSize: '11px' }}>▶ Vidéo</span>}
-                  {ex.materiel && <span style={{ color: '#888', fontSize: '11px' }}>· {ex.materiel}</span>}
+                  {ex.materiel && <span style={{ color: '#666', fontSize: '10px', marginTop: '4px', display: 'block' }}>· {ex.materiel}</span>}
                 </div>
               </div>
             )
