@@ -155,7 +155,7 @@ export default function CoachPage() {
         </div>
       </div>
 
-      <div className="main-content" style={{ flex: 1, padding: '20px 20px 32px', minWidth: 0 }}>
+      <div className="main-content" style={{ flex: 1, padding: '20px 20px 32px', minWidth: 0, overflowX: 'hidden' }}>
         <div className="topbar">
           <button onClick={() => setSidebarOpen(true)} className="btn-hamburger">
             <span className="hamburger-line" />
