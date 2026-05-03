@@ -214,11 +214,10 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
     })
   }
 
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 640)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640)
-    check()
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [])
@@ -471,10 +470,10 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
 
       {/* ══ MOBILE : vue liste verticale style TotalCoaching ══ */}
       {!loading && isMobile && (
-        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+        <div style={{ flex: 1, width: '100%', minWidth: 0, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
 
           {/* Strip 7 jours */}
-          <div style={{ display: 'flex', gap: '4px', padding: '12px 14px 0', flexShrink: 0, position: 'sticky', top: 0, background: '#0B0B14', zIndex: 10 }}>
+          <div style={{ display: 'flex', gap: '4px', padding: '12px 14px 0', flexShrink: 0, position: 'sticky', top: 0, background: '#0B0B14', zIndex: 10, width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
             {days.map((ds, i) => {
               const dayReals = byDate[ds] || []
               const isToday = ds === today
@@ -504,7 +503,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
           </div>
 
           {/* Liste des jours */}
-          <div style={{ padding: '16px 14px 80px' }}>
+          <div style={{ padding: '16px 14px 80px', width: '100%', boxSizing: 'border-box' }}>
             {days.map(ds => {
               const dayReals = byDate[ds] || []
               const isToday = ds === today
@@ -513,7 +512,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
               const dateLabel = new Date(ds + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()
 
               return (
-                <div key={ds} style={{ marginBottom: '20px' }}>
+                <div key={ds} style={{ marginBottom: '20px', overflow: 'hidden' }}>
                   {/* En-tête de jour */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '1px', color: isToday ? '#1A6FFF' : estSel ? '#2ECC71' : '#AAAACC' }}>{dateLabel}</span>
@@ -537,12 +536,12 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                   </div>
 
                   {/* Séances du jour */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%', minWidth: 0 }}>
                     {dayReals.map(r => {
                       if (r.activite_id && !r.seance_id) {
                         return (
                           <div key={r.id} onClick={() => { setMpActiviteModal({ id: r.id, nom: r.activites?.nom || 'Activité', duree: r.duree_minutes ?? null }); setMpActiviteDuree(r.duree_minutes != null ? String(r.duree_minutes) : '') }}
-                            style={{ background: '#C9A84C10', border: '1px solid #C9A84C30', borderLeft: '4px solid #C9A84C', borderRadius: '14px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+                            style={{ background: '#C9A84C10', border: '1px solid #C9A84C30', borderLeft: '4px solid #C9A84C', borderRadius: '14px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', width: '100%', boxSizing: 'border-box', minWidth: 0 }}>
                             <span style={{ fontSize: '18px' }}>🏃</span>
                             <div style={{ flex: 1 }}>
                               <div style={{ fontWeight: '800', fontSize: '14px', color: '#E0C87A' }}>{r.activites?.nom || 'Activité'}</div>
@@ -563,7 +562,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                           r.qualite_sommeil != null && { label: 'Sommeil', val: r.qualite_sommeil, color: '#2ECC71' },
                         ].filter(Boolean) as { label: string; val: number; color: string }[]
                         return (
-                          <div key={r.id} style={{ background: '#2ECC7108', border: '1px solid #2ECC7130', borderLeft: '4px solid #2ECC71', borderRadius: '14px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div key={r.id} style={{ background: '#2ECC7108', border: '1px solid #2ECC7130', borderLeft: '4px solid #2ECC71', borderRadius: '14px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '10px', width: '100%', boxSizing: 'border-box', minWidth: 0 }}>
                             <span style={{ fontSize: '18px' }}>💚</span>
                             <div style={{ flex: 1 }}>
                               <div style={{ fontWeight: '800', fontSize: '13px', color: '#2ECC71', marginBottom: '4px' }}>Wellness</div>
@@ -588,11 +587,11 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                       const typeLabel = LABELS_TYPE[r.seances?.type || ''] || r.seances?.type || ''
 
                       return (
-                        <div key={r.id} style={{ background: '#141420', border: '1px solid #222238', borderRadius: '14px', display: 'flex' }}>
+                        <div key={r.id} style={{ background: '#141420', border: '1px solid #222238', borderRadius: '14px', display: 'flex', width: '100%', boxSizing: 'border-box', minWidth: 0 }}>
                           {/* Barre colorée */}
                           <div style={{ width: '4px', background: statusColor, flexShrink: 0, borderRadius: '14px 0 0 14px' }} />
 
-                          <div style={{ flex: 1 }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
                             {/* Header séance */}
                             <div style={{ display: 'flex', alignItems: 'center', padding: '10px 10px 10px 14px', gap: '8px' }}>
                               <button onClick={() => toggleExpandSession(r.id)} style={{ flex: 1, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left', padding: 0, minWidth: 0 }}>
