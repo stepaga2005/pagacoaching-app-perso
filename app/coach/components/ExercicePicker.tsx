@@ -17,7 +17,7 @@ export function ExercicePicker({ exercices, onConfirm, onClose }: {
   const [filtresFamille, setFiltresFamille] = useState<string[]>([])
   const [selection, setSelection] = useState<Set<string>>(new Set())
   const [source, setSource] = useState<'all' | 'mes' | 'tc'>('all')
-  const [preview, setPreview] = useState<Exercice | null>(null)
+  const [preview, setPreview] = useState<PreviewExercice | null>(null)
 
   // Familles uniques triées
   const familles = Array.from(
@@ -217,7 +217,9 @@ export function ExercicePicker({ exercices, onConfirm, onClose }: {
   )
 }
 
-function PreviewModal({ ex, onClose }: { ex: Exercice; onClose: () => void }) {
+export type PreviewExercice = { nom: string; video_url?: string | null; familles?: { nom: string; couleur: string } | null; description?: string | null }
+
+export function PreviewModal({ ex, onClose }: { ex: PreviewExercice; onClose: () => void }) {
   const ytId = ex.video_url ? getYoutubeId(ex.video_url) : null
   const vimeoId = ex.video_url ? getVimeoId(ex.video_url) : null
   const isTcVideo = ex.video_url?.includes(TC_URL)

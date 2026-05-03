@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { SeanceExercice, Exercice, SetConfig, Seance, TYPES_SEANCE, LABELS_TYPE, TYPE_COLORS } from '../lib/types'
 import { VideoThumb } from './shared/VideoThumb'
 import { SearchableSelect } from './shared/SearchableSelect'
-import { ExercicePicker } from './ExercicePicker'
+import { ExercicePicker, PreviewModal, PreviewExercice } from './ExercicePicker'
 import { DuplicationModal } from './DuplicationModal'
 import { toast } from '../lib/toast'
 
@@ -36,6 +36,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
   const [isMobile, setIsMobile] = useState(false)
   const [dragBlockIdx, setDragBlockIdx] = useState<number | null>(null)
   const [dropBlockIdx, setDropBlockIdx] = useState<number | null>(null)
+  const [preview, setPreview] = useState<PreviewExercice | null>(null)
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640)
@@ -256,7 +257,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                   <div style={{ position: 'absolute', top: -4, left: 8, right: 8, height: 3, background: '#1A6FFF', borderRadius: 2, zIndex: 20, boxShadow: '0 0 8px #1A6FFF80' }} />
                 )}
                 <div
-                  draggable={true}
+                  draggable={!isMobile}
                   onDragStart={e => { const t = (e.target as HTMLElement).tagName; if (['INPUT', 'BUTTON', 'SELECT', 'TEXTAREA'].includes(t)) { e.preventDefault(); return }; e.dataTransfer.effectAllowed = 'move'; setDragBlockIdx(blockIdx) }}
                   onDragOver={e => { e.preventDefault(); if (dropBlockIdx !== blockIdx) setDropBlockIdx(blockIdx) }}
                   onDrop={e => { e.preventDefault(); handleBlockDrop(blockIdx, blocks) }}
@@ -340,7 +341,12 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                               <button onClick={() => moveBlock(idx, 1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
                             </div>
                           )}
-                          <VideoThumb url={l.exercices?.video_url} size={60} famille={fam} />
+                          <div onClick={e => { e.stopPropagation(); setPreview({ nom: l.exercices?.nom || '', video_url: l.exercices?.video_url, familles: fam }) }} style={{ cursor: 'pointer', flexShrink: 0, position: 'relative', borderRadius: '8px', overflow: 'hidden' }}>
+                            <VideoThumb url={l.exercices?.video_url} size={60} famille={fam} />
+                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.22)' }}>
+                              <span style={{ fontSize: '14px', color: '#FFF', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>▶</span>
+                            </div>
+                          </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontWeight: '600', fontSize: '13px' }}>{l.exercices?.nom}</div>
                             <div style={{ display: 'flex', gap: '5px', marginTop: '3px', flexWrap: 'wrap' }}>
@@ -398,7 +404,12 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                             <button onClick={() => moveBlock(idx, -1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: isMobile ? '18px' : '10px', lineHeight: 1, padding: isMobile ? '2px 6px' : '0' }}>▲</button>
                             <button onClick={() => moveBlock(idx, 1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: isMobile ? '18px' : '10px', lineHeight: 1, padding: isMobile ? '2px 6px' : '0' }}>▼</button>
                           </div>
-                          <VideoThumb url={l.exercices?.video_url} size={isMobile ? 48 : 80} famille={fam} />
+                          <div onClick={e => { e.stopPropagation(); setPreview({ nom: l.exercices?.nom || '', video_url: l.exercices?.video_url, familles: fam }) }} style={{ cursor: 'pointer', flexShrink: 0, position: 'relative', borderRadius: '8px', overflow: 'hidden' }}>
+                            <VideoThumb url={l.exercices?.video_url} size={isMobile ? 48 : 80} famille={fam} />
+                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.22)' }}>
+                              <span style={{ fontSize: isMobile ? '14px' : '20px', color: '#FFF', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>▶</span>
+                            </div>
+                          </div>
                           <div style={{ minWidth: 0, flex: 1 }}>
                             <div style={{ fontWeight: '600', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.exercices?.nom}</div>
                             <div style={{ display: 'flex', gap: '5px', marginTop: '3px', flexWrap: 'wrap' }}>
@@ -489,6 +500,9 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
       {showDup && (
         <DuplicationModal seance={{ ...seance, nom, seance_exercices: lignes }} onClose={() => setShowDup(false)} onDuplique={() => onSave('')} />
       )}
+
+      {/* Preview vidéo exercice */}
+      {preview && <PreviewModal ex={preview} onClose={() => setPreview(null)} />}
     </div>
   )
 }

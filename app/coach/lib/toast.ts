@@ -1,7 +1,15 @@
 type ToastType = 'success' | 'error' | 'info'
 
+let current: { el: HTMLElement; timer: ReturnType<typeof setTimeout> } | null = null
+
 export function toast(message: string, type: ToastType = 'info', duration = 3500) {
   if (typeof window === 'undefined') return
+
+  if (current) {
+    clearTimeout(current.timer)
+    current.el.remove()
+    current = null
+  }
 
   const colors: Record<ToastType, { bg: string; border: string; icon: string }> = {
     success: { bg: '#0D2E1A', border: '#2ECC71', icon: '✓' },
@@ -32,15 +40,16 @@ export function toast(message: string, type: ToastType = 'info', duration = 3500
   el.appendChild(text)
   document.body.appendChild(el)
 
-  // Fade in
   requestAnimationFrame(() => {
     el.style.opacity = '1'
     el.style.transform = 'translateX(-50%) translateY(0)'
   })
 
-  setTimeout(() => {
+  const timer = setTimeout(() => {
     el.style.opacity = '0'
     el.style.transform = 'translateX(-50%) translateY(8px)'
-    setTimeout(() => el.remove(), 300)
+    setTimeout(() => { el.remove(); if (current?.el === el) current = null }, 300)
   }, duration)
+
+  current = { el, timer }
 }
