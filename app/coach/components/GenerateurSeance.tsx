@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { toast } from '../lib/toast'
 import { AttributionModal } from './AttributionModal'
@@ -232,6 +232,14 @@ function SelectField({ label, value, onChange, options }: {
 // ─── Composant principal ──────────────────────────────────────────────────────
 
 export function GenerateurSeance() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   const [poste, setPoste]       = useState<Poste>('milieu')
   const [niv, setNiv]           = useState('Semi-pro')
   const [md, setMd]             = useState<MD>('MD-4')
@@ -410,7 +418,7 @@ export function GenerateurSeance() {
           <div style={{ width: '3px', height: '16px', background: '#1A6FFF', borderRadius: '2px' }} />
           <span style={{ fontSize: '12px', fontWeight: '800', color: '#1A6FFF', letterSpacing: '1px', textTransform: 'uppercase' }}>Joueur</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
           <SelectField label="Poste" value={poste} onChange={v => setPoste(v as Poste)} options={[
             { v: 'attaquant', l: 'Attaquant de pointe' }, { v: 'ailier', l: 'Ailier' },
             { v: 'milieu', l: 'Milieu de terrain' }, { v: 'lateral', l: 'Latéral' },
@@ -430,7 +438,7 @@ export function GenerateurSeance() {
           <div style={{ width: '3px', height: '16px', background: '#C9A84C', borderRadius: '2px' }} />
           <span style={{ fontSize: '12px', fontWeight: '800', color: '#C9A84C', letterSpacing: '1px', textTransform: 'uppercase' }}>Séance</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr 1fr', gap: '12px', marginBottom: '14px' }}>
           <SelectField label="Jour MD" value={md} onChange={v => setMd(v as MD)} options={[
             { v: 'MD+3', l: 'MD+3' }, { v: 'MD+2', l: 'MD+2' }, { v: 'MD-4', l: 'MD-4' },
             { v: 'MD-2', l: 'MD-2' }, { v: 'MD-1', l: 'MD-1 Veille' }, { v: 'MD', l: 'MD Match' },
@@ -443,7 +451,7 @@ export function GenerateurSeance() {
             Array.from({ length: 8 }, (_, i) => ({ v: String(i + 1), l: `S${i + 1}` }))
           } />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr 1fr', gap: '12px' }}>
           <SelectField label="Objectif" value={obj} onChange={v => setObj(v as Objectif)} options={[
             { v: 'vitesse', l: 'Vitesse / Explosivité' }, { v: 'force', l: 'Force bas du corps' },
             { v: 'prevention', l: 'Prévention / Ischios' }, { v: 'endurance', l: 'Endurance / Conditioning' },

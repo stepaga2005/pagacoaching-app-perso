@@ -45,6 +45,14 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
   const [reals35, setReals35]      = useState<DReal35[]>([])
   const [unread, setUnread]        = useState(0)
   const [loading, setLoading]      = useState(true)
+  const [isMobile, setIsMobile]    = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
 
   useEffect(() => {
     loadData()
@@ -128,7 +136,7 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
       </div>
 
       {/* ── Stats ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '28px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '10px', marginBottom: '28px' }}>
         {[
           { label: 'Joueurs actifs', value: joueurs.length, color: '#1A6FFF', icon: '👥' },
           { label: 'Séances aujourd\'hui', value: seancesJour.length, color: '#1A6FFF', icon: '📅' },
@@ -444,7 +452,8 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
             <h2 style={{ fontSize: '13px', fontWeight: '800', color: '#1A6FFF', letterSpacing: '1px', textTransform: 'uppercase' }}>Planning semaine</h2>
           </div>
           <div style={{ background: '#141420', border: '1px solid #222238', borderRadius: '16px', overflow: 'hidden' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr repeat(7, 36px)', gap: '4px', padding: '10px 14px', borderBottom: '1px solid #1C1C2C', alignItems: 'center' }}>
+            <div style={{ overflowX: 'auto' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '120px repeat(7, 36px)', gap: '4px', padding: '10px 14px', borderBottom: '1px solid #1C1C2C', alignItems: 'center', minWidth: '400px' }}>
               <div />
               {weekDays.map((ds, i) => (
                 <div key={ds} style={{ textAlign: 'center' }}>
@@ -456,7 +465,7 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
             {joueursAvecSeances.map((j, ji) => {
               const jReals = byPlayer[j.id] || []
               return (
-                <div key={j.id} style={{ display: 'grid', gridTemplateColumns: '1fr repeat(7, 36px)', gap: '4px', padding: '10px 14px', alignItems: 'center', borderTop: ji > 0 ? '1px solid #111' : 'none' }}>
+                <div key={j.id} style={{ display: 'grid', gridTemplateColumns: '120px repeat(7, 36px)', gap: '4px', padding: '10px 14px', alignItems: 'center', borderTop: ji > 0 ? '1px solid #111' : 'none', minWidth: '400px' }}>
                   <div style={{ fontWeight: '700', fontSize: '13px', color: '#CCC', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', paddingRight: '8px' }}>
                     {j.prenom} {j.nom}
                   </div>
@@ -477,6 +486,7 @@ export function Dashboard({ coachId, onNavTo }: { coachId: string | null; onNavT
                 </div>
               )
             })}
+            </div>
           </div>
         </div>
       )}
