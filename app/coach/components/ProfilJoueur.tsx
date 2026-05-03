@@ -76,6 +76,18 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
   useEffect(() => { loadData() }, [joueur.id])
 
   useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (videoModal) { setVideoModal(null); return }
+      if (seanceDetail) { setSeanceDetail(null); return }
+      if (wellnessDate) { setWellnessDate(null); return }
+      if (createDate && !seanceEdit) { setCreateDate(null); return }
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [videoModal, seanceDetail, wellnessDate, createDate, seanceEdit])
+
+  useEffect(() => {
     const joueurId = joueur.id
     async function refreshReals() {
       const { data } = await supabase
@@ -147,7 +159,8 @@ export function ProfilJoueur({ joueur, onBack }: { joueur: Joueur; onBack: () =>
   }
 
   async function toggleCompletee(r: Realisation) {
-    await supabase.from('realisations').update({ completee: !r.completee }).eq('id', r.id)
+    const { error } = await supabase.from('realisations').update({ completee: !r.completee }).eq('id', r.id)
+    if (error) { toast('Erreur mise à jour : ' + error.message, 'error'); return }
     await loadData()
     setSeanceDetail(prev => prev?.id === r.id ? { ...prev, completee: !r.completee } : prev)
   }

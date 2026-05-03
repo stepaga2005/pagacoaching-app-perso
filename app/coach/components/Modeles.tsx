@@ -29,6 +29,17 @@ export function Modeles() {
     if (selectedProg) loadSeancesProg(selectedProg.id)
   }, [selectedProg])
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      if (showPicker) { setShowPicker(null); return }
+      if (showNewProg) { setShowNewProg(false); return }
+      if (showAssign) { setShowAssign(false); return }
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [showPicker, showNewProg, showAssign])
+
   async function loadProgrammes() {
     const { data } = await supabase.from('programmes').select('*').order('nom')
     if (data) {
@@ -377,15 +388,24 @@ export function AssignProgrammeModal({ programme, seances, onClose }: {
   onClose: () => void
 }) {
   const [joueurs, setJoueurs] = useState<{ id: string; nom: string; prenom: string }[]>([])
+  const [loadingJoueurs, setLoadingJoueurs] = useState(true)
   const [selectedJoueurs, setSelectedJoueurs] = useState<Set<string>>(new Set())
   const [dateDebut, setDateDebut] = useState(() => new Date().toISOString().split('T')[0])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
+    setLoadingJoueurs(true)
     supabase.from('joueurs').select('id, nom, prenom').eq('actif', true).order('nom').then(({ data }) => {
       if (data) setJoueurs(data)
+      setLoadingJoueurs(false)
     })
   }, [])
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
 
   function toggleJoueur(id: string) {
     setSelectedJoueurs(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
@@ -394,32 +414,39 @@ export function AssignProgrammeModal({ programme, seances, onClose }: {
   async function confirmer() {
     if (selectedJoueurs.size === 0) return
     setSaving(true)
-    const debut = new Date(dateDebut + 'T12:00:00')
-
-    for (const joueurId of selectedJoueurs) {
-      // Créer l'entrée joueur_programme
-      await supabase.from('joueur_programmes').insert({
-        joueur_id: joueurId, programme_id: programme.id,
-        date_debut: dateDebut, actif: true,
-      })
-
-      // Créer les réalisations pour chaque séance
-      if (seances.length > 0) {
-        const rows = seances.map(s => {
-          const d = new Date(debut)
-          d.setDate(d.getDate() + (s.semaine - 1) * 7 + (s.jour_semaine - 1))
-          return {
-            joueur_id: joueurId, seance_id: s.id,
-            date_realisation: d.toISOString().split('T')[0], completee: false,
-          }
+    try {
+      const debut = new Date(dateDebut + 'T12:00:00')
+      let errors = 0
+      for (const joueurId of selectedJoueurs) {
+        const { error: e1 } = await supabase.from('joueur_programmes').insert({
+          joueur_id: joueurId, programme_id: programme.id,
+          date_debut: dateDebut, actif: true,
         })
-        await supabase.from('realisations').insert(rows)
+        if (e1) { errors++; continue }
+        if (seances.length > 0) {
+          const rows = seances.map(s => {
+            const d = new Date(debut)
+            d.setDate(d.getDate() + (s.semaine - 1) * 7 + (s.jour_semaine - 1))
+            return {
+              joueur_id: joueurId, seance_id: s.id,
+              date_realisation: d.toISOString().split('T')[0], completee: false,
+            }
+          })
+          const { error: e2 } = await supabase.from('realisations').insert(rows)
+          if (e2) errors++
+        }
       }
+      onClose()
+      if (errors > 0) {
+        toast(`Attribution partielle : ${errors} erreur(s) sur ${selectedJoueurs.size} joueur(s)`, 'error')
+      } else {
+        toast(`✓ Modèle "${programme.nom}" attribué à ${selectedJoueurs.size} joueur${selectedJoueurs.size > 1 ? 's' : ''}`, 'success')
+      }
+    } catch (e: unknown) {
+      toast('Erreur attribution : ' + (e instanceof Error ? e.message : String(e)), 'error')
+    } finally {
+      setSaving(false)
     }
-
-    setSaving(false)
-    onClose()
-    toast(`✓ Modèle "${programme.nom}" attribué à ${selectedJoueurs.size} joueur${selectedJoueurs.size > 1 ? 's' : ''}`, 'success')
   }
 
   return (
@@ -445,7 +472,8 @@ export function AssignProgrammeModal({ programme, seances, onClose }: {
             Joueurs {selectedJoueurs.size > 0 && <span style={{ color: '#5599FF' }}>— {selectedJoueurs.size} sélectionné{selectedJoueurs.size > 1 ? 's' : ''}</span>}
           </label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '260px', overflowY: 'auto' }}>
-            {joueurs.length === 0 && <div style={{ color: '#7878A8', fontSize: '13px' }}>Aucun joueur actif</div>}
+            {loadingJoueurs && <div style={{ color: '#7878A8', fontSize: '13px' }}>Chargement...</div>}
+            {!loadingJoueurs && joueurs.length === 0 && <div style={{ color: '#7878A8', fontSize: '13px' }}>Aucun joueur actif</div>}
             {joueurs.map(j => {
               const sel = selectedJoueurs.has(j.id)
               return (
