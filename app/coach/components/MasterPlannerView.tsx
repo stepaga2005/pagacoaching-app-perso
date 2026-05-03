@@ -51,6 +51,9 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
   const [allJoueurs, setAllJoueurs] = useState<{ id: string; nom: string; prenom: string }[]>([])
   const [mpActiviteModal, setMpActiviteModal] = useState<{ id: string; nom: string; duree: number | null } | null>(null)
   const [mpActiviteDuree, setMpActiviteDuree] = useState<string>('')
+  const [mpAddActiviteDate, setMpAddActiviteDate] = useState<string | null>(null)
+  const [mpNewActiviteNom, setMpNewActiviteNom] = useState('')
+  const [mpNewActiviteDuree, setMpNewActiviteDuree] = useState('')
   const [videoModal, setVideoModal] = useState<string | null>(null)
   const [mpDragState, setMpDragState] = useState<{ realId: string; blockIdx: number } | null>(null)
   const [mpDropState, setMpDropState] = useState<{ realId: string; blockIdx: number } | null>(null)
@@ -78,6 +81,29 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
       .select('id, seance_id, activite_id, duree_minutes, date_realisation, completee, rpe, fatigue, courbatures, qualite_sommeil, notes_joueur, seances(id, nom, type, seance_exercices(id, ordre, series, repetitions, duree_secondes, distance_metres, charge_kg, recuperation_secondes, lien_suivant, uni_podal, notes, sets_config, exercices(nom, video_url, familles(nom, couleur)))), activites(nom)')
       .eq('joueur_id', joueur.id).order('date_realisation')
     if (data) setReals(data as unknown as MPRealisation[])
+  }
+
+  async function mpAjouterActivite() {
+    if (!mpAddActiviteDate || !mpNewActiviteNom.trim()) return
+    const { data: userData } = await supabase.auth.getUser()
+    const coachId = userData?.user?.id
+    if (!coachId) { toast('Erreur: non authentifié', 'error'); return }
+    let activiteId: string
+    const { data: existing } = await supabase.from('activites')
+      .select('id').eq('coach_id', coachId).eq('nom', mpNewActiviteNom.trim()).maybeSingle()
+    if (existing) {
+      activiteId = existing.id
+    } else {
+      const { data: newAct, error } = await supabase.from('activites')
+        .insert({ coach_id: coachId, nom: mpNewActiviteNom.trim() }).select('id').single()
+      if (error || !newAct) { toast('Erreur création activité', 'error'); return }
+      activiteId = newAct.id
+    }
+    const duree = mpNewActiviteDuree ? Number(mpNewActiviteDuree) : null
+    await supabase.from('realisations').insert({ joueur_id: joueur.id, activite_id: activiteId, date_realisation: mpAddActiviteDate, completee: false, duree_minutes: duree })
+    await mpReload()
+    setMpAddActiviteDate(null); setMpNewActiviteNom(''); setMpNewActiviteDuree('')
+    toast('Activité ajoutée', 'success')
   }
 
   async function mpDeleteRealisation(id: string) {
@@ -1113,6 +1139,10 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                 style={{ padding: '16px', borderRadius: '14px', border: '1px solid #2ECC7140', background: '#2ECC7115', color: '#2ECC71', cursor: 'pointer', fontSize: '15px', fontWeight: '700', textAlign: 'left' }}>
                 💚 Indices Wellness
               </button>
+              <button onClick={() => { setMpAddActiviteDate(mpActionDate); setMpNewActiviteNom(''); setMpNewActiviteDuree(''); setMpActionDate(null) }}
+                style={{ padding: '16px', borderRadius: '14px', border: '1px solid #E0C87A40', background: '#E0C87A12', color: '#E0C87A', cursor: 'pointer', fontSize: '15px', fontWeight: '700', textAlign: 'left' }}>
+                🏃 Activité / Match
+              </button>
             </div>
             <button onClick={() => setMpActionDate(null)} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#9898B8', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
           </div>
@@ -1384,6 +1414,54 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
           onDone={() => { setShowCopierModal(false); setModeSelection(false); setJoursSelectionnes(new Set()) }}
           onClose={() => setShowCopierModal(false)}
         />
+      )}
+
+      {/* Modal nouvelle activité */}
+      {mpAddActiviteDate && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}
+          onClick={() => setMpAddActiviteDate(null)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '360px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+              <div style={{ fontWeight: '800', fontSize: '17px' }}>🏃 Activité / Match</div>
+              <button onClick={() => setMpAddActiviteDate(null)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ color: '#C9A84C', fontSize: '13px', marginBottom: '20px' }}>
+              {new Date(mpAddActiviteDate + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+            </div>
+
+            {/* Presets rapides */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+              {['Match officiel', 'Match amical', 'Tournoi', 'Stage', 'Détente', 'Autre'].map(label => (
+                <button key={label} onClick={() => setMpNewActiviteNom(label)}
+                  style={{ padding: '7px 12px', borderRadius: '8px', border: `1px solid ${mpNewActiviteNom === label ? '#E0C87A' : '#2C2C44'}`, background: mpNewActiviteNom === label ? '#E0C87A20' : 'transparent', color: mpNewActiviteNom === label ? '#E0C87A' : '#888', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}>
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ marginBottom: '14px' }}>
+              <div style={{ color: '#9898B8', fontSize: '11px', fontWeight: '700', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Nom personnalisé</div>
+              <input value={mpNewActiviteNom} onChange={e => setMpNewActiviteNom(e.target.value)}
+                placeholder="Ex: Match de préparation..."
+                className="input" style={{ width: '100%', boxSizing: 'border-box', fontSize: '14px' }} />
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{ color: '#9898B8', fontSize: '11px', fontWeight: '700', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Durée (min) — optionnel</div>
+              <input type="number" value={mpNewActiviteDuree} onChange={e => setMpNewActiviteDuree(e.target.value)}
+                placeholder="Ex: 90"
+                className="input" style={{ width: '100%', boxSizing: 'border-box', fontSize: '14px' }} />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={() => setMpAddActiviteDate(null)} style={{ flex: 1, padding: '13px', borderRadius: '12px', border: '1px solid #2C2C44', background: 'transparent', color: '#9898B8', cursor: 'pointer', fontSize: '14px' }}>Annuler</button>
+              <button onClick={mpAjouterActivite} disabled={!mpNewActiviteNom.trim()}
+                style={{ flex: 2, padding: '13px', borderRadius: '12px', border: 'none', background: mpNewActiviteNom.trim() ? '#E0C87A' : '#333', color: mpNewActiviteNom.trim() ? '#0A0A0A' : '#666', cursor: mpNewActiviteNom.trim() ? 'pointer' : 'not-allowed', fontWeight: '800', fontSize: '14px' }}>
+                Ajouter au planning
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Modal durée activité */}
