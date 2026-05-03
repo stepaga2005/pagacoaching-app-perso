@@ -1105,7 +1105,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
       {mpActionDate && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}
           onClick={() => setMpActionDate(null)}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '20px', padding: '24px', width: '100%', maxWidth: '340px' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '20px', padding: '20px', width: '100%', maxWidth: '340px', maxHeight: '90vh', overflowY: 'auto', margin: '0 16px', boxSizing: 'border-box' }}>
             <div style={{ fontWeight: '800', fontSize: '16px', marginBottom: '4px' }}>Ajouter</div>
             <div style={{ color: '#C9A84C', fontSize: '13px', marginBottom: '20px' }}>
               {new Date(mpActionDate + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
