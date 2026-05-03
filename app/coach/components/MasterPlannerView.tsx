@@ -1268,18 +1268,8 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                 <div style={{ width: '36px', height: '4px', background: '#3A3A55', borderRadius: '2px' }} />
               </div>
               {/* Header */}
-              <div style={{ padding: '8px 16px 12px', borderBottom: '1px solid #1E1E30' }}>
+              <div style={{ padding: '8px 16px 10px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  {exo.exercices?.video_url ? (
-                    <button onClick={() => setVideoModal(exo.exercices!.video_url!)}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
-                      <VideoThumb url={exo.exercices.video_url} size={56} famille={exo.exercices.familles ? { nom: exo.exercices.familles.nom, couleur: exo.exercices.familles.couleur } : null} />
-                    </button>
-                  ) : (
-                    <div style={{ width: '32px', height: '32px', background: couleur + '20', border: `1px solid ${couleur}40`, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <span style={{ color: couleur, fontSize: '12px', fontWeight: '900' }}>{exo.ordre}</span>
-                    </div>
-                  )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     {fam && <div style={{ color: couleur, fontSize: '10px', fontWeight: '800', textTransform: 'uppercase' }}>{fam.nom}</div>}
                     <div style={{ color: '#FFF', fontWeight: '800', fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exo.exercices?.nom}</div>
@@ -1290,6 +1280,10 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                     <button onClick={() => { removeExo(r.id, exo.id); setExpandedExo(null) }} style={{ background: '#FF475710', border: '1px solid #FF475730', borderRadius: '8px', padding: '8px 12px', color: '#FF4757', cursor: 'pointer', fontSize: '14px' }}>✕</button>
                   </div>
                 </div>
+              </div>
+              {/* Grand thumbnail — tap pour lire */}
+              <div style={{ flexShrink: 0, height: '160px', overflow: 'hidden', borderTop: '1px solid #1E1E30', borderBottom: '1px solid #1E1E30' }}>
+                <VideoThumb url={exo.exercices?.video_url} fullWidth={true} famille={fam ? { nom: fam.nom, couleur: fam.couleur } : null} />
               </div>
               {/* Body scrollable */}
               <div style={{ overflowY: 'auto', flex: 1, padding: '16px', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
