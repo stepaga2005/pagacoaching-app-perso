@@ -14,9 +14,9 @@ const FAMILLE_EMOJI: Record<string, string> = {
   'Technique de base': '🎓', 'Technique athlétique': '🏆',
 }
 
-// Module-level caches
+// ── Caches module-level ──────────────────────────────────────────────────────
 const thumbCache = new Map<string, string>()
-const inFlight = new Map<string, Promise<string>>()
+const inFlight   = new Map<string, Promise<string>>()
 const rawThumbCache = new Map<string, string>()
 let capturingCount = 0
 const captureQueue: Array<() => void> = []
@@ -32,13 +32,10 @@ function captureFirstFrame(url: string): Promise<string> {
     const run = () => {
       capturingCount++
       const video = document.createElement('video')
-      video.preload = 'metadata'
-      video.crossOrigin = 'anonymous'
-      video.muted = true
-      video.playsInline = true
-      const done = (result: string) => {
-        video.src = ''; video.load()
-        capturingCount--; drainQueue(); resolve(result)
+      video.preload = 'metadata'; video.crossOrigin = 'anonymous'
+      video.muted = true; video.playsInline = true
+      const done = (r: string) => {
+        video.src = ''; video.load(); capturingCount--; drainQueue(); resolve(r)
       }
       video.addEventListener('loadedmetadata', () => { video.currentTime = 0.5 })
       video.addEventListener('seeked', () => {
@@ -49,8 +46,7 @@ function captureFirstFrame(url: string): Promise<string> {
           canvas.height = Math.round(video.videoHeight * scale)
           canvas.getContext('2d')!.drawImage(video, 0, 0, canvas.width, canvas.height)
           const dataUrl = canvas.toDataURL('image/jpeg', 0.75)
-          rawThumbCache.set(url, dataUrl)
-          done(dataUrl)
+          rawThumbCache.set(url, dataUrl); done(dataUrl)
         } catch { done('') }
       })
       video.addEventListener('error', () => done(''))
@@ -68,14 +64,16 @@ async function fetchVimeoThumb(vimeoId: string): Promise<string> {
   const p = fetch(`/api/vimeo-thumb?id=${vimeoId}`)
     .then(r => r.json())
     .then((d: { url?: string }) => {
-      const url = d.url || ''
-      if (url) thumbCache.set(vimeoId, url)
-      inFlight.delete(vimeoId)
-      return url
+      const url = d.url || ''; if (url) thumbCache.set(vimeoId, url)
+      inFlight.delete(vimeoId); return url
     })
     .catch(() => { inFlight.delete(vimeoId); return '' })
-  inFlight.set(vimeoId, p)
-  return p
+  inFlight.set(vimeoId, p); return p
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function isMobileDevice() {
+  return typeof window !== 'undefined' && window.innerWidth < 768
 }
 
 function GradientBox({ famille, fullWidth, size, withEmoji }: {
@@ -101,25 +99,58 @@ function GradientBox({ famille, fullWidth, size, withEmoji }: {
   )
 }
 
-function PlayBtn() {
+function PlayBtn({ size = 44 }: { size?: number }) {
   return (
     <div style={{
-      position: 'absolute', inset: 0,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      pointerEvents: 'none',
+      position: 'absolute', inset: 0, display: 'flex',
+      alignItems: 'center', justifyContent: 'center', pointerEvents: 'none',
     }}>
       <div style={{
-        width: 44, height: 44, borderRadius: '50%',
-        background: 'rgba(0,0,0,0.52)', border: '2px solid rgba(255,255,255,0.65)',
+        width: size, height: size, borderRadius: '50%',
+        background: 'rgba(0,0,0,0.55)', border: '2px solid rgba(255,255,255,0.7)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         backdropFilter: 'blur(4px)',
       }}>
-        <span style={{ color: '#FFF', fontSize: 15, marginLeft: 3, lineHeight: 1 }}>▶</span>
+        <span style={{ color: '#FFF', fontSize: size * 0.35, marginLeft: size * 0.07, lineHeight: 1 }}>▶</span>
       </div>
     </div>
   )
 }
 
+// Modal plein écran pour lire une vidéo sur mobile (Vimeo / YouTube)
+function VideoModal({ src, onClose }: { src: string; onClose: () => void }) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    document.body.style.overflow = 'hidden'
+    return () => { document.removeEventListener('keydown', handler); document.body.style.overflow = '' }
+  }, [onClose])
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,0.96)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '50%', width: 40, height: 40, color: '#FFF', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}
+      >✕</button>
+      <div
+        style={{ width: '100%', maxWidth: 600, aspectRatio: '16/9', padding: '0 12px', boxSizing: 'border-box' }}
+        onClick={e => e.stopPropagation()}
+      >
+        <iframe
+          src={src}
+          style={{ width: '100%', height: '100%', border: 'none', borderRadius: 8 }}
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    </div>
+  )
+}
+
+// ── Composant principal ──────────────────────────────────────────────────────
 export function VideoThumb({
   url, size = 72, famille, fullWidth = false,
 }: {
@@ -128,18 +159,19 @@ export function VideoThumb({
   famille?: FamilleMin | null
   fullWidth?: boolean
 }) {
-  const ytId = url ? getYoutubeId(url) : null
-  const vimeoId = url ? getVimeoId(url) : null
-  const [isMobile, setIsMobile] = useState(false)
+  // Initialisation immédiate pour éviter le flash "desktop" sur mobile
+  const [mobile, setMobile] = useState(() => isMobileDevice())
+  const ytId    = url ? getYoutubeId(url) : null
+  const vimeoId = url ? getVimeoId(url)   : null
+
   const [thumbUrl, setThumbUrl] = useState<string | null>(() =>
     vimeoId ? (thumbCache.get(vimeoId) || null) : null
   )
-  const [playing, setPlaying] = useState(false)
-  const [hovered, setHovered] = useState(false)
+  const [modalSrc, setModalSrc] = useState<string | null>(null)
+  const [hovered, setHovered]   = useState(false)
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
-    check()
+    const check = () => setMobile(window.innerWidth < 768)
     window.addEventListener('resize', check)
     return () => window.removeEventListener('resize', check)
   }, [])
@@ -154,9 +186,7 @@ export function VideoThumb({
     height: fullWidth ? undefined : Math.round(size * 0.56),
     aspectRatio: fullWidth ? '16/9' : undefined,
     borderRadius: fullWidth ? 0 : '8px',
-    overflow: 'hidden',
-    flexShrink: 0,
-    position: 'relative',
+    overflow: 'hidden', flexShrink: 0, position: 'relative',
   }
 
   if (!url) {
@@ -170,68 +200,80 @@ export function VideoThumb({
   // ── YouTube ──────────────────────────────────────────────────────────────
   if (ytId) {
     const thumb = `https://img.youtube.com/vi/${ytId}/mqdefault.jpg`
-    const showPlayer = fullWidth && (isMobile ? playing : hovered)
+    const embedSrc = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0`
     return (
-      <div style={{ ...containerStyle, cursor: fullWidth && isMobile ? 'pointer' : 'default' }}
-        onMouseEnter={() => !isMobile && fullWidth && setHovered(true)}
-        onMouseLeave={() => !isMobile && fullWidth && setHovered(false)}
-        onClick={fullWidth && isMobile ? e => { e.stopPropagation(); setPlaying(true) } : undefined}
-      >
-        {showPlayer ? (
-          <iframe
-            src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0`}
-            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-            allow="autoplay"
-          />
-        ) : (
-          <>
-            <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-            {fullWidth && isMobile && <PlayBtn />}
-          </>
-        )}
-      </div>
+      <>
+        {modalSrc && <VideoModal src={modalSrc} onClose={() => setModalSrc(null)} />}
+        <div style={containerStyle}
+          onMouseEnter={() => !mobile && fullWidth && setHovered(true)}
+          onMouseLeave={() => !mobile && fullWidth && setHovered(false)}
+        >
+          {fullWidth && !mobile && hovered ? (
+            <iframe src={embedSrc} style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} allow="autoplay" />
+          ) : (
+            <>
+              <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              {fullWidth && mobile && (
+                <div style={{ position: 'absolute', inset: 0, cursor: 'pointer' }}
+                  onClick={e => { e.stopPropagation(); setModalSrc(embedSrc) }}>
+                  <PlayBtn />
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </>
     )
   }
 
   // ── Vimeo ─────────────────────────────────────────────────────────────────
   if (vimeoId) {
-    const showPlayer = fullWidth && (isMobile ? playing : hovered)
+    const embedSrc = mobile
+      ? `https://player.vimeo.com/video/${vimeoId}?autoplay=1`
+      : `https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&loop=1&background=1`
+
     return (
-      <div style={{ ...containerStyle, cursor: fullWidth && isMobile ? 'pointer' : 'default' }}
-        onMouseEnter={() => !isMobile && fullWidth && setHovered(true)}
-        onMouseLeave={() => !isMobile && fullWidth && setHovered(false)}
-        onClick={fullWidth && isMobile ? e => { e.stopPropagation(); setPlaying(true) } : undefined}
-      >
-        {showPlayer ? (
-          <iframe
-            src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&loop=1&background=1`}
-            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
-            allow="autoplay; fullscreen"
-          />
-        ) : thumbUrl ? (
-          <>
-            <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-            {fullWidth && isMobile && <PlayBtn />}
-          </>
-        ) : (
-          <>
-            <GradientBox famille={famille} fullWidth={fullWidth} size={size} withEmoji={false} />
-            {fullWidth && isMobile && <PlayBtn />}
-          </>
-        )}
-      </div>
+      <>
+        {modalSrc && <VideoModal src={modalSrc} onClose={() => setModalSrc(null)} />}
+        <div style={containerStyle}
+          onMouseEnter={() => !mobile && fullWidth && setHovered(true)}
+          onMouseLeave={() => !mobile && fullWidth && setHovered(false)}
+        >
+          {fullWidth && !mobile && hovered ? (
+            <iframe src={embedSrc} style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} allow="autoplay; fullscreen" />
+          ) : (
+            <>
+              {thumbUrl
+                ? <img src={thumbUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                : <GradientBox famille={famille} fullWidth={fullWidth} size={size} withEmoji={false} />
+              }
+              {fullWidth && mobile && (
+                <div style={{ position: 'absolute', inset: 0, cursor: 'pointer' }}
+                  onClick={e => { e.stopPropagation(); setModalSrc(`https://player.vimeo.com/video/${vimeoId}?autoplay=1`) }}>
+                  <PlayBtn />
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </>
     )
   }
 
-  // ── Raw mp4 (Supabase Storage) ────────────────────────────────────────────
-  return <RawVideoThumb url={url} famille={famille} fullWidth={fullWidth} size={size}
-    containerStyle={containerStyle} isMobile={isMobile} />
+  // ── Raw mp4 (Supabase Storage — exercices TC) ─────────────────────────────
+  return (
+    <RawVideoThumb
+      url={url} famille={famille} fullWidth={fullWidth}
+      size={size} containerStyle={containerStyle} mobile={mobile}
+    />
+  )
 }
 
-function RawVideoThumb({ url, famille, fullWidth, size, containerStyle, isMobile }: {
+function RawVideoThumb({ url, famille, fullWidth, size, containerStyle, mobile }: {
   url: string; famille?: FamilleMin | null; fullWidth: boolean; size: number
-  containerStyle: React.CSSProperties; isMobile: boolean
+  containerStyle: React.CSSProperties; mobile: boolean
 }) {
+  // Capture frame uniquement sur desktop
   const [thumb, setThumb] = useState<string | null>(() => rawThumbCache.get(url) || null)
   const [playing, setPlaying] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -243,22 +285,20 @@ function RawVideoThumb({ url, famille, fullWidth, size, containerStyle, isMobile
   }, [])
 
   useEffect(() => {
-    // Capture first frame on desktop only — crashes mobile browsers
-    if (thumb || isMobile) return
-    const el = ref.current
-    if (!el) return
-    const observer = new IntersectionObserver(entries => {
+    if (thumb || mobile) return
+    const el = ref.current; if (!el) return
+    const obs = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting) {
-        observer.disconnect()
+        obs.disconnect()
         captureFirstFrame(url).then(t => { if (t && mountedRef.current) setThumb(t) })
       }
     }, { threshold: 0.1 })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [url, thumb, isMobile])
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [url, thumb, mobile])
 
-  // Mobile: static card + ▶ button → tap plays inline
-  if (isMobile && fullWidth) {
+  // Mobile fullWidth : gradient + ▶ → lecture inline dans la carte
+  if (mobile && fullWidth) {
     return (
       <div style={containerStyle}>
         {playing ? (
@@ -267,18 +307,21 @@ function RawVideoThumb({ url, famille, fullWidth, size, containerStyle, isMobile
             style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000', display: 'block' }}
           />
         ) : (
-          <div style={{ width: '100%', height: '100%', position: 'relative', cursor: 'pointer' }}
-            onClick={e => { e.stopPropagation(); setPlaying(true) }}
-          >
+          <>
             <GradientBox famille={famille} fullWidth={fullWidth} size={size} withEmoji={true} />
-            <PlayBtn />
-          </div>
+            <div
+              style={{ position: 'absolute', inset: 0, cursor: 'pointer' }}
+              onClick={e => { e.stopPropagation(); setPlaying(true) }}
+            >
+              <PlayBtn />
+            </div>
+          </>
         )}
       </div>
     )
   }
 
-  // Desktop or small size: captured frame or gradient
+  // Desktop ou petite taille : frame capturée ou gradient
   return (
     <div ref={ref} style={containerStyle}>
       {thumb
