@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getYoutubeId, getVimeoId } from '../../lib/utils'
 
 type FamilleMin = { id?: string; nom: string; couleur: string }
@@ -14,9 +14,57 @@ const FAMILLE_EMOJI: Record<string, string> = {
   'Technique de base': '🎓', 'Technique athlétique': '🏆',
 }
 
-// Module-level: thumbnail cache + in-flight dedup
+// Module-level: Vimeo thumbnail cache + in-flight dedup
 const thumbCache = new Map<string, string>()
 const inFlight = new Map<string, Promise<string>>()
+
+// Raw video thumbnail capture (TC exercises) — max 2 concurrent
+const rawThumbCache = new Map<string, string>()
+let capturingCount = 0
+const captureQueue: Array<() => void> = []
+
+function drainQueue() {
+  while (capturingCount < 2 && captureQueue.length > 0) {
+    captureQueue.shift()!()
+  }
+}
+
+function captureFirstFrame(url: string): Promise<string> {
+  if (rawThumbCache.has(url)) return Promise.resolve(rawThumbCache.get(url)!)
+  return new Promise(resolve => {
+    const run = () => {
+      capturingCount++
+      const video = document.createElement('video')
+      video.preload = 'metadata'
+      video.crossOrigin = 'anonymous'
+      video.muted = true
+      video.playsInline = true
+      const done = (result: string) => {
+        video.src = ''
+        video.load()
+        capturingCount--
+        drainQueue()
+        resolve(result)
+      }
+      video.addEventListener('loadedmetadata', () => { video.currentTime = 0.5 })
+      video.addEventListener('seeked', () => {
+        try {
+          const canvas = document.createElement('canvas')
+          const scale = Math.min(1, 320 / video.videoWidth)
+          canvas.width = Math.round(video.videoWidth * scale)
+          canvas.height = Math.round(video.videoHeight * scale)
+          canvas.getContext('2d')!.drawImage(video, 0, 0, canvas.width, canvas.height)
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.75)
+          rawThumbCache.set(url, dataUrl)
+          done(dataUrl)
+        } catch { done('') }
+      })
+      video.addEventListener('error', () => done(''))
+      video.src = url
+    }
+    if (capturingCount < 2) run(); else captureQueue.push(run)
+  })
+}
 
 async function fetchThumb(vimeoId: string): Promise<string> {
   const cached = thumbCache.get(vimeoId)
@@ -143,11 +191,38 @@ export function VideoThumb({
     )
   }
 
-  // ── Raw video file ────────────────────────────────────────────────
+  // ── Raw video file (Supabase storage, mp4, m4v…) ─────────────────
+  // Capture la première frame lazily via IntersectionObserver (max 2 en parallèle)
+  return <RawVideoThumb url={url} famille={famille} fullWidth={fullWidth} size={size} containerStyle={containerStyle} />
+}
+
+function RawVideoThumb({ url, famille, fullWidth, size, containerStyle }: {
+  url: string; famille?: FamilleMin | null; fullWidth: boolean; size: number
+  containerStyle: React.CSSProperties
+}) {
+  const [thumb, setThumb] = useState<string | null>(() => rawThumbCache.get(url) || null)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (thumb) return
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        observer.disconnect()
+        captureFirstFrame(url).then(t => { if (t) setThumb(t) })
+      }
+    }, { threshold: 0.1 })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [url, thumb])
+
   return (
-    <div style={containerStyle}>
-      <video src={url} muted loop playsInline preload="metadata"
-        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+    <div ref={ref} style={containerStyle}>
+      {thumb
+        ? <img src={thumb} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', background: '#E8E8E8' }} />
+        : <GradientBox famille={famille} fullWidth={fullWidth} size={size} withEmoji={true} />
+      }
     </div>
   )
 }

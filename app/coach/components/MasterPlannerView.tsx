@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Joueur, MPRealisation, MPSeanceExercice, Exercice, Seance, SetConfig, JOURS, JOURS_FULL, LABELS_TYPE, TYPE_COLORS } from '../lib/types'
 import { VideoThumb } from './shared/VideoThumb'
@@ -52,6 +52,8 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
   const [mpActiviteModal, setMpActiviteModal] = useState<{ id: string; nom: string; duree: number | null } | null>(null)
   const [mpActiviteDuree, setMpActiviteDuree] = useState<string>('')
   const [videoModal, setVideoModal] = useState<string | null>(null)
+  const [mpDragState, setMpDragState] = useState<{ realId: string; blockIdx: number } | null>(null)
+  const [mpDropState, setMpDropState] = useState<{ realId: string; blockIdx: number } | null>(null)
 
   useEffect(() => {
     supabase.from('seances').select('id, nom').eq('est_template', true).order('nom').limit(2000)
@@ -299,6 +301,19 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
       supabase.from('seance_exercices').update({ ordre: idx + 1 }).eq('id', swapId)
       return { ...r, seances: { ...r.seances!, seance_exercices: newExos } }
     }))
+  }
+
+  function moveExoBlock(realisationId: string, targetBlockIdx: number, blocks: MPSeanceExercice[][]) {
+    if (!mpDragState || mpDragState.realId !== realisationId || mpDragState.blockIdx === targetBlockIdx) {
+      setMpDragState(null); setMpDropState(null); return
+    }
+    const nb = [...blocks]
+    const [moved] = nb.splice(mpDragState.blockIdx, 1)
+    nb.splice(targetBlockIdx, 0, moved)
+    const newExos = nb.flat().map((e, i) => ({ ...e, ordre: i + 1 }))
+    setReals(prev => prev.map(r => r.id === realisationId ? { ...r, seances: { ...r.seances!, seance_exercices: newExos } } : r))
+    newExos.forEach(e => supabase.from('seance_exercices').update({ ordre: e.ordre }).eq('id', e.id))
+    setMpDragState(null); setMpDropState(null)
   }
 
   async function addSet(realisationId: string, exoId: string, exo: MPSeanceExercice) {
@@ -791,10 +806,12 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                 )}
                                 <div style={{ padding: '7px 8px', borderTop: exoIdx > 0 && !insideGroup ? '1px solid #1A1A1A' : 'none', background: 'transparent' }}>
                                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '5px', marginBottom: '5px' }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0', flexShrink: 0, marginTop: '2px' }}>
-                                      <button onClick={() => moveExo(r.id, exo.id, -1)} style={{ background: 'none', border: 'none', color: '#2C2C44', cursor: 'pointer', fontSize: '10px', lineHeight: 1, padding: '1px 2px' }}>▲</button>
-                                      <button onClick={() => moveExo(r.id, exo.id, 1)} style={{ background: 'none', border: 'none', color: '#2C2C44', cursor: 'pointer', fontSize: '10px', lineHeight: 1, padding: '1px 2px' }}>▼</button>
-                                    </div>
+                                    {insideGroup && (
+                                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0', flexShrink: 0, marginTop: '2px' }}>
+                                        <button onClick={() => moveExo(r.id, exo.id, -1)} style={{ background: 'none', border: 'none', color: '#2C2C44', cursor: 'pointer', fontSize: '10px', lineHeight: 1, padding: '1px 2px' }}>▲</button>
+                                        <button onClick={() => moveExo(r.id, exo.id, 1)} style={{ background: 'none', border: 'none', color: '#2C2C44', cursor: 'pointer', fontSize: '10px', lineHeight: 1, padding: '1px 2px' }}>▼</button>
+                                      </div>
+                                    )}
                                     {hasVideo ? (
                                       <button onClick={() => setVideoModal(exo.exercices!.video_url!)}
                                         style={{ width: '24px', height: '24px', background: '#212135', border: '1px solid #2C2C44', borderRadius: '5px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '11px', color: '#1A6FFF' }}>▶</button>
@@ -876,8 +893,18 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                               </div>
                             )
                           }
+                          const isDraggingBlock = mpDragState?.realId === r.id && mpDragState?.blockIdx === blocIdx
+                          const isDropTarget = mpDropState?.realId === r.id && mpDropState?.blockIdx === blocIdx && !!mpDragState && !isDraggingBlock
                           return (
-                            <div key={`bloc-${blocIdx}`} style={isGroup ? { borderLeft: '4px solid #1A6FFF', background: '#1A6FFF12', margin: '4px 0', borderRadius: '0 6px 6px 0' } : { marginTop: blocIdx > 0 ? '1px' : '0' }}>
+                            <div key={`bloc-${blocIdx}`} style={{ position: 'relative' }}
+                              draggable={true}
+                              onDragStart={e => { const t = (e.target as HTMLElement).tagName; if (['INPUT', 'BUTTON', 'SELECT', 'TEXTAREA'].includes(t)) { e.preventDefault(); return }; e.dataTransfer.effectAllowed = 'move'; setMpDragState({ realId: r.id, blockIdx: blocIdx }) }}
+                              onDragOver={e => { e.preventDefault(); if (!mpDropState || mpDropState.realId !== r.id || mpDropState.blockIdx !== blocIdx) setMpDropState({ realId: r.id, blockIdx: blocIdx }) }}
+                              onDrop={e => { e.preventDefault(); moveExoBlock(r.id, blocIdx, blocs) }}
+                              onDragEnd={() => { setMpDragState(null); setMpDropState(null) }}
+                            >
+                              {isDropTarget && <div style={{ position: 'absolute', top: -2, left: 4, right: 4, height: 2, background: '#1A6FFF', borderRadius: 2, zIndex: 20, boxShadow: '0 0 6px #1A6FFF80' }} />}
+                              <div style={isGroup ? { borderLeft: '4px solid #1A6FFF', background: '#1A6FFF12', margin: '4px 0', borderRadius: '0 6px 6px 0', opacity: isDraggingBlock ? 0.3 : 1, transition: 'opacity 0.15s' } : { marginTop: blocIdx > 0 ? '1px' : '0', opacity: isDraggingBlock ? 0.3 : 1, transition: 'opacity 0.15s' }}>
                               {isGroup && (
                                 <div style={{ padding: '4px 8px', background: '#1A6FFF30', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                   <span style={{ color: '#6AAEFF', fontSize: '11px', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase' }}>⇌ {groupLabel}</span>
@@ -901,6 +928,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                   </div>
                                 )
                               })()}
+                              </div>
                             </div>
                           )
                         })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Exercice, Famille } from '../lib/types'
 import { getYoutubeId, getVimeoId } from '../lib/utils'
@@ -8,30 +8,117 @@ import { toast } from '../lib/toast'
 import { MultiCheck } from './shared/MultiCheck'
 import { VideoThumb } from './shared/VideoThumb'
 
+const PAGE = 60
+const TC_URL_PATTERN = '%/storage/v1/object/public/videos/tc/%'
+const TC_ZONES = ['Pectoraux', 'Dos', 'Biceps', 'Triceps', 'Abdominaux', 'Lombaires', 'Quadriceps', 'Ischios', 'Fessiers', 'Mollets']
+
 export function Exercices() {
   const [exercices, setExercices] = useState<Exercice[]>([])
   const [familles, setFamilles] = useState<Famille[]>([])
+  const [famillesCount, setFamillesCount] = useState<Record<string, number>>({})
   const [showForm, setShowForm] = useState(false)
   const [editEx, setEditEx] = useState<Exercice | null>(null)
   const [filtresFamille, setFiltresFamille] = useState<string[]>([])
+  const [filtresZone, setFiltresZone] = useState<string[]>([])
+  const [zonesCount, setZonesCount] = useState<Record<string, number>>({})
   const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [sourceTab, setSourceTab] = useState<'mes' | 'tc'>('mes')
   const [apercu, setApercu] = useState<Exercice | null>(null)
   const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(false)
+  const [offset, setOffset] = useState(0)
   const scrollRef = useRef(0)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [form, setForm] = useState({
     nom: '', famille_id: '', description: '', consignes_execution: '',
     video_url: '', materiel: [] as string[], zone_musculaire: [] as string[], type_effort: '', position: '',
   })
 
-  useEffect(() => { loadData() }, [])
+  // Charge les familles une seule fois
+  useEffect(() => {
+    supabase.from('familles').select('*').order('nom').then(({ data }) => {
+      if (data) setFamilles([...data].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
+    })
+  }, [])
 
-  async function loadData() {
-    const [{ data: exs }, { data: fams }] = await Promise.all([
-      supabase.from('exercices').select('*, familles(nom, couleur)').order('nom').limit(5000),
-      supabase.from('familles').select('*').order('nom'),
-    ])
-    if (exs) setExercices([...exs].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
-    if (fams) setFamilles([...fams].sort((a, b) => a.nom.localeCompare(b.nom, 'fr')))
+  // Compte les exercices par famille et par zone pour l'onglet actif
+  useEffect(() => {
+    if (sourceTab === 'tc') {
+      supabase.from('exercices').select('famille_id, zone_musculaire').ilike('video_url', TC_URL_PATTERN).then(({ data }) => {
+        if (!data) return
+        const fCounts: Record<string, number> = {}
+        const zCounts: Record<string, number> = {}
+        data.forEach(e => {
+          if (e.famille_id) fCounts[e.famille_id] = (fCounts[e.famille_id] || 0) + 1
+          e.zone_musculaire?.forEach((z: string) => { zCounts[z] = (zCounts[z] || 0) + 1 })
+        })
+        setFamillesCount(fCounts)
+        setZonesCount(zCounts)
+      })
+    } else {
+      supabase.from('exercices').select('famille_id').or(`video_url.is.null,video_url.not.ilike.${TC_URL_PATTERN}`).then(({ data }) => {
+        if (!data) return
+        const counts: Record<string, number> = {}
+        data.forEach(e => { if (e.famille_id) counts[e.famille_id] = (counts[e.famille_id] || 0) + 1 })
+        setFamillesCount(counts)
+        setZonesCount({})
+      })
+    }
+  }, [sourceTab])
+
+  // Recharge quand les filtres changent
+  useEffect(() => {
+    setOffset(0)
+    setExercices([])
+    loadExercices(0, true)
+  }, [sourceTab, filtresFamille, filtresZone, search])
+
+  const loadExercices = useCallback(async (off: number, reset = false) => {
+    setLoading(true)
+    let q = supabase
+      .from('exercices')
+      .select('*, familles(nom, couleur)')
+      .order('nom')
+      .range(off, off + PAGE - 1)
+
+    // Filtre source au niveau DB
+    if (sourceTab === 'tc') {
+      q = q.ilike('video_url', TC_URL_PATTERN)
+    } else {
+      // Exclut les exercices TC (url supabase storage), garde les null et les autres urls
+      q = q.or(`video_url.is.null,video_url.not.ilike.${TC_URL_PATTERN}`)
+    }
+
+    // Filtre famille
+    if (filtresFamille.length > 0) {
+      q = q.in('famille_id', filtresFamille)
+    }
+
+    // Filtre zone musculaire (TC uniquement)
+    if (filtresZone.length > 0) {
+      q = q.overlaps('zone_musculaire', filtresZone)
+    }
+
+    // Filtre recherche
+    if (search.trim()) {
+      q = q.ilike('nom', `%${search.trim()}%`)
+    }
+
+    const { data } = await q
+    if (data) {
+      setExercices(prev => reset ? data : [...prev, ...data])
+      setHasMore(data.length === PAGE)
+      setOffset(off + data.length)
+    }
+    setLoading(false)
+  }, [sourceTab, filtresFamille, filtresZone, search])
+
+  function handleSearchInput(val: string) {
+    setSearchInput(val)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => setSearch(val), 350)
   }
 
   function openAdd() {
@@ -68,7 +155,7 @@ export function Exercices() {
       const { error } = await supabase.from('exercices').insert(payload).select()
       if (error) { toast('Erreur création : ' + error.message, 'error'); setSaving(false); return }
     }
-    await loadData()
+    setOffset(0); setExercices([]); loadExercices(0, true)
     closeForm()
     setSaving(false)
   }
@@ -76,15 +163,8 @@ export function Exercices() {
   async function handleDelete(id: string) {
     if (!confirm('Supprimer cet exercice ?')) return
     await supabase.from('exercices').delete().eq('id', id)
-    await loadData()
+    setOffset(0); setExercices([]); loadExercices(0, true)
   }
-
-  const filtres = filtresFamille.length > 0
-    ? exercices.filter(e => filtresFamille.includes(e.famille_id))
-    : exercices
-  const affichés = filtres
-    .filter(e => e.nom.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))
 
   const inp = (placeholder: string, key: keyof typeof form, type = 'text') => (
     <input type={type} placeholder={placeholder} value={form[key] as string}
@@ -261,19 +341,36 @@ export function Exercices() {
         paddingBottom: '12px', marginBottom: '12px',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
-        <h1 style={{ fontSize: '24px', fontWeight: '800' }}>
-          Exercices <span style={{ color: '#9898B8', fontSize: '16px', fontWeight: '400' }}>({affichés.length})</span>
-        </h1>
-        <button onClick={openAdd} style={{
-          background: '#1A6FFF', color: '#FFF', padding: '12px 20px',
-          borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '14px',
-        }}>+ Nouvel exercice</button>
+        <h1 style={{ fontSize: '24px', fontWeight: '800' }}>Exercices</h1>
+        {sourceTab === 'mes' && (
+          <button onClick={openAdd} style={{
+            background: '#1A6FFF', color: '#FFF', padding: '12px 20px',
+            borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: '600', fontSize: '14px',
+          }}>+ Nouvel exercice</button>
+        )}
+      </div>
+
+      {/* Onglets source */}
+      <div style={{ display: 'flex', marginBottom: '16px', background: '#18182A', borderRadius: '10px', border: '1px solid #2C2C44', padding: '4px' }}>
+        {(['mes', 'TotalCoaching'] as const).map((tab, i) => {
+          const id = i === 0 ? 'mes' : 'tc'
+          const active = sourceTab === id
+          return (
+            <button key={id} onClick={() => { setSourceTab(id as 'mes' | 'tc'); setFiltresFamille([]); setFiltresZone([]); setSearchInput(''); setSearch('') }} style={{
+              flex: 1, padding: '9px 12px', borderRadius: '7px', border: 'none',
+              background: active ? (id === 'tc' ? '#2962FF' : '#2C2C44') : 'transparent',
+              color: active ? '#FFF' : '#666',
+              fontSize: '13px', fontWeight: active ? '700' : '400', cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}>{tab === 'mes' ? 'Mes exercices' : 'TotalCoaching'}</button>
+          )
+        })}
       </div>
 
       <input
         placeholder="Rechercher un exercice..."
-        value={search}
-        onChange={e => setSearch(e.target.value)}
+        value={searchInput}
+        onChange={e => handleSearchInput(e.target.value)}
         style={{
           width: '100%', background: '#18182A', border: '1px solid #2C2C44',
           borderRadius: '10px', padding: '12px 16px', color: '#FFF', fontSize: '14px',
@@ -281,9 +378,11 @@ export function Exercices() {
         }}
       />
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
-        {familles.map(f => {
+      {/* Filtres famille */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: sourceTab === 'tc' ? '10px' : '24px' }}>
+        {familles.filter(f => (famillesCount[f.id] || 0) > 0).map(f => {
           const actif = filtresFamille.includes(f.id)
+          const count = famillesCount[f.id] || 0
           return (
             <button key={f.id} onClick={() => setFiltresFamille(prev =>
               actif ? prev.filter(id => id !== f.id) : [...prev, f.id]
@@ -291,8 +390,10 @@ export function Exercices() {
               padding: '6px 14px', borderRadius: '20px', border: `1px solid ${actif ? f.couleur : '#2C2C44'}`,
               background: actif ? f.couleur + '20' : 'transparent',
               color: actif ? f.couleur : '#666', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '6px',
             }}>
               {f.nom}
+              <span style={{ fontSize: '10px', opacity: 0.7 }}>{count}</span>
             </button>
           )
         })}
@@ -300,47 +401,93 @@ export function Exercices() {
           <button onClick={() => setFiltresFamille([])} style={{
             padding: '6px 14px', borderRadius: '20px', border: '1px solid #FF4757',
             background: 'transparent', color: '#FF4757', fontSize: '12px', cursor: 'pointer',
-          }}>✕ Reset</button>
+          }}>✕</button>
         )}
       </div>
 
-      {affichés.length === 0 ? (
+      {/* Filtres zone musculaire (TC uniquement) */}
+      {sourceTab === 'tc' && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '24px' }}>
+          {TC_ZONES.filter(z => (zonesCount[z] || 0) > 0).map(z => {
+            const actif = filtresZone.includes(z)
+            const count = zonesCount[z] || 0
+            return (
+              <button key={z} onClick={() => setFiltresZone(prev =>
+                actif ? prev.filter(x => x !== z) : [...prev, z]
+              )} style={{
+                padding: '5px 12px', borderRadius: '20px',
+                border: `1px solid ${actif ? '#B89968' : '#2C2C44'}`,
+                background: actif ? '#B8996820' : 'transparent',
+                color: actif ? '#B89968' : '#666', fontSize: '11px', fontWeight: '600', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '5px',
+              }}>
+                {z}
+                <span style={{ fontSize: '9px', opacity: 0.7 }}>{count}</span>
+              </button>
+            )
+          })}
+          {filtresZone.length > 0 && (
+            <button onClick={() => setFiltresZone([])} style={{
+              padding: '5px 12px', borderRadius: '20px', border: '1px solid #FF4757',
+              background: 'transparent', color: '#FF4757', fontSize: '11px', cursor: 'pointer',
+            }}>✕</button>
+          )}
+        </div>
+      )}
+
+      {loading && exercices.length === 0 ? (
+        <div style={{ color: '#9898B8', fontSize: '14px', padding: '24px', textAlign: 'center' }}>Chargement...</div>
+      ) : exercices.length === 0 ? (
         <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px', padding: '24px', color: '#9898B8', fontSize: '14px' }}>
           Aucun exercice.
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
-          {affichés.map(ex => {
-            const fam = ex.familles
-            return (
-              <div key={ex.id} style={{
-                background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px',
-                cursor: 'pointer', transition: 'border-color 0.15s', overflow: 'hidden',
-              }}
-                onClick={() => { scrollRef.current = window.scrollY; setApercu(ex) }}
-              >
-                <VideoThumb url={ex.video_url} famille={fam} fullWidth />
-                <div style={{ padding: '10px 14px 12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
-                    <div style={{ fontWeight: '700', fontSize: '13px', flex: 1 }}>{ex.nom}</div>
-                    {fam && (
-                      <span style={{
-                        padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: '600',
-                        background: fam.couleur + '20', color: fam.couleur, whiteSpace: 'nowrap', marginLeft: '8px', flexShrink: 0,
-                      }}>{fam.nom}</span>
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+            {exercices.map(ex => {
+              const fam = ex.familles
+              return (
+                <div key={ex.id} style={{
+                  background: '#18182A', border: '1px solid #2C2C44', borderRadius: '12px',
+                  cursor: 'pointer', transition: 'border-color 0.15s', overflow: 'hidden',
+                }}
+                  onClick={() => { scrollRef.current = window.scrollY; setApercu(ex) }}
+                >
+                  <VideoThumb url={ex.video_url} famille={fam} fullWidth />
+                  <div style={{ padding: '10px 14px 12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                      <div style={{ fontWeight: '700', fontSize: '13px', flex: 1 }}>{ex.nom}</div>
+                      {fam && (
+                        <span style={{
+                          padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: '600',
+                          background: fam.couleur + '20', color: fam.couleur, whiteSpace: 'nowrap', marginLeft: '8px', flexShrink: 0,
+                        }}>{fam.nom}</span>
+                      )}
+                    </div>
+                    {ex.description && (
+                      <p style={{ color: '#A8A8C4', fontSize: '11px', lineHeight: '1.4', margin: 0,
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                      }}>{ex.description}</p>
                     )}
                   </div>
-                  {ex.description && (
-                    <p style={{ color: '#A8A8C4', fontSize: '11px', lineHeight: '1.4', margin: 0,
-                      display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                    }}>{ex.description}</p>
-                  )}
-                  {ex.materiel && <span style={{ color: '#666', fontSize: '10px', marginTop: '4px', display: 'block' }}>· {ex.materiel}</span>}
                 </div>
-              </div>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
+
+          {hasMore && (
+            <button
+              onClick={() => loadExercices(offset)}
+              disabled={loading}
+              style={{
+                display: 'block', width: '100%', marginTop: '20px', padding: '14px',
+                borderRadius: '10px', border: '1px solid #2C2C44',
+                background: 'transparent', color: loading ? '#555' : '#9898B8',
+                fontSize: '14px', cursor: loading ? 'not-allowed' : 'pointer',
+              }}
+            >{loading ? 'Chargement...' : `Charger plus (${exercices.length} affichés)`}</button>
+          )}
+        </>
       )}
     </div>
   )

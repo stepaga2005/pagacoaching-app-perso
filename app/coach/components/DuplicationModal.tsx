@@ -94,7 +94,10 @@ export function DuplicationModal({ seance, onClose, onDuplique }: {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300 }}>
       <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '16px', padding: '28px', width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: '800', marginBottom: '20px' }}>Dupliquer avec progression</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>Dupliquer avec progression</h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#666', fontSize: '22px', cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>✕</button>
+        </div>
 
         {/* 1 — Nombre de semaines */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
