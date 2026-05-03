@@ -392,6 +392,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
     const val = !exo.lien_suivant
     patchExoLocal(realisationId, exo.id, { lien_suivant: val })
     await saveExoField(exo.id, { lien_suivant: val })
+    toast(val ? 'Superset créé avec l\'exercice suivant' : 'Exercice délié', val ? 'success' : 'info')
   }
 
   async function addExoToSession(realisationId: string, exercice: Exercice) {
@@ -627,25 +628,32 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                     const p = [exo.repetitions && `${exo.repetitions}r`, exo.duree_secondes && `${exo.duree_secondes}s`, exo.distance_metres && `${exo.distance_metres}m`, exo.charge_kg && `${exo.charge_kg}kg`].filter(Boolean)
                                     return exo.series ? `${exo.series}×${p.join(' ') || '—'}` : p.join(' ') || '—'
                                   })()
+                                  const prevLinked = ei > 0 && exos[ei - 1].lien_suivant
+                                  const inSuperset = prevLinked || exo.lien_suivant
+                                  const startSuperset = !prevLinked && exo.lien_suivant
+                                  const endSuperset = prevLinked && !exo.lien_suivant
                                   return (
-                                    <div key={exo.id}>
-                                      {exo.lien_suivant === false && ei > 0 && (
-                                        <div style={{ height: '1px', background: '#1C1C2C', margin: '0 14px' }} />
+                                    <div key={exo.id} style={{ padding: '0 8px', marginTop: inSuperset && !startSuperset ? '0' : (ei > 0 ? '4px' : '0') }}>
+                                      {startSuperset && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '5px 10px 3px', background: '#1A6FFF12', borderTop: '1px solid #1A6FFF40', borderLeft: '1px solid #1A6FFF40', borderRight: '1px solid #1A6FFF40', borderRadius: '8px 8px 0 0' }}>
+                                          <span style={{ fontSize: '10px' }}>🔗</span>
+                                          <span style={{ color: '#1A6FFF', fontWeight: '800', fontSize: '10px', letterSpacing: '1px' }}>SUPERSET</span>
+                                        </div>
                                       )}
-                                      <div style={{ padding: '2px 8px' }}>
-                                        <button onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
-                                          style={{ width: '100%', background: '#1A1A2E', border: 'none', borderRadius: '10px', cursor: 'pointer', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', minHeight: '52px', boxSizing: 'border-box' }}>
-                                          <VideoThumb url={exo.exercices?.video_url} size={52} famille={exo.exercices?.familles} />
-                                          <div style={{ flex: 1, minWidth: 0 }}>
-                                            <span style={{ color: '#EEE', fontSize: '13px', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{exo.exercices?.nom}</span>
-                                            <span style={{ fontSize: '11px', color: seriesSummary !== '—' ? '#1A6FFF' : '#555', fontWeight: '600' }}>
-                                              {seriesSummary !== '—' ? seriesSummary : 'Appuyer pour configurer'}
-                                            </span>
-                                            {exo.lien_suivant && <span style={{ fontSize: '10px', color: '#1A6FFF80', marginLeft: '6px' }}>⇌</span>}
-                                          </div>
-                                          <span style={{ color: '#1A6FFF80', fontSize: '16px', flexShrink: 0 }}>✏️</span>
-                                        </button>
-                                      </div>
+                                      <button onClick={() => setExpandedExo({ rId: r.id, eId: exo.id })}
+                                        style={{ width: '100%', background: inSuperset ? '#1A6FFF08' : '#1A1A2E', border: 'none', borderLeft: inSuperset ? '2px solid #1A6FFF50' : 'none', borderRight: inSuperset ? '1px solid #1A6FFF40' : 'none', borderBottom: !endSuperset && inSuperset ? 'none' : undefined, borderRadius: inSuperset ? '0' : '10px', cursor: 'pointer', padding: '10px 12px', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', minHeight: '52px', boxSizing: 'border-box' }}>
+                                        <VideoThumb url={exo.exercices?.video_url} size={52} famille={exo.exercices?.familles} />
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                          <span style={{ color: '#EEE', fontSize: '13px', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>{exo.exercices?.nom}</span>
+                                          <span style={{ fontSize: '11px', color: seriesSummary !== '—' ? '#1A6FFF' : '#555', fontWeight: '600' }}>
+                                            {seriesSummary !== '—' ? seriesSummary : 'Appuyer pour configurer'}
+                                          </span>
+                                        </div>
+                                        <span style={{ color: '#1A6FFF80', fontSize: '16px', flexShrink: 0 }}>✏️</span>
+                                      </button>
+                                      {endSuperset && (
+                                        <div style={{ height: '5px', background: '#1A6FFF08', borderLeft: '2px solid #1A6FFF50', borderRight: '1px solid #1A6FFF40', borderBottom: '1px solid #1A6FFF40', borderRadius: '0 0 8px 8px' }} />
+                                      )}
                                     </div>
                                   )
                                 })}
@@ -1257,6 +1265,9 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
         const couleur = fam?.couleur || '#555'
         const hasSets = Array.isArray(exo.sets_config) && exo.sets_config.length > 0
         const inputLg: React.CSSProperties = { background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '10px', color: '#FFF', fontSize: '16px', outline: 'none', textAlign: 'center', width: '100%', boxSizing: 'border-box' as const }
+        const allExosSorted = [...(r.seances?.seance_exercices || [])].sort((a, b) => a.ordre - b.ordre)
+        const exoIdx = allExosSorted.findIndex(e => e.id === exo.id)
+        const nextExo = exoIdx >= 0 && exoIdx < allExosSorted.length - 1 ? allExosSorted[exoIdx + 1] : null
         return (
           <>
             {/* Backdrop */}
@@ -1300,8 +1311,14 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                   <button onClick={() => addSet(r.id, exo.id, exo)}
                     style={{ background: '#1A6FFF20', border: '1px solid #1A6FFF40', borderRadius: '10px', padding: '10px 18px', color: '#1A6FFF', cursor: 'pointer', fontSize: '13px', fontWeight: '700' }}>+ Série</button>
                   <div style={{ flex: 1 }} />
-                  <button onClick={() => toggleLienSuivant(r.id, exo)}
-                    style={{ background: exo.lien_suivant ? '#1A6FFF20' : '#212135', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#2C2C44'}`, borderRadius: '10px', padding: '10px 14px', color: exo.lien_suivant ? '#1A6FFF' : '#555', cursor: 'pointer', fontSize: '14px' }}>⇌</button>
+                  {nextExo ? (
+                    <button onClick={() => toggleLienSuivant(r.id, exo)}
+                      style={{ background: exo.lien_suivant ? '#1A6FFF20' : '#212135', border: `1px solid ${exo.lien_suivant ? '#1A6FFF50' : '#2C2C44'}`, borderRadius: '10px', padding: '10px 14px', color: exo.lien_suivant ? '#1A6FFF' : '#666', cursor: 'pointer', fontSize: '12px', fontWeight: '700', maxWidth: '140px', textAlign: 'center', lineHeight: 1.2 }}>
+                      {exo.lien_suivant ? `⇌ Délier\ndu superset` : `⇌ Superset\navec suivant`}
+                    </button>
+                  ) : (
+                    <div style={{ fontSize: '11px', color: '#444', textAlign: 'center', maxWidth: '100px', lineHeight: 1.3 }}>Dernier exo —<br/>pas de suivant</div>
+                  )}
                 </div>
 
                 {/* Table sets */}
