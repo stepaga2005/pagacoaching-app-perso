@@ -420,7 +420,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
   })
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#0B0B14', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#0B0B14', display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
       {/* Header */}
       <div style={{ display: 'flex', flexDirection: 'column', borderBottom: '1px solid #2C2C44', background: '#18182A', flexShrink: 0 }}>
         {/* Ligne 1 : fermer + titre + joueur */}
@@ -471,7 +471,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
 
       {/* ══ MOBILE : vue liste verticale style TotalCoaching ══ */}
       {!loading && isMobile && (
-        <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
 
           {/* Strip 7 jours */}
           <div style={{ display: 'flex', gap: '4px', padding: '12px 14px 0', flexShrink: 0, position: 'sticky', top: 0, background: '#0B0B14', zIndex: 10 }}>
