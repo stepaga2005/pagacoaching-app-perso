@@ -29,6 +29,8 @@ function drainQueue() {
   }
 }
 
+const MAX_QUEUE = 20
+
 function captureFirstFrame(url: string): Promise<string> {
   if (rawThumbCache.has(url)) return Promise.resolve(rawThumbCache.get(url)!)
   return new Promise(resolve => {
@@ -62,7 +64,9 @@ function captureFirstFrame(url: string): Promise<string> {
       video.addEventListener('error', () => done(''))
       video.src = url
     }
-    if (capturingCount < 2) run(); else captureQueue.push(run)
+    if (capturingCount < 2) run()
+    else if (captureQueue.length < MAX_QUEUE) captureQueue.push(run)
+    else resolve('') // queue full, skip
   })
 }
 
@@ -202,15 +206,23 @@ function RawVideoThumb({ url, famille, fullWidth, size, containerStyle }: {
 }) {
   const [thumb, setThumb] = useState<string | null>(() => rawThumbCache.get(url) || null)
   const ref = useRef<HTMLDivElement>(null)
+  const mountedRef = useRef(true)
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => { mountedRef.current = false }
+  }, [])
 
   useEffect(() => {
     if (thumb) return
+    // Loading mp4 files to capture frames crashes mobile browsers — skip on mobile
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return
     const el = ref.current
     if (!el) return
     const observer = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting) {
         observer.disconnect()
-        captureFirstFrame(url).then(t => { if (t) setThumb(t) })
+        captureFirstFrame(url).then(t => { if (t && mountedRef.current) setThumb(t) })
       }
     }, { threshold: 0.1 })
     observer.observe(el)
