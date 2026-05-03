@@ -267,7 +267,7 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                     boxShadow: isDragging ? '0 12px 32px rgba(0,0,0,0.6)' : 'none',
                     borderRadius: '12px',
                     transition: 'opacity 0.15s, transform 0.15s, box-shadow 0.15s',
-                    cursor: isDragging ? 'grabbing' : 'grab',
+                    cursor: isMobile ? 'default' : isDragging ? 'grabbing' : 'grab',
                   }}
                 >
               {block.map((l, li) => {
@@ -318,7 +318,11 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                   return (
                     <div key={idx} style={{ marginTop: debutGroupe && idx > 0 ? '8px' : '0' }}>
                       {debutGroupe && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#1A6FFF18', borderTop: '1px solid #1A6FFF50', borderBottom: '1px solid #1A6FFF25', borderLeft: '1px solid #1A6FFF50', borderRight: '1px solid #1A6FFF50', borderRadius: '10px 10px 0 0', padding: '8px 14px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#1A6FFF18', borderTop: '1px solid #1A6FFF50', borderBottom: '1px solid #1A6FFF25', borderLeft: '1px solid #1A6FFF50', borderRight: '1px solid #1A6FFF50', borderRadius: '10px 10px 0 0', padding: '8px 14px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
+                            <button onClick={() => moveBlock(idx, -1)} style={{ background: 'none', border: 'none', color: '#5878FF', cursor: 'pointer', fontSize: isMobile ? '18px' : '11px', lineHeight: 1, padding: isMobile ? '2px 6px' : '0' }}>▲</button>
+                            <button onClick={() => moveBlock(idx, 1)} style={{ background: 'none', border: 'none', color: '#5878FF', cursor: 'pointer', fontSize: isMobile ? '18px' : '11px', lineHeight: 1, padding: isMobile ? '2px 6px' : '0' }}>▼</button>
+                          </div>
                           <span style={{ fontSize: '13px' }}>🔗</span>
                           <span style={{ color: '#1A6FFF', fontWeight: '700', fontSize: '12px', letterSpacing: '1px' }}>{labelGroupe}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
@@ -330,10 +334,12 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                       )}
                       <div style={{ background: '#1A6FFF06', borderTop: debutGroupe ? 'none' : '1px solid #1A6FFF25', borderLeft: '1px solid #1A6FFF50', borderRight: '1px solid #1A6FFF50', padding: '10px 10px 8px' }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '8px' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
-                            <button onClick={() => moveBlock(idx, -1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
-                            <button onClick={() => moveBlock(idx, 1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
-                          </div>
+                          {!isMobile && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
+                              <button onClick={() => moveBlock(idx, -1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
+                              <button onClick={() => moveBlock(idx, 1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
+                            </div>
+                          )}
                           <VideoThumb url={l.exercices?.video_url} size={60} famille={fam} />
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontWeight: '600', fontSize: '13px' }}>{l.exercices?.nom}</div>
@@ -389,8 +395,8 @@ export function EditeurSeance({ seance, exercices, onSave, onCancel, joueurId, d
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto', gap: '8px', padding: '10px 8px', alignItems: 'center' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
-                            <button onClick={() => moveBlock(idx, -1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▲</button>
-                            <button onClick={() => moveBlock(idx, 1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: '10px', lineHeight: 1 }}>▼</button>
+                            <button onClick={() => moveBlock(idx, -1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: isMobile ? '18px' : '10px', lineHeight: 1, padding: isMobile ? '2px 6px' : '0' }}>▲</button>
+                            <button onClick={() => moveBlock(idx, 1)} style={{ background: 'none', border: 'none', color: '#9898B8', cursor: 'pointer', fontSize: isMobile ? '18px' : '10px', lineHeight: 1, padding: isMobile ? '2px 6px' : '0' }}>▼</button>
                           </div>
                           <VideoThumb url={l.exercices?.video_url} size={isMobile ? 48 : 80} famille={fam} />
                           <div style={{ minWidth: 0, flex: 1 }}>
