@@ -129,10 +129,10 @@ function VideoModal({ src, onClose }: { src: string; onClose: () => void }) {
   return (
     <div
       style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(0,0,0,0.96)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
-      onClick={onClose}
+      onClick={e => { e.stopPropagation(); onClose() }}
     >
       <button
-        onClick={onClose}
+        onClick={e => { e.stopPropagation(); onClose() }}
         style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '50%', width: 40, height: 40, color: '#FFF', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}
       >✕</button>
       <div
@@ -207,6 +207,7 @@ export function VideoThumb({
         <div style={containerStyle}
           onMouseEnter={() => !mobile && fullWidth && setHovered(true)}
           onMouseLeave={() => !mobile && fullWidth && setHovered(false)}
+          onClick={mobile && fullWidth ? e => e.stopPropagation() : undefined}
         >
           {fullWidth && !mobile && hovered ? (
             <iframe src={embedSrc} style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} allow="autoplay" />
@@ -238,6 +239,7 @@ export function VideoThumb({
         <div style={containerStyle}
           onMouseEnter={() => !mobile && fullWidth && setHovered(true)}
           onMouseLeave={() => !mobile && fullWidth && setHovered(false)}
+          onClick={mobile && fullWidth ? e => e.stopPropagation() : undefined}
         >
           {fullWidth && !mobile && hovered ? (
             <iframe src={embedSrc} style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} allow="autoplay; fullscreen" />
@@ -300,7 +302,7 @@ function RawVideoThumb({ url, famille, fullWidth, size, containerStyle, mobile }
   // Mobile fullWidth : gradient + ▶ → lecture inline dans la carte
   if (mobile && fullWidth) {
     return (
-      <div style={containerStyle}>
+      <div style={containerStyle} onClick={e => e.stopPropagation()}>
         {playing ? (
           <video
             src={url} autoPlay playsInline controls
