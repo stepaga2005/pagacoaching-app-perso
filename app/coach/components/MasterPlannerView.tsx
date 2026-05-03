@@ -28,7 +28,6 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
     return d.toISOString().split('T')[0]
   })
   const [addExoTo, setAddExoTo] = useState<string | null>(null)
-  const [rechercheExo, setRechercheExo] = useState('')
   const [loading, setLoading] = useState(true)
   const [expandedExo, setExpandedExo] = useState<{ rId: string; eId: string } | null>(null)
   const [mpActionDate, setMpActionDate] = useState<string | null>(null)
@@ -395,17 +394,18 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
     toast(val ? 'Superset créé avec l\'exercice suivant' : 'Exercice délié', val ? 'success' : 'info')
   }
 
-  async function addExoToSession(realisationId: string, exercice: Exercice) {
+  async function addExosToSession(realisationId: string, exsToAdd: Exercice[]) {
     const r = reals.find(rx => rx.id === realisationId)
-    if (!r?.seances) return
-    const ordre = (r.seances.seance_exercices?.length || 0) + 1
-    const { data } = await supabase.from('seance_exercices').insert({ seance_id: r.seance_id, exercice_id: exercice.id, ordre }).select('id').single()
+    if (!r?.seances || exsToAdd.length === 0) return
+    const baseOrdre = r.seances.seance_exercices?.length || 0
+    const inserts = exsToAdd.map((ex, i) => ({ seance_id: r.seance_id, exercice_id: ex.id, ordre: baseOrdre + i + 1 }))
+    const { data } = await supabase.from('seance_exercices').insert(inserts).select('id, ordre')
     if (data) {
-      const newExo: MPSeanceExercice = { id: data.id, ordre, exercices: { nom: exercice.nom, video_url: exercice.video_url || undefined, familles: exercice.familles } }
-      setReals(prev => prev.map(rx => rx.id !== realisationId ? rx : { ...rx, seances: { ...rx.seances!, seance_exercices: [...(rx.seances?.seance_exercices || []), newExo] } }))
+      const newExos: MPSeanceExercice[] = exsToAdd.map((ex, i) => ({ id: data[i].id, ordre: baseOrdre + i + 1, exercices: { nom: ex.nom, video_url: ex.video_url || undefined, familles: ex.familles } }))
+      setReals(prev => prev.map(rx => rx.id !== realisationId ? rx : { ...rx, seances: { ...rx.seances!, seance_exercices: [...(rx.seances?.seance_exercices || []), ...newExos] } }))
+      toast(`${exsToAdd.length} exercice${exsToAdd.length > 1 ? 's' : ''} ajouté${exsToAdd.length > 1 ? 's' : ''}`, 'success')
     }
     setAddExoTo(null)
-    setRechercheExo('')
   }
 
   const weekLabel = (() => {
@@ -658,7 +658,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                                   )
                                 })}
                                 <div style={{ padding: '6px 14px 10px' }}>
-                                  <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }}
+                                  <button onClick={() => { setAddExoTo(r.id) }}
                                     style={{ width: '100%', background: 'transparent', border: '1px dashed #2C2C44', borderRadius: '10px', padding: '10px', color: '#7878A8', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}>
                                     + Ajouter un exercice
                                   </button>
@@ -968,7 +968,7 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
                         })
                       })()}
                       <div style={{ padding: '5px' }}>
-                        <button onClick={() => { setAddExoTo(r.id); setRechercheExo('') }} style={{ width: '100%', background: '#0B0B14', border: '1px dashed #2C2C44', borderRadius: '6px', padding: '8px 4px', color: '#7878A8', cursor: 'pointer', fontSize: '11px', fontWeight: '600', minHeight: '36px' }}>+ exercice</button>
+                        <button onClick={() => { setAddExoTo(r.id) }} style={{ width: '100%', background: '#0B0B14', border: '1px dashed #2C2C44', borderRadius: '6px', padding: '8px 4px', color: '#7878A8', cursor: 'pointer', fontSize: '11px', fontWeight: '600', minHeight: '36px' }}>+ exercice</button>
                       </div>
                     </div>
                   )
@@ -1204,26 +1204,11 @@ export function MasterPlannerView({ joueur, realisations: initialReals, exercice
       )}
 
       {addExoTo && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400 }}>
-          <div style={{ background: '#18182A', border: '1px solid #2C2C44', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '440px', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: '700' }}>Ajouter un exercice</h3>
-              <button onClick={() => setAddExoTo(null)} style={{ background: 'none', border: 'none', color: '#888', fontSize: '18px', cursor: 'pointer' }}>✕</button>
-            </div>
-            <input value={rechercheExo} onChange={e => setRechercheExo(e.target.value)} placeholder="Rechercher..."
-              autoFocus
-              style={{ background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '10px 14px', color: '#FFF', fontSize: '14px', outline: 'none', marginBottom: '10px' }} />
-            <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {exercices.filter(e => e.nom.toLowerCase().includes(rechercheExo.toLowerCase())).map(ex => (
-                <button key={ex.id} onClick={() => addExoToSession(addExoTo, ex)}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#212135', border: '1px solid #2C2C44', borderRadius: '8px', padding: '10px 14px', cursor: 'pointer', textAlign: 'left' }}>
-                  <span style={{ color: '#FFF', fontSize: '13px', fontWeight: '600' }}>{ex.nom}</span>
-                  {ex.familles && <span style={{ fontSize: '10px', color: ex.familles.couleur, background: ex.familles.couleur + '20', padding: '2px 8px', borderRadius: '8px' }}>{ex.familles.nom}</span>}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        <ExercicePicker
+          exercices={exercices}
+          onConfirm={exs => addExosToSession(addExoTo, exs)}
+          onClose={() => setAddExoTo(null)}
+        />
       )}
 
       {/* MP — Créer une nouvelle séance */}
